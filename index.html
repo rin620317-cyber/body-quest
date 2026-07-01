@@ -215,6 +215,31 @@
     </div>
   </div>
 
+  <!-- FOOD -->
+  <div class="card">
+    <h3>🍽 食事ログ <span class="muted" id="foodDayLabel"></span></h3>
+    <div style="display:flex;gap:16px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;"><span class="muted">カロリー</span><span id="calTxt">0 / 2100</span></div>
+        <div class="xpbar"><div class="xpfill" id="calFill" style="background:linear-gradient(90deg,#fbbf24,#fb7185);animation:none;"></div></div>
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;"><span class="muted">タンパク質</span><span id="proTxt">0 / 100g</span></div>
+        <div class="xpbar"><div class="xpfill" id="proFill" style="background:linear-gradient(90deg,#4ade80,#38bdf8);animation:none;"></div></div>
+      </div>
+    </div>
+    <div id="mealList"></div>
+    <div class="muted" style="margin:12px 0 8px;">タップで追加：</div>
+    <div id="foodChips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label class="mini">自分の食品名</label><input id="cfName" style="width:130px;" placeholder="例: 妻の肉じゃが"></div>
+      <div><label class="mini">kcal</label><input type="number" id="cfKcal" style="width:80px;"></div>
+      <div><label class="mini">P(g)</label><input type="number" id="cfP" style="width:66px;"></div>
+      <button id="cfAdd" class="ghost">登録</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
+  </div>
+
   <!-- BADGES -->
   <div class="card">
     <h3>🏆 実績バッジ</h3>
@@ -317,10 +342,23 @@ const WORKOUT=[
   {n:'休憩',           s:20,c:'ラスト！もう一度プランク。'},
   {n:'プランク(ラスト)',s:45,c:'残り全部出し切る。あと少し！'},
 ];
+/* 食事クイック追加プリセット（1食あたりの目安）k=kcal, p=タンパク質g */
+const FOODS=[
+  {n:'ごはん 茶碗1',k:234,p:3.8},{n:'玄米 茶碗1',k:220,p:4.2},{n:'木綿豆腐 半丁',k:110,p:10.5},
+  {n:'卵 1個',k:76,p:6.2},{n:'納豆 1P',k:90,p:7.4},{n:'鶏むね 100g',k:108,p:22},
+  {n:'サラダチキン',k:115,p:24},{n:'鮭 1切れ',k:106,p:18},{n:'ツナ水煮 1缶',k:71,p:16},
+  {n:'サバ缶 1缶',k:350,p:26},{n:'プロテイン 1杯',k:120,p:24},{n:'ギリシャヨーグルト',k:59,p:10},
+  {n:'味噌汁 1杯',k:40,p:3},{n:'ブロッコリー 100g',k:33,p:4.3},{n:'バナナ 1本',k:86,p:1.1},
+  {n:'おにぎり 1個',k:180,p:3},{n:'食パン 6枚切1',k:158,p:5.3},{n:'牛乳 200ml',k:122,p:6.6},
+  {n:'ラーメン 1杯',k:500,p:20},{n:'唐揚げ 3個',k:300,p:18},{n:'ビール 350',k:140,p:1},
+  {n:'アーモンド 25g',k:150,p:5.5},
+];
 
 let state=load();
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.days){s.earned=s.earned||[];return s;}}catch(e){}
-  return {goalWeight:63,days:{},earned:[]};}
+function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+  if(!s||!s.days)s={goalWeight:63,days:{}};
+  s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[];
+  return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
 function pad(n){return String(n).padStart(2,'0');}
@@ -439,8 +477,42 @@ function render(){
   document.getElementById('wkWO').textContent=d7.reduce((a,d)=>a+(state.days[d]?+state.days[d].wo||0:0),0);
   document.getElementById('wkRun').textContent=d7.filter(d=>state.days[d]&&state.days[d].run).length;
   document.getElementById('wkKm').textContent=d7.reduce((a,d)=>a+(state.days[d]?+state.days[d].km||0:0),0).toFixed(1);
+  renderFood();
 }
 function afterChange(){render();}
+
+function renderFood(){
+  const dd=day(cur); dd.meals=dd.meals||[];
+  let kcal=0,pro=0; dd.meals.forEach(m=>{kcal+=+m.k||0; pro+=+m.p||0;});
+  document.getElementById('foodDayLabel').textContent=cur===today()?'(今日)':cur;
+  document.getElementById('calTxt').textContent=Math.round(kcal)+' / '+state.calTarget;
+  document.getElementById('proTxt').textContent=Math.round(pro)+' / '+state.proTarget+'g';
+  document.getElementById('calFill').style.width=Math.min(100,kcal/state.calTarget*100)+'%';
+  document.getElementById('proFill').style.width=Math.min(100,pro/state.proTarget*100)+'%';
+  const over=kcal>state.calTarget;
+  document.getElementById('calFill').style.filter=over?'saturate(1.4) brightness(1.1)':'';
+  document.getElementById('calTxt').style.color=over?'var(--fire)':'';
+  const proHit=pro>=state.proTarget;
+  document.getElementById('proTxt').style.color=proHit?'var(--accent)':'';
+  // meal list
+  const ml=document.getElementById('mealList'); ml.innerHTML='';
+  dd.meals.forEach((m,i)=>{const el=document.createElement('div');
+    el.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--panel2);border-radius:10px;margin-bottom:6px;font-size:.85rem;';
+    el.innerHTML=`<span style="flex:1;">${m.n}</span><span class="muted">${Math.round(m.k)}kcal・P${m.p}g</span>`;
+    const x=document.createElement('span'); x.textContent='×'; x.style.cssText='cursor:pointer;color:var(--fire);font-weight:900;padding:0 4px;';
+    x.onclick=()=>{dd.meals.splice(i,1);save();render();}; el.appendChild(x); ml.appendChild(el);});
+  if(!dd.meals.length){ml.innerHTML='<div class="muted" style="padding:4px 2px;">まだ記録なし。下のボタンからタップで追加。</div>';}
+  // chips (custom first, then presets)
+  const fc=document.getElementById('foodChips'); fc.innerHTML='';
+  state.customFoods.concat(FOODS).forEach((f,idx)=>{const c=document.createElement('button');
+    c.className='ghost'; c.style.cssText='padding:8px 12px;font-size:.8rem;font-weight:600;';
+    const custom=idx<state.customFoods.length;
+    c.textContent=(custom?'★ ':'+ ')+f.n;
+    c.onclick=()=>{dd.meals.push({n:f.n,k:+f.k||0,p:+f.p||0});save();render();beep(660,.08);
+      if(pro< state.proTarget && (pro+(+f.p||0))>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
+      else toast('追加：'+f.n);};
+    fc.appendChild(c);});
+}
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
   document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
@@ -523,6 +595,17 @@ document.getElementById('exportBtn').onclick=()=>{const b=new Blob([JSON.stringi
 document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
 document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const s=JSON.parse(r.result);if(s.days){state=s;state.earned=state.earned||[];save();prevLevel=null;render();prevLevel=levelFor(totalXP(state)).lvl;toast('データを読み込みました');}}catch(x){toast('読み込み失敗');}};r.readAsText(f);};
+/* food log handlers */
+document.getElementById('cfAdd').onclick=()=>{const n=document.getElementById('cfName').value.trim();
+  const k=parseFloat(document.getElementById('cfKcal').value);const p=parseFloat(document.getElementById('cfP').value);
+  if(!n||isNaN(k)){toast('名前とkcalを入れてください');return;}
+  state.customFoods.unshift({n,k,p:isNaN(p)?0:p});save();
+  document.getElementById('cfName').value='';document.getElementById('cfKcal').value='';document.getElementById('cfP').value='';
+  render();toast('★ '+n+' を登録');};
+document.getElementById('editTargets').onclick=()=>{
+  const c=prompt('1日の目標カロリー(kcal)',state.calTarget);if(c!==null){const v=parseFloat(c);if(!isNaN(v))state.calTarget=v;}
+  const p=prompt('1日の目標タンパク質(g)',state.proTarget);if(p!==null){const v=parseFloat(p);if(!isNaN(v))state.proTarget=v;}
+  save();render();};
 
 prevLevel=levelFor(totalXP(state)).lvl;
 render();
