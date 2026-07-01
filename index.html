@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#07090d">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="体クエスト">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>体改造クエスト</title>
+<style>
+  :root{
+    --bg:#07090d; --panel:rgba(24,28,38,.72); --panel2:rgba(38,44,58,.6); --line:rgba(255,255,255,.08);
+    --txt:#eef2f9; --sub:#94a1b5; --accent:#4ade80; --accent2:#38bdf8; --violet:#a78bfa;
+    --gold:#fbbf24; --fire:#fb7185; --shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{background:var(--bg); color:var(--txt); overflow-x:hidden;
+    font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;}
+  /* animated aurora bg */
+  #aurora{position:fixed; inset:0; z-index:-2; filter:blur(70px); opacity:.55;}
+  #aurora span{position:absolute; border-radius:50%; mix-blend-mode:screen; animation:float 14s ease-in-out infinite;}
+  #aurora .a1{width:46vw;height:46vw;left:-8vw;top:-10vw;background:#16a34a;}
+  #aurora .a2{width:42vw;height:42vw;right:-10vw;top:6vw;background:#2563eb;animation-delay:-4s;}
+  #aurora .a3{width:40vw;height:40vw;left:20vw;bottom:-12vw;background:#7c3aed;animation-delay:-8s;}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(4vw,3vh) scale(1.1);}66%{transform:translate(-3vw,-2vh) scale(.95);}}
+  #fx{position:fixed; inset:0; z-index:60; pointer-events:none;}
+
+  .wrap{max-width:720px; margin:0 auto; padding:16px 16px 80px;}
+  h1{font-size:1.4rem; margin:0; letter-spacing:.5px;}
+  h3{margin:0 0 14px; font-size:1rem; display:flex; align-items:center; gap:8px;}
+  .muted{color:var(--sub); font-size:.82rem;}
+  .card{background:var(--panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow);
+    animation:rise .5s both;}
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+  /* HERO */
+  .hero{display:flex; align-items:center; gap:16px;}
+  .ring{position:relative; width:96px; height:96px; flex:0 0 auto;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .lvl{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring .lvl b{font-size:1.9rem; font-weight:800; line-height:1;
+    background:linear-gradient(90deg,#4ade80,#38bdf8); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .ring .lvl small{font-size:.6rem; color:var(--sub); letter-spacing:2px;}
+  .xpbar{height:10px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; margin-top:8px;}
+  .xpfill{height:100%; width:0%; border-radius:8px; background:linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa);
+    background-size:200% 100%; animation:shine 3s linear infinite; transition:width .8s cubic-bezier(.2,.8,.2,1);}
+  @keyframes shine{to{background-position:200% 0;}}
+  .streak{display:flex; align-items:baseline; gap:4px;}
+  .streak b{font-size:1.7rem; font-weight:800; color:var(--fire); text-shadow:0 0 16px rgba(251,113,133,.5);}
+  .flames{font-size:1.1rem;}
+
+  /* QUESTS */
+  .quest{position:relative; display:flex; align-items:center; gap:14px; padding:14px; border-radius:16px;
+    background:var(--panel2); margin-bottom:10px; cursor:pointer; user-select:none; overflow:hidden;
+    border:1px solid transparent; transition:transform .12s, border-color .25s, background .25s;}
+  .quest:active{transform:scale(.98);}
+  .quest.done{border-color:var(--accent); background:rgba(74,222,128,.12);}
+  .quest.done .qtitle{color:#c7f9d8;}
+  .qcheck{width:30px;height:30px;border-radius:10px;border:2px solid rgba(255,255,255,.2);flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#052012;transition:.25s;}
+  .quest.done .qcheck{background:var(--accent);border-color:var(--accent);transform:rotate(360deg);}
+  .qemoji{font-size:1.5rem;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
+  .qtitle{font-weight:600;}
+  .qsub{font-size:.7rem;color:var(--sub);}
+  .qxp{margin-left:auto;font-size:.78rem;color:var(--sub);font-weight:700;}
+  .quest.done::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(74,222,128,.4),transparent 60%);animation:flash .6s ease-out;}
+  @keyframes flash{from{opacity:1;}to{opacity:0;}}
+
+  input,button{font-family:inherit;}
+  input[type=number],input[type=date]{background:rgba(0,0,0,.25);border:1px solid var(--line);color:var(--txt);
+    border-radius:12px;padding:11px 12px;font-size:1rem;width:120px;}
+  input:focus{outline:none;border-color:var(--accent2);}
+  button{border:none;border-radius:12px;padding:11px 18px;font-weight:800;font-size:.95rem;cursor:pointer;
+    background:linear-gradient(135deg,#38bdf8,#4ade80);color:#052028;transition:transform .12s,filter .2s;}
+  button:active{transform:scale(.96);}
+  button.ghost{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--line);}
+  button.big{width:100%;padding:16px;font-size:1.05rem;letter-spacing:1px;background:linear-gradient(135deg,#fb7185,#a78bfa);color:#fff;}
+  button.big .sub{display:block;font-size:.7rem;opacity:.85;font-weight:600;margin-top:2px;letter-spacing:0;}
+  label.mini{font-size:.76rem;color:var(--sub);display:block;margin-bottom:5px;}
+
+  canvas#chart{width:100%;height:190px;}
+  .stat{text-align:center;flex:1;}
+  .stat b{display:block;font-size:1.35rem;font-weight:800;}
+  .stat span{font-size:.7rem;color:var(--sub);}
+
+  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
+  .badge{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;
+    opacity:.32;filter:grayscale(1);transition:.4s;position:relative;}
+  .badge.on{opacity:1;filter:none;border-color:var(--gold);box-shadow:0 0 18px rgba(251,191,36,.3);animation:pop .5s;}
+  @keyframes pop{0%{transform:scale(.6);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+  .badge .be{font-size:1.7rem;}
+  .badge .bt{font-size:.64rem;color:var(--sub);margin-top:4px;line-height:1.2;}
+
+  .datehop{display:flex;gap:8px;align-items:center;justify-content:center;margin:2px 0 12px;}
+  .datehop button{padding:7px 14px;}
+  .quote{font-size:.88rem;color:var(--sub);font-style:italic;text-align:center;}
+
+  /* TOAST */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);
+    background:linear-gradient(135deg,#fbbf24,#fb7185);color:#2a1400;padding:13px 22px;border-radius:14px;
+    font-weight:800;box-shadow:var(--shadow);opacity:0;transition:.4s cubic-bezier(.2,.9,.2,1);z-index:70;text-align:center;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+  /* MODAL (level up + workout) */
+  .overlay{position:fixed;inset:0;background:rgba(4,6,10,.82);backdrop-filter:blur(8px);z-index:80;
+    display:none;align-items:center;justify-content:center;padding:20px;}
+  .overlay.show{display:flex;animation:fade .3s;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:26px;max-width:440px;width:100%;
+    text-align:center;box-shadow:var(--shadow);animation:pop .4s;}
+  .lvlup h2{font-size:2rem;margin:6px 0;background:linear-gradient(90deg,#fbbf24,#fb7185,#a78bfa);
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lvlup .num{font-size:4rem;font-weight:900;line-height:1;
+    background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  /* WORKOUT */
+  .wo-timer{position:relative;width:200px;height:200px;margin:8px auto 4px;}
+  .wo-timer svg{transform:rotate(-90deg);}
+  .wo-timer .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .wo-timer .c .t{font-size:3.4rem;font-weight:900;font-variant-numeric:tabular-nums;}
+  .wo-timer.rest .t{color:var(--accent2);}
+  .wo-name{font-size:1.5rem;font-weight:800;margin:4px 0;}
+  .wo-next{color:var(--sub);font-size:.85rem;min-height:1.2em;}
+  .wo-cue{color:var(--gold);font-size:.85rem;margin-top:6px;min-height:2.4em;}
+  .wo-prog{display:flex;gap:4px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap;}
+  .wo-prog i{width:22px;height:5px;border-radius:3px;background:rgba(255,255,255,.15);}
+  .wo-prog i.done{background:var(--accent);}
+  .wo-prog i.cur{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+  .wo-btns{display:flex;gap:10px;margin-top:16px;}
+  .wo-btns button{flex:1;}
+
+  .link{color:var(--accent2);font-size:.8rem;cursor:pointer;text-decoration:underline;}
+</style>
+</head>
+<body>
+<div id="aurora"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+<canvas id="fx"></canvas>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="card">
+    <div class="hero">
+      <div class="ring">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,.08)" stroke-width="8" fill="none"/>
+          <circle id="ringFill" cx="48" cy="48" r="42" stroke="url(#g)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs></svg>
+        <div class="lvl"><b id="lvl">1</b><small>LEVEL</small></div>
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <h1>体改造クエスト</h1>
+          <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
+        </div>
+        <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
+        <div class="xpbar"><div class="xpfill" id="xpfill"></div></div>
+      </div>
+    </div>
+    <div class="quote" id="quote" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="datehop">
+    <button class="ghost" id="prevDay">‹ 前日</button>
+    <input type="date" id="curDate">
+    <button class="ghost" id="nextDay">翌日 ›</button>
+  </div>
+
+  <!-- QUESTS -->
+  <div class="card">
+    <h3>⚔️ 今日のクエスト <span class="muted" id="dayLabel"></span></h3>
+    <div id="quests"></div>
+  </div>
+
+  <!-- CORE WORKOUT CTA -->
+  <div class="card" style="text-align:center;">
+    <h3 style="justify-content:center;">🔥 ぽっこりお腹 撃退プログラム</h3>
+    <div class="muted" style="margin-bottom:14px;">配達では鍛えにくい体幹をピンポイントで。器具なし・約9分・マンションでも静かにできる種目。<b style="color:var(--accent);">完了すると「筋トレ」が自動達成</b>。</div>
+    <button class="big" id="startWO">▶ 体幹プログラムを開始<span class="sub">今日やった回数：<span id="woCount">0</span> ・ 累計 <span id="woTotal">0</span> 回</span></button>
+  </div>
+
+  <!-- WEIGHT -->
+  <div class="card">
+    <h3>⚖️ 体重 & お腹の記録</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+      <div><label class="mini">体重(kg)</label><input type="number" step="0.1" id="wInput" placeholder="66.5"></div>
+      <div><label class="mini">腹囲(cm) 任意</label><input type="number" step="0.5" id="waistInput" placeholder="85"></div>
+      <div><label class="mini">目標体重</label><input type="number" step="0.1" id="goalInput"></div>
+      <button id="saveW">記録</button>
+    </div>
+    <div style="display:flex;margin-top:16px;">
+      <div class="stat"><b id="sStart">–</b><span>スタート</span></div>
+      <div class="stat"><b id="sNow">–</b><span>現在</span></div>
+      <div class="stat"><b id="sDiff">–</b><span>増減</span></div>
+      <div class="stat"><b id="sGoal">–</b><span>目標まで</span></div>
+    </div>
+    <div style="text-align:center;margin-top:8px;"><span class="link" id="toggleMetric">グラフ切替：体重 / 腹囲</span></div>
+    <canvas id="chart" width="680" height="190" style="margin-top:6px;"></canvas>
+  </div>
+
+  <!-- DELIVERY -->
+  <div class="card">
+    <h3>🚴 配達 = 有酸素ボーナス</h3>
+    <div class="muted" style="margin-bottom:12px;">ほぼ毎日1時間の配達＝約15km/450kcal。走った分だけXPが入ります（5XP/km）。</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+      <div><label class="mini">今日の走行(km)</label><input type="number" step="0.5" id="kmInput" placeholder="15"></div>
+      <button id="saveKm">記録</button>
+      <div class="stat"><b id="kmToday">0</b><span>今日km / <span id="kcalToday">0</span>kcal</span></div>
+      <div class="stat"><b id="kmTotal">0</b><span>累計km</span></div>
+    </div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="card">
+    <h3>🏆 実績バッジ</h3>
+    <div class="badges" id="badges"></div>
+  </div>
+
+  <!-- WEEK -->
+  <div class="card">
+    <h3>📅 今週のサマリー</h3>
+    <div style="display:flex;">
+      <div class="stat"><b id="wkPerfect">0</b><span>完璧日</span></div>
+      <div class="stat"><b id="wkWO">0</b><span>体幹トレ</span></div>
+      <div class="stat"><b id="wkRun">0</b><span>朝ラン</span></div>
+      <div class="stat"><b id="wkKm">0</b><span>今週km</span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;margin-top:18px;">
+    <button class="ghost" id="exportBtn">データ書き出し</button>
+    <button class="ghost" id="importBtn">読み込み</button>
+  </div>
+  <input type="file" id="fileInput" accept=".json" style="display:none;">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- LEVEL UP MODAL -->
+<div class="overlay" id="lvlOverlay"><div class="modal lvlup">
+  <div style="font-size:2.4rem;">🎉</div><h2>LEVEL UP!</h2>
+  <div class="num" id="lvlupNum">2</div>
+  <div class="muted" id="lvlupMsg" style="margin:10px 0 18px;"></div>
+  <button class="big" onclick="document.getElementById('lvlOverlay').classList.remove('show')">続ける 💪</button>
+</div></div>
+
+<!-- WORKOUT MODAL -->
+<div class="overlay" id="woOverlay"><div class="modal" id="woModal">
+  <div class="wo-timer" id="woTimer">
+    <svg width="200" height="200"><circle cx="100" cy="100" r="88" stroke="rgba(255,255,255,.08)" stroke-width="10" fill="none"/>
+      <circle id="woRing" cx="100" cy="100" r="88" stroke="#4ade80" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="0"/></svg>
+    <div class="c"><div class="t" id="woTime">00</div><div class="muted" id="woPhase">READY</div></div>
+  </div>
+  <div class="wo-name" id="woName">準備はいい？</div>
+  <div class="wo-next" id="woNext"></div>
+  <div class="wo-cue" id="woCue"></div>
+  <div class="wo-prog" id="woProg"></div>
+  <div class="wo-btns">
+    <button class="ghost" id="woPause">一時停止</button>
+    <button class="ghost" id="woQuit">やめる</button>
+  </div>
+</div></div>
+
+<script>
+/* ============ DATA ============ */
+const KEY='bodyquest_v1';
+const QUESTS=[
+  {key:'sleep',   emoji:'🌙',title:'21時就寝',   sub:'睡眠不足は食欲ホルモンを乱す',xp:25},
+  {key:'noNight', emoji:'🚫',title:'夜食なし',   sub:'内臓脂肪の一番の敵',        xp:25},
+  {key:'run',     emoji:'🏃',title:'朝ラン',     sub:'脂肪燃焼＆頭が冴える',      xp:30},
+  {key:'strength',emoji:'💪',title:'筋トレ/体幹',sub:'ぽっこり対策の本丸',        xp:30},
+];
+const QUOTES=[
+  "サボった過去より、今日やる自分。それだけが体を変える。",
+  "毎日1時間走れてる時点で、あなたは十分に動ける人。",
+  "ぽっこりお腹は、体幹10分の積み重ねで必ず変わる。",
+  "完璧より継続。1回抜けても連続はやり直せる。",
+  "夜食を我慢した自分を、明日の体重が褒めてくれる。",
+  "3児の父が本気で鍛える背中、最高の教育。",
+  "タンパク質は体重×1.2〜1.6g。豆腐＋卵＋魚＋魚肉。",
+  "配達15kmで450kcal。走るほど痩せる仕事、実は最強。",
+];
+const BADGES=[
+  {id:'first', e:'👣',t:'初記録',    chk:s=>Object.keys(s.days).length>=1},
+  {id:'wo1',   e:'🔰',t:'体幹デビュー',chk:s=>totalWO(s)>=1},
+  {id:'s3',    e:'🔥',t:'3日連続',   chk:s=>maxStreak(s)>=3},
+  {id:'s7',    e:'🔥',t:'7日連続',   chk:s=>maxStreak(s)>=7},
+  {id:'s30',   e:'🏆',t:'30日連続',  chk:s=>maxStreak(s)>=30},
+  {id:'wo10',  e:'💪',t:'体幹10回',  chk:s=>totalWO(s)>=10},
+  {id:'wo30',  e:'🦾',t:'体幹30回',  chk:s=>totalWO(s)>=30},
+  {id:'w1',    e:'📉',t:'−1kg',      chk:s=>lost(s)>=1},
+  {id:'w3',    e:'📉',t:'−3kg',      chk:s=>lost(s)>=3},
+  {id:'waist', e:'📏',t:'腹囲−3cm',  chk:s=>waistLost(s)>=3},
+  {id:'goal',  e:'🎯',t:'目標達成',  chk:s=>{const n=latestW(s);return n!=null&&n<=s.goalWeight;}},
+  {id:'run10', e:'🌅',t:'朝ラン10',  chk:s=>count(s,'run')>=10},
+  {id:'km100', e:'🚴',t:'累計100km', chk:s=>totalKm(s)>=100},
+  {id:'km500', e:'🚵',t:'累計500km', chk:s=>totalKm(s)>=500},
+];
+/* Core workout: name, seconds, cue. type work/rest */
+const WORKOUT=[
+  {n:'プランク',       s:40,c:'肘の下に肩。お尻を上げすぎず一直線をキープ。'},
+  {n:'休憩',           s:15,c:'深呼吸。次はクランチ。'},
+  {n:'クランチ',       s:40,c:'おへそを覗き込むように。腰は床に押し付ける。'},
+  {n:'休憩',           s:15,c:'次はレッグレイズ。'},
+  {n:'レッグレイズ',   s:40,c:'脚を下ろすとき腰が反らない範囲で。きつければ膝を曲げてOK。'},
+  {n:'休憩',           s:20,c:'次はバイシクル。'},
+  {n:'バイシクルクランチ',s:40,c:'肘と反対の膝をタッチ。ゆっくり大きく。'},
+  {n:'休憩',           s:15,c:'次はサイドプランク(左)。'},
+  {n:'サイドプランク 左',s:30,c:'体を一直線に。腰を落とさない。'},
+  {n:'休憩',           s:12,c:'反対側いきます。'},
+  {n:'サイドプランク 右',s:30,c:'肩の真下に肘。呼吸を止めない。'},
+  {n:'休憩',           s:20,c:'ラスト！もう一度プランク。'},
+  {n:'プランク(ラスト)',s:45,c:'残り全部出し切る。あと少し！'},
+];
+
+let state=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.days){s.earned=s.earned||[];return s;}}catch(e){}
+  return {goalWeight:63,days:{},earned:[]};}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+
+function pad(n){return String(n).padStart(2,'0');}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function today(){return iso(new Date());}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return iso(x);}
+function dayDiff(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
+let cur=today();
+function day(d){if(!state.days[d])state.days[d]={};return state.days[d];}
+function score(d){const x=state.days[d]||{};return QUESTS.reduce((a,q)=>a+(x[q.key]?1:0),0);}
+
+/* aggregates */
+function sd(s){return Object.keys(s.days).sort();}
+function count(s,k){return sd(s).filter(d=>s.days[d][k]).length;}
+function totalKm(s){return sd(s).reduce((a,d)=>a+(+s.days[d].km||0),0);}
+function totalWO(s){return sd(s).reduce((a,d)=>a+(+s.days[d].wo||0),0);}
+function wDays(s){return sd(s).filter(d=>s.days[d].w!=null);}
+function firstW(s){const w=wDays(s);return w.length?+s.days[w[0]].w:null;}
+function latestW(s){const w=wDays(s);return w.length?+s.days[w[w.length-1]].w:null;}
+function lost(s){const f=firstW(s),n=latestW(s);return(f!=null&&n!=null)?f-n:0;}
+function waistDays(s){return sd(s).filter(d=>s.days[d].waist!=null);}
+function waistLost(s){const w=waistDays(s);if(w.length<2)return 0;return(+s.days[w[0]].waist)-(+s.days[w[w.length-1]].waist);}
+function totalXP(s){let xp=0;for(const d of sd(s)){const x=s.days[d];QUESTS.forEach(q=>{if(x[q.key])xp+=q.xp;});if(score(d)===4)xp+=50;xp+=Math.round((+x.km||0)*5);xp+=(+x.wo||0)*15;}return xp;}
+function maxStreak(s){const ds=sd(s);let mx=0,c=0,prev=null;for(const d of ds){if(score(d)>=3){if(prev&&dayDiff(prev,d)===1)c++;else c=1;mx=Math.max(mx,c);prev=d;}else{prev=null;c=0;}}return mx;}
+function curStreak(s){let c=0,d=today();if(score(d)<3)d=addDays(d,-1);while(score(d)>=3){c++;d=addDays(d,-1);}return c;}
+function levelFor(xp){let lvl=1,need=200,acc=0;while(xp>=acc+need){acc+=need;lvl++;need=Math.round(need*1.25);}return{lvl,into:xp-acc,need};}
+
+/* ============ FX: confetti ============ */
+const fx=document.getElementById('fx'),fxc=fx.getContext('2d');let parts=[];
+function resizeFX(){fx.width=innerWidth;fx.height=innerHeight;}resizeFX();addEventListener('resize',resizeFX);
+const seed=[.12,.87,.34,.66,.5,.21,.78,.43,.91,.08,.6,.29];let si=0;
+function rnd(){si=(si+1)%seed.length;return seed[si];}
+function burst(x,y,n,colors){for(let i=0;i<n;i++){const a=(i/n)*6.283+rnd();const sp=3+rnd()*6;
+  parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,g:.18,life:60+rnd()*30,
+    c:colors[i%colors.length],r:3+rnd()*4,rot:rnd()*6,vr:(rnd()-.5)*.4});}}
+function confettiRain(){const cols=['#4ade80','#38bdf8','#fbbf24','#fb7185','#a78bfa'];
+  for(let i=0;i<120;i++)parts.push({x:rnd()*fx.width,y:-20-rnd()*fx.height*.5,vx:(rnd()-.5)*2,vy:2+rnd()*4,g:.05,life:140,c:cols[i%5],r:3+rnd()*5,rot:rnd()*6,vr:(rnd()-.5)*.3});}
+let running=false;
+function loop(){fxc.clearRect(0,0,fx.width,fx.height);let alive=false;
+  for(const p of parts){if(p.life<=0)continue;alive=true;p.life--;p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
+    fxc.save();fxc.translate(p.x,p.y);fxc.rotate(p.rot);fxc.fillStyle=p.c;fxc.globalAlpha=Math.min(1,p.life/25);
+    fxc.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6);fxc.restore();}
+  parts=parts.filter(p=>p.life>0&&p.y<fx.height+40);
+  if(alive){requestAnimationFrame(loop);}else{running=false;fxc.clearRect(0,0,fx.width,fx.height);}}
+function playFX(){if(!running){running=true;requestAnimationFrame(loop);}}
+
+/* ============ SOUND (tiny beep) ============ */
+let actx;function beep(freq,dur,type){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  const o=actx.createOscillator(),g=actx.createGain();o.type=type||'sine';o.frequency.value=freq;
+  o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.0001,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.25,actx.currentTime+.02);
+  g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+dur);o.start();o.stop(actx.currentTime+dur);}catch(e){}}
+
+/* ============ TOAST / animated counter ============ */
+let tT;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2400);}
+function animNum(el,to){const from=+el.dataset.v||0;if(from===to){el.textContent=to;return;}el.dataset.v=to;
+  const st=performance.now(),dur=700;function step(n){const p=Math.min(1,(n-st)/dur);const e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(to-from)*e);if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+
+/* ============ RENDER ============ */
+let prevLevel=null, metricMode='w';
+function render(){
+  document.getElementById('curDate').value=cur;
+  document.getElementById('dayLabel').textContent=cur===today()?'(今日)':'';
+  const dd=day(cur);
+  /* quests */
+  const qc=document.getElementById('quests');qc.innerHTML='';
+  QUESTS.forEach(q=>{const el=document.createElement('div');el.className='quest'+(dd[q.key]?' done':'');
+    el.innerHTML=`<div class="qcheck">${dd[q.key]?'✓':''}</div><div class="qemoji">${q.emoji}</div>
+      <div><div class="qtitle">${q.title}</div><div class="qsub">${q.sub}</div></div><div class="qxp">+${q.xp}XP</div>`;
+    el.onclick=e=>{const r=el.getBoundingClientRect();el.style.setProperty('--mx',(e.clientX-r.left)+'px');el.style.setProperty('--my',(e.clientY-r.top)+'px');
+      const now=!dd[q.key];dd[q.key]=now;save();
+      if(now){beep(660,.12);burst(e.clientX,e.clientY,14,['#4ade80','#38bdf8','#fbbf24']);playFX();}
+      checkBadges();afterChange();
+      if(score(cur)===4&&now){toast('🎉 パーフェクトデイ！ +50XP');confettiRain();playFX();beep(880,.15);setTimeout(()=>beep(1170,.2),120);}};
+    qc.appendChild(el);});
+  /* xp / level */
+  const xp=totalXP(state),L=levelFor(xp);
+  document.getElementById('lvl').textContent=L.lvl;
+  animNum(document.getElementById('xptxt'),xp);
+  document.getElementById('xpnext').textContent=(L.need-L.into)+' XP';
+  const pct=L.into/L.need;
+  document.getElementById('xpfill').style.width=Math.min(100,pct*100)+'%';
+  document.getElementById('ringFill').style.strokeDashoffset=264-264*pct;
+  const cs=curStreak(state);document.getElementById('streak').textContent=cs;
+  document.getElementById('flames').textContent=cs>=3?'🔥'.repeat(Math.min(4,Math.floor(cs/3))):'';
+  document.getElementById('quote').textContent=QUOTES[new Date(cur).getDate()%QUOTES.length];
+  if(prevLevel!==null&&L.lvl>prevLevel){levelUp(L.lvl);}prevLevel=L.lvl;
+  /* weight */
+  document.getElementById('wInput').value=dd.w!=null?dd.w:'';
+  document.getElementById('waistInput').value=dd.waist!=null?dd.waist:'';
+  document.getElementById('goalInput').value=state.goalWeight;
+  const f=firstW(state),n=latestW(state),g=state.goalWeight;
+  document.getElementById('sStart').textContent=f!=null?f+'kg':'–';
+  document.getElementById('sNow').textContent=n!=null?n+'kg':'–';
+  const diffEl=document.getElementById('sDiff');
+  diffEl.textContent=(f!=null&&n!=null)?((n-f>=0?'+':'')+(n-f).toFixed(1)):'–';
+  diffEl.style.color=(f!=null&&n!=null)?(n-f<=0?'var(--accent)':'var(--fire)'):'';
+  document.getElementById('sGoal').textContent=n!=null?((n-g)<=0?'達成🎯':(n-g).toFixed(1)+'kg'):'–';
+  drawChart();
+  /* delivery */
+  document.getElementById('kmInput').value=dd.km!=null?dd.km:'';
+  const km=+dd.km||0;document.getElementById('kmToday').textContent=km;
+  document.getElementById('kcalToday').textContent=Math.round(km*30);
+  document.getElementById('kmTotal').textContent=totalKm(state).toFixed(1);
+  /* workout counts */
+  document.getElementById('woCount').textContent=dd.wo||0;
+  document.getElementById('woTotal').textContent=totalWO(state);
+  /* badges */
+  const bc=document.getElementById('badges');bc.innerHTML='';
+  BADGES.forEach(b=>{const on=b.chk(state);const el=document.createElement('div');el.className='badge'+(on?' on':'');
+    el.innerHTML=`<div class="be">${b.e}</div><div class="bt">${b.t}</div>`;bc.appendChild(el);});
+  /* week */
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i));
+  document.getElementById('wkPerfect').textContent=d7.filter(d=>score(d)===4).length;
+  document.getElementById('wkWO').textContent=d7.reduce((a,d)=>a+(state.days[d]?+state.days[d].wo||0:0),0);
+  document.getElementById('wkRun').textContent=d7.filter(d=>state.days[d]&&state.days[d].run).length;
+  document.getElementById('wkKm').textContent=d7.reduce((a,d)=>a+(state.days[d]?+state.days[d].km||0:0),0).toFixed(1);
+}
+function afterChange(){render();}
+
+function levelUp(n){document.getElementById('lvlupNum').textContent=n;
+  document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
+  document.getElementById('lvlOverlay').classList.add('show');confettiRain();playFX();beep(660,.12);setTimeout(()=>beep(880,.12),120);setTimeout(()=>beep(1170,.25),240);}
+
+function checkBadges(){BADGES.forEach(b=>{if(b.chk(state)&&!state.earned.includes(b.id)){state.earned.push(b.id);save();
+  toast('🏆 実績解除：'+b.t);confettiRain();playFX();beep(990,.18);}});}
+
+/* ============ CHART ============ */
+function drawChart(){const c=document.getElementById('chart'),ctx=c.getContext('2d');const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
+  const isW=metricMode==='w';const days=isW?wDays(state):waistDays(state);
+  if(days.length<1){ctx.fillStyle='#94a1b5';ctx.font='14px sans-serif';ctx.fillText((isW?'体重':'腹囲')+'を記録するとグラフが出ます',20,H/2);return;}
+  const vals=days.map(d=>+state.days[d][isW?'w':'waist']);
+  const goal=isW?state.goalWeight:null;
+  let min=Math.min(...vals,goal!=null?goal:Infinity),max=Math.max(...vals,goal!=null?goal:-Infinity);
+  const p=(max-min)*.18||1;min-=p;max+=p;
+  const L=42,R=W-14,T=18,B=H-26;
+  const x=i=>days.length===1?(L+R)/2:L+(R-L)*i/(days.length-1);
+  const y=v=>B-(B-T)*(v-min)/(max-min);
+  /* area gradient */
+  const grad=ctx.createLinearGradient(0,T,0,B);grad.addColorStop(0,'rgba(74,222,128,.35)');grad.addColorStop(1,'rgba(74,222,128,0)');
+  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+  if(goal!=null){ctx.setLineDash([5,4]);ctx.strokeStyle='#fbbf24';ctx.beginPath();ctx.moveTo(L,y(goal));ctx.lineTo(R,y(goal));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#fbbf24';ctx.font='11px sans-serif';ctx.fillText('目標 '+goal,R-48,y(goal)-5);}
+  ctx.beginPath();vals.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});
+  ctx.lineTo(x(vals.length-1),B);ctx.lineTo(x(0),B);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.strokeStyle='#4ade80';ctx.lineWidth=2.5;ctx.beginPath();vals.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});ctx.stroke();
+  ctx.fillStyle='#4ade80';vals.forEach((v,i)=>{ctx.beginPath();ctx.arc(x(i),y(v),3.5,0,7);ctx.fill();});
+  ctx.fillStyle='#94a1b5';ctx.font='10px sans-serif';ctx.fillText(max.toFixed(1),4,T+4);ctx.fillText(min.toFixed(1),4,B);}
+
+/* ============ WORKOUT ENGINE ============ */
+let wo={i:0,left:0,timer:null,paused:false,active:false};
+function openWO(){wo={i:0,left:WORKOUT[0].s,timer:null,paused:false,active:true};
+  document.getElementById('woOverlay').classList.add('show');buildProg();renderWO();
+  clearInterval(wo.timer);wo.timer=setInterval(tickWO,1000);beep(660,.12);}
+function buildProg(){const p=document.getElementById('woProg');p.innerHTML='';
+  WORKOUT.forEach((s,i)=>{if(s.n==='休憩')return;const el=document.createElement('i');el.dataset.idx=i;p.appendChild(el);});}
+function renderWO(){const step=WORKOUT[wo.i];const rest=step.n==='休憩';
+  document.getElementById('woTimer').classList.toggle('rest',rest);
+  document.getElementById('woTime').textContent=pad(wo.left);
+  document.getElementById('woPhase').textContent=rest?'REST':'GO!';
+  document.getElementById('woName').textContent=step.n;
+  document.getElementById('woCue').textContent=step.c;
+  const nx=WORKOUT[wo.i+1];document.getElementById('woNext').textContent=nx?('次：'+nx.n+(nx.n!=='休憩'?' '+nx.s+'秒':'')):'これでラスト！';
+  const off=553-553*(wo.left/step.s);document.getElementById('woRing').style.strokeDashoffset=off;
+  document.getElementById('woRing').setAttribute('stroke',rest?'#38bdf8':'#4ade80');
+  /* progress dots */
+  document.querySelectorAll('#woProg i').forEach(el=>{const idx=+el.dataset.idx;el.classList.toggle('done',idx<wo.i);el.classList.toggle('cur',idx===wo.i);});}
+function tickWO(){if(wo.paused||!wo.active)return;wo.left--;
+  if(wo.left===3){beep(880,.1);}if(wo.left<=0){nextWO();return;}renderWO();}
+function nextWO(){beep(1046,.15);
+  if(wo.i>=WORKOUT.length-1){finishWO();return;}
+  wo.i++;wo.left=WORKOUT[wo.i].s;renderWO();
+  if(WORKOUT[wo.i].n!=='休憩'){beep(1046,.12);setTimeout(()=>beep(1318,.14),130);}}
+function finishWO(){clearInterval(wo.timer);wo.active=false;
+  const dd=day(cur);dd.wo=(+dd.wo||0)+1;dd.strength=true;save();
+  document.getElementById('woOverlay').classList.remove('show');
+  checkBadges();render();
+  toast('💪 体幹プログラム完了！ +45XP  お腹に効いてます');confettiRain();playFX();
+  beep(660,.12);setTimeout(()=>beep(880,.12),120);setTimeout(()=>beep(1170,.28),240);}
+function quitWO(){clearInterval(wo.timer);wo.active=false;document.getElementById('woOverlay').classList.remove('show');}
+document.getElementById('startWO').onclick=openWO;
+document.getElementById('woQuit').onclick=quitWO;
+document.getElementById('woPause').onclick=e=>{wo.paused=!wo.paused;e.target.textContent=wo.paused?'再開':'一時停止';};
+
+/* ============ EVENTS ============ */
+document.getElementById('saveW').onclick=()=>{const dd=day(cur);
+  const v=parseFloat(document.getElementById('wInput').value);if(!isNaN(v))dd.w=v;else delete dd.w;
+  const wa=parseFloat(document.getElementById('waistInput').value);if(!isNaN(wa))dd.waist=wa;else delete dd.waist;
+  save();checkBadges();render();toast('記録しました 📈');beep(660,.1);};
+document.getElementById('goalInput').onchange=e=>{const v=parseFloat(e.target.value);if(!isNaN(v)){state.goalWeight=v;save();render();}};
+document.getElementById('saveKm').onclick=()=>{const dd=day(cur);const v=parseFloat(document.getElementById('kmInput').value);
+  if(!isNaN(v))dd.km=v;else delete dd.km;save();checkBadges();render();toast('+'+Math.round((v||0)*5)+'XP 🚴');beep(660,.1);};
+document.getElementById('toggleMetric').onclick=()=>{metricMode=metricMode==='w'?'waist':'w';drawChart();};
+document.getElementById('prevDay').onclick=()=>{cur=addDays(cur,-1);render();};
+document.getElementById('nextDay').onclick=()=>{cur=addDays(cur,1);render();};
+document.getElementById('curDate').onchange=e=>{cur=e.target.value;render();};
+document.getElementById('exportBtn').onclick=()=>{const b=new Blob([JSON.stringify(state)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bodyquest-backup.json';a.click();};
+document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const s=JSON.parse(r.result);if(s.days){state=s;state.earned=state.earned||[];save();prevLevel=null;render();prevLevel=levelFor(totalXP(state)).lvl;toast('データを読み込みました');}}catch(x){toast('読み込み失敗');}};r.readAsText(f);};
+
+prevLevel=levelFor(totalXP(state)).lvl;
+render();
+setTimeout(confettiRain,300);setTimeout(playFX,300); // welcome burst
+
+/* PWA: register service worker for offline use */
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+</script>
+</body>
+</html>
