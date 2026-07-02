@@ -1,5 +1,5 @@
 /* 体改造クエスト service worker — offline app shell */
-const CACHE = 'bodyquest-v10';
+const CACHE = 'bodyquest-v11';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
