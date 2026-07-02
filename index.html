@@ -170,6 +170,8 @@
     <div class="quote" id="quote" style="margin-top:14px;"></div>
   </div>
 
+  <button class="big" id="calmBtn" style="background:linear-gradient(135deg,#fb7185,#f43f5e);margin-bottom:14px;">🔥 むしゃくしゃボタン<span class="sub">ケンカ・イライラで食べたくなったら、まずコレ</span></button>
+
   <div class="datehop">
     <button class="ghost" id="prevDay">‹ 前日</button>
     <input type="date" id="curDate">
@@ -297,6 +299,47 @@
   <input type="file" id="fileInput" accept=".json" style="display:none;">
 </div>
 
+<!-- ケンカの日モード -->
+<div class="overlay" id="calmOverlay"><div class="modal">
+  <div style="font-size:2rem;">🔥→🧘</div>
+  <h2 style="font-size:1.3rem;margin:6px 0;">ちょっと待った。まず落ち着こう。</h2>
+  <div class="muted" style="margin-bottom:16px;">今のは"怒り"で、お腹は減ってない。3つのどれかで波をやり過ごそう。</div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <button class="big" id="calmMove" style="background:linear-gradient(135deg,#38bdf8,#4ade80);">💪 まず動く（全身HIIT）<span class="sub">怒りを筋トレで燃やす</span></button>
+    <button class="big" id="calmBreath" style="background:linear-gradient(135deg,#a78bfa,#38bdf8);">🧘 深呼吸ガイド<span class="sub">吸って4秒・吐いて6秒 × 6回</span></button>
+    <button class="big" id="calmWait" style="background:linear-gradient(135deg,#fbbf24,#fb7185);">⏳ 10分だけ待つ<span class="sub">衝動の波はすぐ引く</span></button>
+  </div>
+  <div style="border-top:1px solid var(--line);margin:18px 0 12px;"></div>
+  <div class="muted" style="margin-bottom:8px;">落ち着いたら、正直に記録：</div>
+  <div style="display:flex;gap:10px;">
+    <button id="calmHeld" style="flex:1;">💪 乗り切った</button>
+    <button class="ghost" id="calmGave" style="flex:1;">🍺 行ってしまった</button>
+  </div>
+  <div class="muted" id="calmStats" style="margin-top:12px;font-size:.8rem;"></div>
+  <div style="text-align:center;margin-top:10px;"><span class="link" id="calmClose">閉じる</span></div>
+</div></div>
+
+<!-- 深呼吸ガイド -->
+<div class="overlay" id="breathOverlay"><div class="modal" style="text-align:center;">
+  <div style="height:210px;display:flex;align-items:center;justify-content:center;">
+    <div id="breathCircle" style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#38bdf8,#4ade80);transition:transform 4s ease-in-out;transform:scale(.8);"></div>
+  </div>
+  <div id="breathText" style="font-size:1.5rem;font-weight:800;">準備…</div>
+  <div id="breathCount" class="muted" style="margin-top:6px;min-height:1.2em;"></div>
+  <button class="ghost" id="breathStop" style="margin-top:16px;">閉じる</button>
+</div></div>
+
+<!-- 10分待つ -->
+<div class="overlay" id="waitOverlay"><div class="modal" style="text-align:center;">
+  <div style="font-size:1rem;color:var(--sub);letter-spacing:2px;">まず10分、やり過ごす</div>
+  <div style="font-size:3.6rem;font-weight:900;font-variant-numeric:tabular-nums;margin:6px 0;" id="waitTime">10:00</div>
+  <div class="muted" id="waitMsg" style="min-height:2.4em;"></div>
+  <div style="display:flex;gap:10px;margin-top:18px;">
+    <button class="ghost" id="waitStop" style="flex:1;">やめる</button>
+    <button id="waitDone" style="flex:1;">乗り切った💪</button>
+  </div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <!-- LEVEL UP MODAL -->
@@ -364,6 +407,8 @@ const BADGES=[
   {id:'run10', e:'🌅',t:'朝ラン10',  chk:s=>count(s,'run')>=10},
   {id:'km100', e:'🚴',t:'累計100km', chk:s=>totalKm(s)>=100},
   {id:'km500', e:'🚵',t:'累計500km', chk:s=>totalKm(s)>=500},
+  {id:'calm1', e:'🧘',t:'衝動を制す', chk:s=>(s.calmHeld||0)>=1},
+  {id:'calm5', e:'🛡️',t:'乗り切り5連',chk:s=>(s.calmBest||0)>=5},
 ];
 /* Core workout: name, seconds, cue. type work/rest */
 const WORKOUT=[
@@ -430,6 +475,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   if(!s||!s.days)s={goalWeight:63,days:{}};
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
+  s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -744,6 +790,46 @@ function markMusicSel(){document.querySelectorAll('#musicSel .mbtn').forEach(b=>
 document.querySelectorAll('#musicSel .mbtn').forEach(b=>b.onclick=()=>{state.music=b.dataset.m;save();markMusicSel();
   if(state.music==='off')musicStop();else musicStart(state.music);updateNowPlaying();});
 markMusicSel();
+
+/* ============ ケンカの日モード / むしゃくしゃボタン ============ */
+function openCalm(){document.getElementById('calmOverlay').classList.add('show');updateCalmStats();}
+function closeCalm(){document.getElementById('calmOverlay').classList.remove('show');}
+function updateCalmStats(){document.getElementById('calmStats').textContent='乗り切りストリーク：'+(state.calmStreak||0)+' 🔥 ／ 累計 乗り切った '+(state.calmHeld||0)+' 回・ベスト '+(state.calmBest||0)+'連続';}
+document.getElementById('calmBtn').onclick=openCalm;
+document.getElementById('calmClose').onclick=closeCalm;
+document.getElementById('calmMove').onclick=()=>{closeCalm();openWO(buildFullBody(state.silentMode));};
+document.getElementById('calmBreath').onclick=()=>{closeCalm();openBreath();};
+document.getElementById('calmWait').onclick=()=>{closeCalm();openWait();};
+document.getElementById('calmHeld').onclick=()=>{state.calmHeld=(state.calmHeld||0)+1;state.calmStreak=(state.calmStreak||0)+1;
+  if(state.calmStreak>(state.calmBest||0))state.calmBest=state.calmStreak;save();
+  updateCalmStats();checkBadges();render();toast('💪 よく乗り切った！これが一番効く');confettiRain();playFX();beep(880,.14);};
+document.getElementById('calmGave').onclick=()=>{state.calmGave=(state.calmGave||0)+1;state.calmStreak=0;save();
+  updateCalmStats();render();toast('正直に記録できたのが一歩。明日またやろう。');};
+
+let breath={timer:null,cyc:0,running:false};
+const BREATH=[{t:'吸って…',d:4000,s:1.6},{t:'止めて',d:2000,s:1.6},{t:'吐いて…ゆっくり',d:6000,s:0.75}];
+function openBreath(){breath={timer:null,cyc:0,running:true};document.getElementById('breathOverlay').classList.add('show');breathPhase(0);}
+function breathPhase(i){if(!breath.running)return;const p=BREATH[i],c=document.getElementById('breathCircle');
+  c.style.transition='transform '+(p.d/1000)+'s ease-in-out';c.style.transform='scale('+p.s+')';
+  document.getElementById('breathText').textContent=p.t;document.getElementById('breathCount').textContent='呼吸 '+(breath.cyc+1)+' / 6';
+  if(i===0)beep(392,.14);if(i===2)beep(294,.18);
+  breath.timer=setTimeout(()=>{let ni=i+1;if(ni>=BREATH.length){breath.cyc++;ni=0;}
+    if(breath.cyc>=6){breath.running=false;document.getElementById('breathText').textContent='おつかれさま。落ち着いた？';
+      document.getElementById('breathCount').textContent='';document.getElementById('breathCircle').style.transform='scale(1)';return;}
+    breathPhase(ni);},p.d);}
+function closeBreath(){breath.running=false;if(breath.timer)clearTimeout(breath.timer);document.getElementById('breathOverlay').classList.remove('show');}
+document.getElementById('breathStop').onclick=closeBreath;
+
+let wt={timer:null,left:600,running:false};
+const WAITMSG=['波は必ず引く。あと少し。','今のは怒り。お腹は減ってない。','ここを越えたら、あなたの勝ち。','水を一杯飲もう。','深呼吸。長く吐いて。','店じゃなく、家の方へ。'];
+function openWait(){wt={timer:null,left:600,running:true};document.getElementById('waitOverlay').classList.add('show');renderWait();
+  wt.timer=setInterval(()=>{if(!wt.running)return;wt.left--;renderWait();if(wt.left<=0){clearInterval(wt.timer);waitFinish();}},1000);}
+function renderWait(){const m=Math.floor(wt.left/60),s=wt.left%60;document.getElementById('waitTime').textContent=m+':'+pad(s);
+  if(wt.left%30===0)document.getElementById('waitMsg').textContent=WAITMSG[Math.floor(wt.left/30)%WAITMSG.length];}
+function waitFinish(){wt.running=false;document.getElementById('waitTime').textContent='0:00';document.getElementById('waitMsg').textContent='乗り切った！波は過ぎた。えらい。';confettiRain();playFX();beep(660,.12);setTimeout(()=>beep(880,.15),140);}
+function closeWait(){wt.running=false;if(wt.timer)clearInterval(wt.timer);document.getElementById('waitOverlay').classList.remove('show');}
+document.getElementById('waitStop').onclick=closeWait;
+document.getElementById('waitDone').onclick=()=>{closeWait();document.getElementById('calmHeld').click();};
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
