@@ -254,13 +254,18 @@
     <div class="muted" style="margin:16px 0 8px;">⚡ よく食べる（1タップ）</div>
     <div id="foodChips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
 
-    <div class="muted" style="margin:16px 0 8px;">★ 自分の食品を登録（100gあたりの値・検索に追加されます）</div>
+    <div class="muted" style="margin:16px 0 8px;">🍳 料理をざっくり概算で追加（カロリーがわからなくてOK）</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-      <div><label class="mini">名前</label><input id="cfName" style="width:130px;" placeholder="例: 妻の唐揚げ"></div>
-      <div><label class="mini">kcal/100g</label><input type="number" id="cfKcal" style="width:86px;"></div>
-      <div><label class="mini">P/100g</label><input type="number" id="cfP" style="width:74px;"></div>
-      <button id="cfAdd" class="ghost">登録</button>
+      <div style="flex:1;min-width:120px;"><label class="mini">料理名（任意）</label><input id="estName" style="width:100%;" placeholder="例: 妻の肉じゃが"></div>
+      <div><label class="mini">グラム</label><input type="number" id="estGram" value="200" style="width:80px;"></div>
     </div>
+    <div style="margin-top:8px;"><label class="mini">どんな料理？（近いタイプを選ぶ）</label>
+      <select id="estType" style="width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:11px 12px;font-size:1rem;"></select></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px;">
+      <span id="estPrev" style="font-size:.92rem;font-weight:700;color:var(--sub);">≒ — kcal ／ P — g</span>
+      <button id="estAdd">追加</button>
+    </div>
+    <div class="muted" style="font-size:.7rem;margin-top:6px;">目安の目安です。ざっくり把握できればOK。分かる範囲でグラムを入れてください（例: 1皿≒300g）。</div>
     <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
     <div class="muted" style="text-align:center;margin-top:8px;font-size:.72rem;">※数値は一般的な目安です（±）</div>
   </div>
@@ -755,12 +760,36 @@ document.getElementById('importBtn').onclick=()=>document.getElementById('fileIn
 document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const s=JSON.parse(r.result);if(s.days){state=s;state.earned=state.earned||[];save();prevLevel=null;render();prevLevel=levelFor(totalXP(state)).lvl;toast('データを読み込みました');}}catch(x){toast('読み込み失敗');}};r.readAsText(f);};
 /* food log handlers */
-document.getElementById('cfAdd').onclick=()=>{const n=document.getElementById('cfName').value.trim();
-  const k=parseFloat(document.getElementById('cfKcal').value);const p=parseFloat(document.getElementById('cfP').value);
-  if(!n||isNaN(k)){toast('名前と kcal/100g を入れてください');return;}
-  state.customFoods100.unshift({n,k,p:isNaN(p)?0:p});save();
-  document.getElementById('cfName').value='';document.getElementById('cfKcal').value='';document.getElementById('cfP').value='';
-  render();toast('★ '+n+' を登録（検索で使えます）');};
+/* 料理タイプ別の概算（100gあたり kcal / タンパク質g） */
+const CAT=[
+  {n:'あっさり（野菜・スープ中心）',k:45,p:2},
+  {n:'ふつうの和食・定食',k:130,p:7},
+  {n:'ごはんもの・丼・カレー',k:170,p:5},
+  {n:'麺類（ラーメン・パスタ等）',k:140,p:5},
+  {n:'炒め物・こってり系',k:230,p:10},
+  {n:'肉がメインの料理',k:230,p:16},
+  {n:'魚がメインの料理',k:170,p:18},
+  {n:'揚げ物ガッツリ（唐揚げ・カツ）',k:300,p:14},
+  {n:'パン・粉物・ピザ',k:270,p:8},
+  {n:'スイーツ・菓子',k:360,p:4,snack:true},
+];
+(function(){const sel=document.getElementById('estType');CAT.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.n;sel.appendChild(o);});})();
+function updateEstPreview(){const cat=CAT[+document.getElementById('estType').value||0];const g=parseFloat(document.getElementById('estGram').value);const pv=document.getElementById('estPrev');
+  if(cat&&!isNaN(g)&&g>0){const k=Math.round(cat.k*g/100),p=Math.round(cat.p*g/10)/10;pv.textContent='≒ '+k+' kcal ／ P '+p+' g';pv.style.color='var(--accent2)';}
+  else{pv.textContent='≒ — kcal ／ P — g';pv.style.color='var(--sub)';}}
+document.getElementById('estType').onchange=updateEstPreview;
+document.getElementById('estGram').oninput=updateEstPreview;
+document.getElementById('estAdd').onclick=()=>{const cat=CAT[+document.getElementById('estType').value||0];const g=parseFloat(document.getElementById('estGram').value);
+  const nm=(document.getElementById('estName').value.trim()||cat.n);
+  if(!cat||isNaN(g)||g<=0){toast('料理タイプとグラムを入れてください');return;}
+  const dd=day(cur);dd.meals=dd.meals||[];const before=dd.meals.reduce((a,m)=>a+(+m.p||0),0);
+  const k=Math.round(cat.k*g/100),p=Math.round(cat.p*g/10)/10;const snack=cat.snack||isSnack(nm);
+  dd.meals.push({n:nm+' '+g+'g(概算)',k,p,s:snack?1:0});save();
+  document.getElementById('estName').value='';document.getElementById('estGram').value=200;
+  if(before<state.proTarget&&(before+p)>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
+  else if(snack){toast('🍫 '+nm+' +'+k+'kcal ＝ 自転車'+Math.round(k/30)+'km分。戒め！');beep(196,.22,'sawtooth');}
+  else{toast('概算で追加：'+nm);beep(660,.08);} render();updateEstPreview();};
+updateEstPreview();
 document.getElementById('foodSearch').oninput=updateFoodPreview;
 document.getElementById('foodGram').oninput=updateFoodPreview;
 document.getElementById('foodAddG').onclick=()=>{const f=foodByName(document.getElementById('foodSearch').value);
