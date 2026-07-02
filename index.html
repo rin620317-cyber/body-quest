@@ -186,6 +186,15 @@
     <button class="big" id="startWO">▶ 体幹プログラムを開始<span class="sub">今日やった回数：<span id="woCount">0</span> ・ 累計 <span id="woTotal">0</span> 回</span></button>
   </div>
 
+  <!-- FULL BODY CTA -->
+  <div class="card" style="text-align:center;">
+    <h3 style="justify-content:center;">🏋️ 全身10種 HIIT（20秒 × 2周）</h3>
+    <div class="muted" style="margin-bottom:12px;">ジャンプスクワット〜バーピーまで、大きい筋肉を一気に。約13分。完了で「筋トレ」達成＋45XP。</div>
+    <label style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:.85rem;margin-bottom:14px;cursor:pointer;">
+      <input type="checkbox" id="silentChk" style="width:auto;transform:scale(1.3);"> 🔇 静音版（ジャンプなし・マンション向け）</label>
+    <button class="big" id="startFull" style="background:linear-gradient(135deg,#38bdf8,#a78bfa);">▶ 全身プログラムを開始<span class="sub">開始後に音楽を選べます 🎹 / 🎸</span></button>
+  </div>
+
   <!-- WEIGHT -->
   <div class="card">
     <h3>⚖️ 体重 & お腹の記録</h3>
@@ -301,6 +310,12 @@
   <div class="wo-next" id="woNext"></div>
   <div class="wo-cue" id="woCue"></div>
   <div class="wo-prog" id="woProg"></div>
+  <div id="musicSel" style="display:flex;gap:6px;justify-content:center;margin-top:10px;font-size:.78rem;">
+    <button class="ghost mbtn" data-m="off">🔇 OFF</button>
+    <button class="ghost mbtn" data-m="healing">🎹 ヒーリング</button>
+    <button class="ghost mbtn" data-m="eighties">🎸 80s</button>
+  </div>
+  <div id="woNowPlaying" style="text-align:center;font-size:.72rem;color:var(--violet);margin-top:6px;min-height:1em;"></div>
   <div class="wo-btns">
     <button class="ghost" id="woPause">一時停止</button>
     <button class="ghost" id="woQuit">やめる</button>
@@ -406,6 +421,7 @@ let state=load();
 function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   if(!s||!s.days)s={goalWeight:63,days:{}};
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
+  s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -610,19 +626,44 @@ function drawChart(){const c=document.getElementById('chart'),ctx=c.getContext('
   ctx.fillStyle='#94a1b5';ctx.font='10px sans-serif';ctx.fillText(max.toFixed(1),4,T+4);ctx.fillText(min.toFixed(1),4,B);}
 
 /* ============ WORKOUT ENGINE ============ */
+let curProgram=WORKOUT;
 let wo={i:0,left:0,timer:null,paused:false,active:false};
-function openWO(){wo={i:0,left:WORKOUT[0].s,timer:null,paused:false,active:true};
+function buildFullBody(quiet){
+  const B=[
+    {n:'ジャンプスクワット',c:'着地はやわらかく、リズム良く。',qn:'スクワット(ゆっくり)',qc:'3秒で下げ2秒で上げる。静かに深く。'},
+    {n:'ジャンプランジ',c:'空中で足を入れ替える。',qn:'リバースランジ',qc:'後ろへ一歩引いて下げる。左右交互。'},
+    {n:'Vアップ',c:'手と足を同時に上げてV字。'},
+    {n:'プッシュアップ',c:'胸を床ギリギリまで。体は一直線。'},
+    {n:'リバーススノーエンジェル',c:'うつ伏せで腕を大きく回し肩甲骨を寄せる(背中)。'},
+    {n:'パイクプッシュアップ',c:'お尻を高く、頭を床へ(肩)。'},
+    {n:'ロシアンツイスト',c:'座って上体を倒し左右にひねる。'},
+    {n:'ダイヤモンドプッシュアップ',c:'手を胸の下で三角に。二の腕に効く。'},
+    {n:'バーピー',c:'しゃがむ→プランク→ジャンプ。全身。',qn:'バーピー(ジャンプなし)',qc:'ジャンプせず立ち上がるだけ。静か。'},
+    {n:'ツイストマウンテンクライマー',c:'膝を対角の肘へ、テンポ良く。',qn:'マウンテンクライマー(静か)',qc:'足音を抑えゆっくり大きく。'},
+  ];
+  const seq=[];
+  for(let r=1;r<=2;r++){
+    B.forEach((e,idx)=>{const nm=(quiet&&e.qn)?e.qn:e.n, cu=(quiet&&e.qc)?e.qc:e.c;
+      seq.push({n:nm,s:20,c:'【'+r+'周目 '+(idx+1)+'/10】'+cu});
+      if(!(r===2&&idx===B.length-1)) seq.push({n:'休憩',s:10,c:'水分OK。次いきます。'});});
+    if(r===1) seq[seq.length-1]={n:'休憩',s:30,c:'1周終了！30秒休んで2周目へ。'};
+  }
+  return seq;
+}
+function openWO(program){curProgram=program||WORKOUT;
+  wo={i:0,left:curProgram[0].s,timer:null,paused:false,active:true};
   document.getElementById('woOverlay').classList.add('show');buildProg();renderWO();
-  clearInterval(wo.timer);wo.timer=setInterval(tickWO,1000);beep(660,.12);}
+  clearInterval(wo.timer);wo.timer=setInterval(tickWO,1000);beep(660,.12);
+  if(state.music&&state.music!=='off')musicStart(state.music); markMusicSel(); updateNowPlaying();}
 function buildProg(){const p=document.getElementById('woProg');p.innerHTML='';
-  WORKOUT.forEach((s,i)=>{if(s.n==='休憩')return;const el=document.createElement('i');el.dataset.idx=i;p.appendChild(el);});}
-function renderWO(){const step=WORKOUT[wo.i];const rest=step.n==='休憩';
+  curProgram.forEach((s,i)=>{if(s.n==='休憩')return;const el=document.createElement('i');el.dataset.idx=i;p.appendChild(el);});}
+function renderWO(){const step=curProgram[wo.i];const rest=step.n==='休憩';
   document.getElementById('woTimer').classList.toggle('rest',rest);
   document.getElementById('woTime').textContent=pad(wo.left);
   document.getElementById('woPhase').textContent=rest?'REST':'GO!';
   document.getElementById('woName').textContent=step.n;
   document.getElementById('woCue').textContent=step.c;
-  const nx=WORKOUT[wo.i+1];document.getElementById('woNext').textContent=nx?('次：'+nx.n+(nx.n!=='休憩'?' '+nx.s+'秒':'')):'これでラスト！';
+  const nx=curProgram[wo.i+1];document.getElementById('woNext').textContent=nx?('次：'+nx.n+(nx.n!=='休憩'?' '+nx.s+'秒':'')):'これでラスト！';
   const off=553-553*(wo.left/step.s);document.getElementById('woRing').style.strokeDashoffset=off;
   document.getElementById('woRing').setAttribute('stroke',rest?'#38bdf8':'#4ade80');
   /* progress dots */
@@ -630,19 +671,71 @@ function renderWO(){const step=WORKOUT[wo.i];const rest=step.n==='休憩';
 function tickWO(){if(wo.paused||!wo.active)return;wo.left--;
   if(wo.left===3){beep(880,.1);}if(wo.left<=0){nextWO();return;}renderWO();}
 function nextWO(){beep(1046,.15);
-  if(wo.i>=WORKOUT.length-1){finishWO();return;}
-  wo.i++;wo.left=WORKOUT[wo.i].s;renderWO();
-  if(WORKOUT[wo.i].n!=='休憩'){beep(1046,.12);setTimeout(()=>beep(1318,.14),130);}}
-function finishWO(){clearInterval(wo.timer);wo.active=false;
+  if(wo.i>=curProgram.length-1){finishWO();return;}
+  wo.i++;wo.left=curProgram[wo.i].s;renderWO();
+  if(curProgram[wo.i].n!=='休憩'){beep(1046,.12);setTimeout(()=>beep(1318,.14),130);}}
+function finishWO(){clearInterval(wo.timer);wo.active=false;musicStop();
   const dd=day(cur);dd.wo=(+dd.wo||0)+1;dd.strength=true;save();
   document.getElementById('woOverlay').classList.remove('show');
   checkBadges();render();
-  toast('💪 体幹プログラム完了！ +45XP  お腹に効いてます');confettiRain();playFX();
+  toast('💪 プログラム完了！ +45XP よく動いた！');confettiRain();playFX();
   beep(660,.12);setTimeout(()=>beep(880,.12),120);setTimeout(()=>beep(1170,.28),240);}
-function quitWO(){clearInterval(wo.timer);wo.active=false;document.getElementById('woOverlay').classList.remove('show');}
-document.getElementById('startWO').onclick=openWO;
+function quitWO(){clearInterval(wo.timer);wo.active=false;musicStop();document.getElementById('woOverlay').classList.remove('show');}
+document.getElementById('startWO').onclick=()=>openWO(WORKOUT);
+document.getElementById('startFull').onclick=()=>openWO(buildFullBody(state.silentMode));
+document.getElementById('silentChk').checked=state.silentMode;
+document.getElementById('silentChk').onchange=e=>{state.silentMode=e.target.checked;save();};
 document.getElementById('woQuit').onclick=quitWO;
 document.getElementById('woPause').onclick=e=>{wo.paused=!wo.paused;e.target.textContent=wo.paused?'再開':'一時停止';};
+
+/* ============ MUSIC（WebAudioでその場生成） ============ */
+let music={playing:false,style:null,timer:null,nextTime:0,step:0,master:null,track:null};
+const EIGHT_CHORDS=[
+  {bass:110.00,pad:[220.00,261.63,329.63]},{bass:87.31,pad:[174.61,220.00,261.63]},
+  {bass:65.41,pad:[130.81,164.81,196.00]},{bass:98.00,pad:[196.00,246.94,293.66]},
+];
+const HEAL_CHORDS=[[130.81,164.81,196.00,261.63],[146.83,174.61,220.00,293.66],[110.00,164.81,220.00,261.63],[123.47,146.83,196.00,246.94]];
+const TRACKS={eighties:['NEON HIGHWAY','MIDNIGHT DRIVE','ELECTRIC SUNSET','TURBO DREAM','CHROME HEART','LASER CITY','RETRO RUNNER','STARLIGHT CRUISE'],
+  healing:['静寂の森','波のゆらぎ','月光','深呼吸','雲の上','せせらぎ','おだやかな朝']};
+function mOsc(type,f,t,dur,gain,glide){const o=actx.createOscillator(),g=actx.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t);if(glide)o.frequency.exponentialRampToValueAtTime(glide,t+dur);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(music.master);o.start(t);o.stop(t+dur+0.03);}
+function mNoise(t,dur,gain,hp){const n=Math.floor(actx.sampleRate*dur),b=actx.createBuffer(1,n,actx.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=Math.random()*2-1;const s=actx.createBufferSource();s.buffer=b;
+  const f=actx.createBiquadFilter();f.type=hp?'highpass':'lowpass';f.frequency.value=hp?6000:9000;
+  const g=actx.createGain();g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  s.connect(f);f.connect(g);g.connect(music.master);s.start(t);s.stop(t+dur+0.03);}
+function eightStep(step,t,dur){const bar=Math.floor(step/8)%4,ch=EIGHT_CHORDS[bar],ib=step%8;
+  if(ib===0)ch.pad.forEach(f=>mOsc('sawtooth',f,t,dur*8*0.98,0.04));
+  mOsc('sawtooth',ch.bass,t,dur*0.9,0.22);
+  if(ib%4===0)mOsc('sine',150,t,0.18,0.9,50);
+  if(ib===4)mNoise(t,0.16,0.35,true);
+  mNoise(t,0.03,ib%2===0?0.10:0.05,true);
+  if((bar===0||bar===2)&&(ib===2||ib===6)){const lead=[440,523.25,587.33,659.25];mOsc('square',lead[step%4],t,dur*0.8,0.05);}
+  if(step%32===0)pickTrack('eighties');}
+function healStep(step,t,dur){const ch=HEAL_CHORDS[step%HEAL_CHORDS.length];
+  ch.forEach(f=>mOsc('sine',f,t,dur*1.1,0.07));
+  mOsc('sine',ch[step%ch.length]*2,t+0.3,dur*0.9,0.045);
+  if(step%4===0)pickTrack('healing');}
+function scheduler(){if(!music.playing)return;
+  if(music.style==='eighties'){const dur=(60/112)/2;while(music.nextTime<actx.currentTime+0.2){eightStep(music.step,music.nextTime,dur);music.step++;music.nextTime+=dur;}}
+  else{const dur=2.2;while(music.nextTime<actx.currentTime+0.3){healStep(music.step,music.nextTime,dur);music.step++;music.nextTime+=dur;}}}
+function pickTrack(style){const a=TRACKS[style];music.track=a[Math.floor(Math.random()*a.length)];updateNowPlaying();}
+function musicStart(style){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
+  if(actx.state==='suspended')actx.resume();musicStop();
+  music.playing=true;music.style=style;music.step=0;music.nextTime=actx.currentTime+0.1;
+  music.master=actx.createGain();music.master.gain.value=style==='healing'?0.20:0.15;music.master.connect(actx.destination);
+  pickTrack(style);music.timer=setInterval(scheduler,25);}
+function musicStop(){music.playing=false;if(music.timer){clearInterval(music.timer);music.timer=null;}
+  if(music.master){const m=music.master;try{m.gain.linearRampToValueAtTime(0.0001,actx.currentTime+0.3);}catch(e){}setTimeout(()=>{try{m.disconnect();}catch(e){}},400);music.master=null;}
+  updateNowPlaying();}
+function updateNowPlaying(){const el=document.getElementById('woNowPlaying');if(!el)return;
+  el.textContent=(music.playing&&music.style)?('♪ '+(music.track||'')+' — '+(music.style==='eighties'?'SYNTHWAVE · アプリ内生成':'AMBIENT · アプリ内生成')):'';}
+function markMusicSel(){document.querySelectorAll('#musicSel .mbtn').forEach(b=>{const on=b.dataset.m===state.music;b.style.borderColor=on?'var(--accent2)':'';b.style.color=on?'var(--accent2)':'';});}
+document.querySelectorAll('#musicSel .mbtn').forEach(b=>b.onclick=()=>{state.music=b.dataset.m;save();markMusicSel();
+  if(state.music==='off')musicStop();else musicStart(state.music);updateNowPlaying();});
+markMusicSel();
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
