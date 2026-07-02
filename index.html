@@ -229,15 +229,28 @@
       </div>
     </div>
     <div id="mealList"></div>
-    <div class="muted" style="margin:12px 0 8px;">タップで追加：</div>
+
+    <div class="muted" style="margin:14px 0 6px;">🔍 検索して追加（グラム指定で自動計算）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="flex:1;min-width:150px;"><label class="mini">食材・料理名</label>
+        <input list="foodDL" id="foodSearch" style="width:100%;" placeholder="例: 鶏むね / カレーライス"><datalist id="foodDL"></datalist></div>
+      <div><label class="mini">グラム</label><input type="number" id="foodGram" value="100" style="width:74px;"></div>
+      <button id="foodAddG">追加</button>
+    </div>
+    <div id="foodPreview" style="margin-top:6px;font-size:.9rem;color:var(--sub);font-weight:700;">= — kcal ／ P — g</div>
+
+    <div class="muted" style="margin:16px 0 8px;">⚡ よく食べる（1タップ）</div>
     <div id="foodChips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-      <div><label class="mini">自分の食品名</label><input id="cfName" style="width:130px;" placeholder="例: 妻の肉じゃが"></div>
-      <div><label class="mini">kcal</label><input type="number" id="cfKcal" style="width:80px;"></div>
-      <div><label class="mini">P(g)</label><input type="number" id="cfP" style="width:66px;"></div>
+
+    <div class="muted" style="margin:16px 0 8px;">★ 自分の食品を登録（100gあたりの値・検索に追加されます）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label class="mini">名前</label><input id="cfName" style="width:130px;" placeholder="例: 妻の唐揚げ"></div>
+      <div><label class="mini">kcal/100g</label><input type="number" id="cfKcal" style="width:86px;"></div>
+      <div><label class="mini">P/100g</label><input type="number" id="cfP" style="width:74px;"></div>
       <button id="cfAdd" class="ghost">登録</button>
     </div>
-    <div style="text-align:center;margin-top:12px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
+    <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
+    <div class="muted" style="text-align:center;margin-top:8px;font-size:.72rem;">※数値は一般的な目安です（±）</div>
   </div>
 
   <!-- BADGES -->
@@ -353,11 +366,38 @@ const FOODS=[
   {n:'ラーメン 1杯',k:500,p:20},{n:'唐揚げ 3個',k:300,p:18},{n:'ビール 350',k:140,p:1},
   {n:'アーモンド 25g',k:150,p:5.5},
 ];
+/* 100gあたりの栄養DB（検索＋グラム指定用・目安値）[名前, kcal, タンパク質g] */
+const FOODS_DB=[
+ ['白ごはん',156,2.5],['玄米ごはん',152,2.8],['食パン',248,8.9],['ロールパン',309,10.1],['うどん(ゆで)',95,2.6],
+ ['そば(ゆで)',130,4.8],['中華麺(ゆで)',133,3.9],['パスタ(ゆで)',150,5.8],['もち',223,4.0],['オートミール',350,13.7],['コーンフレーク',380,7.8],
+ ['鶏むね(皮なし)',105,23.3],['鶏むね(皮付)',133,21.3],['鶏もも(皮なし)',113,19.0],['鶏もも(皮付)',190,16.6],['ささみ',98,23.9],
+ ['豚バラ',366,14.4],['豚ロース',248,19.3],['豚もも',171,20.5],['牛もも赤身',140,21.2],['牛バラ',381,12.8],
+ ['牛ひき肉',251,17.1],['豚ひき肉',209,17.7],['鶏ひき肉',171,17.5],['ロースハム',211,16.5],['ベーコン',400,12.9],['ウインナー',321,13.2],
+ ['鮭',133,22.3],['まぐろ赤身',115,26.4],['まぐろトロ',344,20.1],['さば',247,20.6],['さんま',287,18.1],['あじ',112,19.7],
+ ['ぶり',257,21.4],['いわし',169,19.2],['たら',72,17.6],['えび',82,18.4],['いか',76,17.9],
+ ['ツナ缶(水煮)',70,16.0],['ツナ缶(油)',267,17.7],['さば缶(水煮)',174,20.9],['しらす干し',113,24.5],['たらこ',131,24.0],
+ ['卵',142,12.2],['木綿豆腐',73,7.0],['絹豆腐',56,5.3],['納豆',190,16.5],['豆乳(無調整)',44,3.6],
+ ['厚揚げ',143,10.7],['油揚げ',377,23.0],['枝豆(ゆで)',118,11.5],['きなこ',451,36.7],
+ ['牛乳',61,3.3],['低脂肪乳',42,3.8],['ヨーグルト(無糖)',56,3.6],['ギリシャヨーグルト',59,10.0],['プロセスチーズ',313,22.7],['カマンベール',291,19.1],
+ ['ブロッコリー',37,5.4],['キャベツ',21,1.3],['レタス',11,0.6],['トマト',20,0.7],['きゅうり',13,1.0],['ほうれん草',20,2.2],
+ ['にんじん',35,0.7],['玉ねぎ',33,1.0],['じゃがいも',76,1.6],['さつまいも',127,1.2],['かぼちゃ',78,1.9],['なす',18,1.1],
+ ['ピーマン',20,0.9],['しめじ',22,2.7],['えのき',34,2.7],['大根',15,0.4],['白菜',13,0.8],['アボカド',176,2.1],['もやし',15,1.7],['オクラ',30,2.1],
+ ['バナナ',86,1.1],['りんご',53,0.1],['みかん',46,0.7],['いちご',31,0.9],['ぶどう',58,0.4],['キウイ',51,1.0],['オレンジ',39,1.0],['梨',43,0.3],['桃',40,0.6],
+ ['カレーライス',130,3.0],['牛丼',150,6.0],['親子丼',140,7.0],['チャーハン',190,5.0],['オムライス',165,5.0],['焼きそば',170,5.0],
+ ['ラーメン',140,5.0],['パスタ(ミート)',150,6.0],['ピザ',260,11.0],['ハンバーガー',250,12.0],['唐揚げ',290,13.0],['とんかつ',330,16.0],
+ ['ハンバーグ',220,13.0],['餃子',210,7.0],['コロッケ',250,5.0],['天ぷら',280,9.0],['肉じゃが',130,4.0],['卵焼き',150,11.0],
+ ['ポテトサラダ',170,2.0],['焼き鳥(もも)',200,17.0],['シュウマイ',210,9.0],['チキン南蛮',290,15.0],['寿司(にぎり)',150,8.0],['おにぎり',170,2.7],['サンドイッチ',230,8.0],
+ ['味噌汁',35,2.5],['豚汁',70,4.0],['コーンスープ',60,1.5],
+ ['ビール',40,0.3],['日本酒',103,0.4],['ハイボール',50,0],['缶チューハイ',50,0],['コーラ',46,0.1],['オレンジジュース',42,0.7],
+ ['ポテトチップス',554,4.7],['チョコレート',550,5.8],['アイスクリーム',180,3.5],['どら焼き',255,6.6],['あんぱん',253,7.0],['プリン',126,5.5],['せんべい',380,7.3],
+ ['サラダ油',921,0],['オリーブ油',921,0],['バター',700,0.6],['マヨネーズ',700,1.4],['ケチャップ',106,1.6],['砂糖',384,0],
+ ['プロテイン(粉)',380,75.0],
+].map(a=>({n:a[0],k:a[1],p:a[2]}));
 
 let state=load();
 function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   if(!s||!s.days)s={goalWeight:63,days:{}};
-  s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[];
+  s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -481,6 +521,14 @@ function render(){
 }
 function afterChange(){render();}
 
+function foodByName(n){n=(n||'').trim(); if(!n)return null;
+  return state.customFoods100.find(x=>x.n===n) || FOODS_DB.find(x=>x.n===n) || null;}
+function updateFoodPreview(){const nEl=document.getElementById('foodSearch'),gEl=document.getElementById('foodGram'),pv=document.getElementById('foodPreview');
+  if(!nEl)return; const f=foodByName(nEl.value); const g=parseFloat(gEl.value);
+  if(f&&!isNaN(g)&&g>0){const k=Math.round(f.k*g/100), p=Math.round(f.p*g/10)/10;
+    pv.textContent='= '+k+' kcal ／ P '+p+' g'; pv.style.color='var(--accent)';}
+  else{pv.textContent = nEl.value ? '= リストから食材を選んでください' : '= — kcal ／ P — g'; pv.style.color='var(--sub)';}}
+
 function renderFood(){
   const dd=day(cur); dd.meals=dd.meals||[];
   let kcal=0,pro=0; dd.meals.forEach(m=>{kcal+=+m.k||0; pro+=+m.p||0;});
@@ -492,8 +540,7 @@ function renderFood(){
   const over=kcal>state.calTarget;
   document.getElementById('calFill').style.filter=over?'saturate(1.4) brightness(1.1)':'';
   document.getElementById('calTxt').style.color=over?'var(--fire)':'';
-  const proHit=pro>=state.proTarget;
-  document.getElementById('proTxt').style.color=proHit?'var(--accent)':'';
+  document.getElementById('proTxt').style.color=pro>=state.proTarget?'var(--accent)':'';
   // meal list
   const ml=document.getElementById('mealList'); ml.innerHTML='';
   dd.meals.forEach((m,i)=>{const el=document.createElement('div');
@@ -501,17 +548,19 @@ function renderFood(){
     el.innerHTML=`<span style="flex:1;">${m.n}</span><span class="muted">${Math.round(m.k)}kcal・P${m.p}g</span>`;
     const x=document.createElement('span'); x.textContent='×'; x.style.cssText='cursor:pointer;color:var(--fire);font-weight:900;padding:0 4px;';
     x.onclick=()=>{dd.meals.splice(i,1);save();render();}; el.appendChild(x); ml.appendChild(el);});
-  if(!dd.meals.length){ml.innerHTML='<div class="muted" style="padding:4px 2px;">まだ記録なし。下のボタンからタップで追加。</div>';}
-  // chips (custom first, then presets)
+  if(!dd.meals.length){ml.innerHTML='<div class="muted" style="padding:4px 2px;">まだ記録なし。検索かボタンから追加。</div>';}
+  // quick chips (staples, 1タップ)
   const fc=document.getElementById('foodChips'); fc.innerHTML='';
-  state.customFoods.concat(FOODS).forEach((f,idx)=>{const c=document.createElement('button');
-    c.className='ghost'; c.style.cssText='padding:8px 12px;font-size:.8rem;font-weight:600;';
-    const custom=idx<state.customFoods.length;
-    c.textContent=(custom?'★ ':'+ ')+f.n;
-    c.onclick=()=>{dd.meals.push({n:f.n,k:+f.k||0,p:+f.p||0});save();render();beep(660,.08);
-      if(pro< state.proTarget && (pro+(+f.p||0))>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
-      else toast('追加：'+f.n);};
+  FOODS.forEach(f=>{const c=document.createElement('button'); c.className='ghost';
+    c.style.cssText='padding:8px 12px;font-size:.8rem;font-weight:600;'; c.textContent='+ '+f.n;
+    c.onclick=()=>{const before=pro; dd.meals.push({n:f.n,k:+f.k||0,p:+f.p||0});save();
+      if(before<state.proTarget && (before+(+f.p||0))>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
+      else{toast('追加：'+f.n);beep(660,.08);} render();};
     fc.appendChild(c);});
+  // datalist (custom100 first, then DB)
+  const dl=document.getElementById('foodDL'); dl.innerHTML='';
+  state.customFoods100.concat(FOODS_DB).forEach(f=>{const o=document.createElement('option'); o.value=f.n; dl.appendChild(o);});
+  updateFoodPreview();
 }
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
@@ -598,10 +647,22 @@ document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!
 /* food log handlers */
 document.getElementById('cfAdd').onclick=()=>{const n=document.getElementById('cfName').value.trim();
   const k=parseFloat(document.getElementById('cfKcal').value);const p=parseFloat(document.getElementById('cfP').value);
-  if(!n||isNaN(k)){toast('名前とkcalを入れてください');return;}
-  state.customFoods.unshift({n,k,p:isNaN(p)?0:p});save();
+  if(!n||isNaN(k)){toast('名前と kcal/100g を入れてください');return;}
+  state.customFoods100.unshift({n,k,p:isNaN(p)?0:p});save();
   document.getElementById('cfName').value='';document.getElementById('cfKcal').value='';document.getElementById('cfP').value='';
-  render();toast('★ '+n+' を登録');};
+  render();toast('★ '+n+' を登録（検索で使えます）');};
+document.getElementById('foodSearch').oninput=updateFoodPreview;
+document.getElementById('foodGram').oninput=updateFoodPreview;
+document.getElementById('foodAddG').onclick=()=>{const f=foodByName(document.getElementById('foodSearch').value);
+  const g=parseFloat(document.getElementById('foodGram').value);
+  if(!f||isNaN(g)||g<=0){toast('リストから食材を選び、グラムを入れてください');return;}
+  const dd=day(cur); dd.meals=dd.meals||[];
+  const before=dd.meals.reduce((a,m)=>a+(+m.p||0),0);
+  const k=Math.round(f.k*g/100), p=Math.round(f.p*g/10)/10;
+  dd.meals.push({n:f.n+' '+g+'g',k,p}); save();
+  document.getElementById('foodSearch').value=''; document.getElementById('foodGram').value=100;
+  if(before<state.proTarget && (before+p)>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
+  else{toast('追加：'+f.n+' '+g+'g');beep(660,.08);} render();};
 document.getElementById('editTargets').onclick=()=>{
   const c=prompt('1日の目標カロリー(kcal)',state.calTarget);if(c!==null){const v=parseFloat(c);if(!isNaN(v))state.calTarget=v;}
   const p=prompt('1日の目標タンパク質(g)',state.proTarget);if(p!==null){const v=parseFloat(p);if(!isNaN(v))state.proTarget=v;}
