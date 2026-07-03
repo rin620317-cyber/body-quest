@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.2.1</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.2.2</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -921,8 +921,15 @@ prevLevel=levelFor(totalXP(state)).lvl;
 render();
 setTimeout(confettiRain,300);setTimeout(playFX,300); // welcome burst
 
-/* PWA: register service worker for offline use */
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+/* PWA: register SW + auto-update (新版が来たら自動リロード) */
+if('serviceWorker' in navigator){
+  let swReloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(swReloaded)return;swReloaded=true;location.reload();});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(reg=>{
+    reg.update();
+    setInterval(()=>reg.update(),60000);
+  }).catch(()=>{});});
+}
 </script>
 </body>
 </html>
