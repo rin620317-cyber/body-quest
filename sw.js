@@ -1,5 +1,5 @@
 /* KARADAクエスト service worker — offline app shell */
-const CACHE = 'bodyquest-13.2.1';
+const CACHE = 'bodyquest-13.2.2';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -13,15 +13,28 @@ self.addEventListener('activate', e => {
   );
 });
 
-/* stale-while-revalidate: instant offline load, refresh in background */
+/* pages: network-first (online = always latest, offline = cache);
+   other assets: stale-while-revalidate */
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const isPage = req.mode === 'navigate' || req.destination === 'document';
+  if (isPage) {
+    e.respondWith(
+      fetch(req).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(req, clone));
+        return res;
+      }).catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
+    );
+    return;
+  }
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const net = fetch(e.request).then(res => {
+    caches.match(req).then(cached => {
+      const net = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
           const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+          caches.open(CACHE).then(c => c.put(req, clone));
         }
         return res;
       }).catch(() => cached);
