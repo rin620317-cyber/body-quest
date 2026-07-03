@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.2.2</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.3.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -229,6 +229,22 @@
       <div class="stat"><b id="kmToday">0</b><span>今日km / <span id="kcalToday">0</span>kcal</span></div>
       <div class="stat"><b id="kmTotal">0</b><span>累計km</span></div>
     </div>
+  </div>
+
+  <!-- WATER -->
+  <div class="card">
+    <h3>💧 水分 <span class="muted" id="waterDayLabel"></span></h3>
+    <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;">
+      <span class="muted">今日の水分</span><span id="waterTxt">0 / 2500 ml</span>
+    </div>
+    <div class="xpbar" style="height:16px;"><div class="xpfill" id="waterFill" style="background:linear-gradient(90deg,#38bdf8,#22d3ee);animation:none;"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <button id="waterCup">＋ コップ 200ml</button>
+      <button id="waterBottle" class="ghost">＋ 500ml</button>
+      <button id="waterUndo" class="ghost">−200</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
+    <div class="muted" style="font-size:.72rem;margin-top:6px;">配達や暑い日はもっと。おしっこが薄い黄色ならOK。就寝1〜2時間前は控えめに。</div>
   </div>
 
   <!-- FOOD -->
@@ -410,6 +426,7 @@ const BADGES=[
   {id:'km500', e:'🚵',t:'累計500km', chk:s=>totalKm(s)>=500},
   {id:'calm1', e:'🧘',t:'衝動を制す', chk:s=>(s.calmHeld||0)>=1},
   {id:'calm5', e:'🛡️',t:'乗り切り5連',chk:s=>(s.calmBest||0)>=5},
+  {id:'water1',e:'💧',t:'水分クリア', chk:s=>Object.keys(s.days).some(d=>(+s.days[d].water||0)>=(s.waterTarget||2500))},
 ];
 /* Core workout: name, seconds, cue. type work/rest */
 const WORKOUT=[
@@ -488,6 +505,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
+  s.waterTarget=s.waterTarget||2500;
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -608,6 +626,7 @@ function render(){
   document.getElementById('wkRun').textContent=d7.filter(d=>state.days[d]&&state.days[d].run).length;
   document.getElementById('wkKm').textContent=d7.reduce((a,d)=>a+(state.days[d]?+state.days[d].km||0:0),0).toFixed(1);
   renderFood();
+  renderWater();
 }
 function afterChange(){render();}
 
@@ -850,6 +869,22 @@ function waitFinish(){wt.running=false;document.getElementById('waitTime').textC
 function closeWait(){wt.running=false;if(wt.timer)clearInterval(wt.timer);document.getElementById('waitOverlay').classList.remove('show');}
 document.getElementById('waitStop').onclick=closeWait;
 document.getElementById('waitDone').onclick=()=>{closeWait();document.getElementById('calmHeld').click();};
+
+/* ============ 水分トラッカー ============ */
+function renderWater(){const dd=day(cur);const w=+dd.water||0;const tg=state.waterTarget||2500;
+  document.getElementById('waterDayLabel').textContent=cur===today()?'(今日)':cur;
+  document.getElementById('waterTxt').textContent=w+' / '+tg+' ml'+(w>0?'（約'+Math.round(w/200)+'杯）':'');
+  document.getElementById('waterFill').style.width=Math.min(100,tg?w/tg*100:0)+'%';
+  document.getElementById('waterTargetEdit').textContent='目標を変更（現在 '+(tg/1000).toFixed(1)+'L）';}
+function addWater(ml){const dd=day(cur);const tg=state.waterTarget||2500;const before=+dd.water||0;
+  dd.water=Math.max(0,before+ml);save();checkBadges();render();
+  if(before<tg&&dd.water>=tg){toast('💧 水分目標クリア！');confettiRain();playFX();beep(880,.12);}
+  else if(ml>0)beep(560,.06);}
+document.getElementById('waterCup').onclick=()=>addWater(200);
+document.getElementById('waterBottle').onclick=()=>addWater(500);
+document.getElementById('waterUndo').onclick=()=>addWater(-200);
+document.getElementById('waterTargetEdit').onclick=()=>{const v=prompt('1日の水分目標(ml)',state.waterTarget||2500);
+  if(v!==null){const n=parseFloat(v);if(!isNaN(n)&&n>0){state.waterTarget=Math.round(n);save();render();}}};
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
