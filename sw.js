@@ -1,5 +1,5 @@
 /* KARADAクエスト service worker — offline app shell */
-const CACHE = 'bodyquest-13.1.1';
+const CACHE = 'bodyquest-13.2.0';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.1.1</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.2.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -257,6 +257,7 @@
     <div id="foodPreview" style="margin-top:6px;font-size:.9rem;color:var(--sub);font-weight:700;">= — kcal ／ P — g</div>
 
     <div class="muted" style="margin:16px 0 8px;">⚡ よく食べる（1タップ）</div>
+    <div id="foodTabs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
     <div id="foodChips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
 
     <div class="muted" style="margin:16px 0 8px;">🍳 料理をざっくり概算で追加（カロリーがわからなくてOK）</div>
@@ -426,19 +427,29 @@ const WORKOUT=[
   {n:'休憩',           s:20,c:'ラスト！もう一度プランク。'},
   {n:'プランク(ラスト)',s:45,c:'残り全部出し切る。あと少し！'},
 ];
-/* 食事クイック追加プリセット（1食あたりの目安）k=kcal, p=タンパク質g */
-const FOODS=[
-  {n:'ごはん 茶碗1',k:234,p:3.8},{n:'玄米 茶碗1',k:220,p:4.2},{n:'木綿豆腐 半丁',k:110,p:10.5},
-  {n:'卵 1個',k:76,p:6.2},{n:'納豆 1P',k:90,p:7.4},{n:'鶏むね 100g',k:108,p:22},
-  {n:'サラダチキン',k:115,p:24},{n:'鮭 1切れ',k:106,p:18},{n:'ツナ水煮 1缶',k:71,p:16},
-  {n:'サバ缶 1缶',k:350,p:26},{n:'プロテイン 1杯',k:120,p:24},{n:'ギリシャヨーグルト',k:59,p:10},
-  {n:'味噌汁 1杯',k:40,p:3},{n:'ブロッコリー 100g',k:33,p:4.3},{n:'バナナ 1本',k:86,p:1.1},
-  {n:'おにぎり 1個',k:180,p:3},{n:'食パン 6枚切1',k:158,p:5.3},{n:'牛乳 200ml',k:122,p:6.6},
-  {n:'ラーメン 1杯',k:500,p:20},{n:'唐揚げ 3個',k:300,p:18},{n:'ビール 350',k:140,p:1},
-  {n:'アーモンド 25g',k:150,p:5.5},
-  {n:'🍫チョコ 1片',k:28,p:0.3},{n:'🍨アイス 1個',k:180,p:3.5},
-  {n:'🥣ヨーグルトボウル',k:275,p:10.5},
+/* 食事クイック追加：カテゴリ分け（1食あたりの目安）k=kcal, p=タンパク質g */
+const FOOD_GROUPS=[
+  {c:'🍚 主食', items:[
+    {n:'ごはん 茶碗1',k:234,p:3.8},{n:'玄米 茶碗1',k:220,p:4.2},{n:'食パン 6枚切1',k:158,p:5.3},{n:'おにぎり 1個',k:180,p:3},
+  ]},
+  {c:'🥚 たんぱく', items:[
+    {n:'卵 1個',k:76,p:6.2},{n:'納豆 1P',k:90,p:7.4},{n:'木綿豆腐 半丁',k:110,p:10.5},{n:'鶏むね 100g',k:108,p:22},
+    {n:'サラダチキン',k:115,p:24},{n:'鮭 1切れ',k:106,p:18},{n:'ツナ水煮 1缶',k:71,p:16},{n:'サバ缶 1缶',k:350,p:26},{n:'プロテイン 1杯',k:120,p:24},
+  ]},
+  {c:'🥛 乳・朝食', items:[
+    {n:'牛乳 200ml',k:122,p:6.6},{n:'ギリシャヨーグルト',k:59,p:10},{n:'🥣ヨーグルトボウル',k:275,p:10.5},{n:'バナナ 1本',k:86,p:1.1},
+  ]},
+  {c:'🥦 野菜・汁', items:[
+    {n:'ブロッコリー 100g',k:33,p:4.3},{n:'味噌汁 1杯',k:40,p:3},
+  ]},
+  {c:'🍜 麺・惣菜', items:[
+    {n:'ラーメン 1杯',k:500,p:20},{n:'唐揚げ 3個',k:300,p:18},
+  ]},
+  {c:'🍫 お菓子・お酒', items:[
+    {n:'ビール 350',k:140,p:1},{n:'🍫チョコ 1片',k:28,p:0.3},{n:'🍨アイス 1個',k:180,p:3.5},{n:'アーモンド 25g',k:150,p:5.5},
+  ]},
 ];
+let foodTab=0;
 /* 100gあたりの栄養DB（検索＋グラム指定用・目安値）[名前, kcal, タンパク質g] */
 const FOODS_DB=[
  ['白ごはん',156,2.5],['玄米ごはん',152,2.8],['食パン',248,8.9],['ロールパン',309,10.1],['うどん(ゆで)',95,2.6],
@@ -635,9 +646,17 @@ function renderFood(){
     const x=document.createElement('span'); x.textContent='×'; x.style.cssText='cursor:pointer;color:var(--fire);font-weight:900;padding:0 4px;';
     x.onclick=()=>{dd.meals.splice(i,1);save();render();}; el.appendChild(x); ml.appendChild(el);});
   if(!dd.meals.length){ml.innerHTML='<div class="muted" style="padding:4px 2px;">まだ記録なし。検索かボタンから追加。</div>';}
-  // quick chips (staples, 1タップ)
+  // quick chips: カテゴリタブ + そのグループのみ表示
+  if(foodTab>=FOOD_GROUPS.length)foodTab=0;
+  const tabsEl=document.getElementById('foodTabs'); tabsEl.innerHTML='';
+  FOOD_GROUPS.forEach((g,gi)=>{const t=document.createElement('button'); t.className='ghost';
+    const on=gi===foodTab;
+    t.style.cssText='padding:6px 10px;font-size:.76rem;font-weight:700;'+(on?'border-color:var(--accent2);color:var(--accent2);background:rgba(56,189,248,.12);':'');
+    t.textContent=g.c;
+    t.onclick=()=>{foodTab=gi; renderFood();};
+    tabsEl.appendChild(t);});
   const fc=document.getElementById('foodChips'); fc.innerHTML='';
-  FOODS.forEach(f=>{const c=document.createElement('button'); c.className='ghost';
+  (FOOD_GROUPS[foodTab]||FOOD_GROUPS[0]).items.forEach(f=>{const c=document.createElement('button'); c.className='ghost';
     c.style.cssText='padding:8px 12px;font-size:.8rem;font-weight:600;'; c.textContent='+ '+f.n;
     c.onclick=()=>{const before=pro; const snack=isSnack(f.n); const k=+f.k||0,p=+f.p||0;
       dd.meals.push({n:f.n,k,p,s:snack?1:0});save();
