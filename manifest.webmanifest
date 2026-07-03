@@ -1,6 +1,6 @@
 {
-  "name": "体改造クエスト",
-  "short_name": "体クエスト",
+  "name": "KARADAクエスト",
+  "short_name": "KARADAクエスト",
   "description": "ゲーム化した体改造・習慣トラッカー",
   "lang": "ja",
   "start_url": "./",
