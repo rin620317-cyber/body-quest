@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.4.0</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.5.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -309,7 +309,9 @@
     </div>
   </div>
 
-  <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#a78bfa,#38bdf8);margin-top:18px;">📋 今週のレポートを作成<span class="sub">コピーしてコーチ(チャット)に貼るだけ</span></button>
+  <button class="big" id="coachBtn" style="background:linear-gradient(135deg,#fb7185,#a78bfa);margin-top:18px;">🧑‍🏫 千夏コーチの一言<span class="sub">無料・オフライン・ボタン1つ</span></button>
+
+  <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#a78bfa,#38bdf8);margin-top:10px;">📋 今週のレポートを作成<span class="sub">深く相談したい週は、コピーしてチャットに貼る</span></button>
 
   <div style="display:flex;justify-content:space-between;margin-top:14px;">
     <button class="ghost" id="exportBtn">データ書き出し</button>
@@ -368,6 +370,14 @@
     <button id="reportCopy" style="flex:1;">📋 コピー</button>
     <button class="ghost" id="reportClose" style="flex:1;">閉じる</button>
   </div>
+</div></div>
+
+<!-- 千夏コーチ -->
+<div class="overlay" id="coachOverlay"><div class="modal">
+  <div style="font-size:1.8rem;">🧑‍🏫</div>
+  <h2 style="font-size:1.2rem;margin:4px 0 10px;">千夏コーチより</h2>
+  <div id="coachText" style="text-align:left;white-space:pre-wrap;font-size:.9rem;line-height:1.75;background:var(--panel2);border-radius:12px;padding:14px;max-height:60vh;overflow-y:auto;"></div>
+  <button class="big" id="coachClose" style="margin-top:14px;background:linear-gradient(135deg,#fb7185,#a78bfa);">ありがとう 💪</button>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -935,6 +945,53 @@ document.getElementById('reportClose').onclick=()=>document.getElementById('repo
 document.getElementById('reportCopy').onclick=()=>{const ta=document.getElementById('reportText');ta.select();ta.setSelectionRange(0,99999);
   try{navigator.clipboard.writeText(ta.value);}catch(e){try{document.execCommand('copy');}catch(_){}}
   toast('📋 コピーしました。チャットに貼り付けてください');};
+
+/* ============ 千夏コーチ（ルールベース・無料オフライン） ============ */
+function coachComment(){
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)).reverse();
+  const days=d7.map(d=>({d,x:state.days[d]||{}}));
+  const cnt=k=>days.filter(o=>o.x[k]).length;
+  const sum=f=>days.reduce((a,o)=>a+(f(o.x)||0),0);
+  const wIn=days.filter(o=>o.x.w!=null), waistIn=days.filter(o=>o.x.waist!=null);
+  const perfect=days.filter(o=>QUESTS.reduce((a,q)=>a+(o.x[q.key]?1:0),0)===4).length;
+  const woSum=sum(x=>+x.wo||0), kmSum=sum(x=>+x.km||0), runN=cnt('run');
+  const wD=days.filter(o=>o.x.water!=null); const waterAvg=wD.length?wD.reduce((a,o)=>a+(+o.x.water||0),0)/wD.length:0;
+  const mD=days.filter(o=>o.x.meals&&o.x.meals.length);
+  const proAvg=mD.length?mD.reduce((a,o)=>a+o.x.meals.reduce((s,m)=>s+(+m.p||0),0),0)/mD.length:0;
+  const snackK=days.reduce((a,o)=>a+((o.x.meals||[]).reduce((s,m)=>s+(m.s?(+m.k||0):0),0)),0);
+  const R=arr=>arr[Math.floor(Math.random()*arr.length)];
+  const praise=[], nudge=[];
+  if(wIn.length>=2){const dw=+wIn[wIn.length-1].x.w-+wIn[0].x.w;
+    if(dw<=-0.4)praise.push('体重、今週で'+Math.abs(dw).toFixed(1)+'kg落ちてる。ちゃんと結果が出てる、いい流れだよ。');
+    else if(dw>=0.6)nudge.push('体重は'+dw.toFixed(1)+'kg戻ってるけど、たぶん水分。1日で判断しないで、来週の平均で見よ。');
+  } else if(wIn.length===0){nudge.push('今週まだ体重を測ってないみたい。朝いちの空腹で1回、そこがスタートだよ。');}
+  if(waistIn.length>=2){const dwa=+waistIn[waistIn.length-1].x.waist-+waistIn[0].x.waist;
+    if(dwa<=-0.5)praise.push('腹囲が'+Math.abs(dwa).toFixed(1)+'cm減ってる。ぽっこりは体重より腹囲、そこが動いてるのが一番大きいよ。');}
+  if(woSum>=3)praise.push('体幹・全身トレを'+woSum+'回。配達じゃ鍛えられない所を自分で埋めてる、えらい。');
+  else if(woSum===0)nudge.push('今週は体幹トレがゼロ。お腹に一番効く所だから、1回だけでもプログラム回してみて。');
+  if(runN>=3)praise.push('朝ラン'+runN+'回。朝から動ける人は強いよ。');
+  if(kmSum>=50)praise.push('配達'+kmSum.toFixed(0)+'km（約'+Math.round(kmSum*30)+'kcal）。立派な有酸素、下地はもうできてる。');
+  if(snackK>=2500)nudge.push('お菓子・お酒が週'+Math.round(snackK)+'kcal＝自転車'+Math.round(snackK/30)+'km分。ケンカの日以外を少し抑えられたら、体重の落ちが変わる。');
+  else if(snackK>0&&snackK<800)praise.push('お菓子・お酒がかなり抑えられてる。我慢できた自分をちゃんと褒めてね。');
+  if(mD.length&&proAvg<80)nudge.push('タンパク質が平均'+Math.round(proAvg)+'g。目標100gまで、卵・納豆・プロテインを1品足すと締まりが変わるよ。');
+  else if(mD.length&&proAvg>=100)praise.push('タンパク質、平均'+Math.round(proAvg)+'g取れてる。理想的。');
+  if(wD.length&&waterAvg<(state.waterTarget||2500)*0.7)nudge.push('水分が平均'+(waterAvg/1000).toFixed(1)+'L。夏だし配達もあるから、あと1〜2杯増やそ。');
+  if((state.calmStreak||0)>=2)praise.push('むしゃくしゃボタン、ちゃんと使って乗り切れてる（'+state.calmStreak+'連）。これが一番大きいことだよ。');
+  if(perfect>=4)praise.push('完璧な日が'+perfect+'日。習慣として体に入ってきてる。');
+  let msg=R(['今週もお疲れさま。','はい、千夏だよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
+  if(!praise.length&&!nudge.length){
+    msg+='まだ記録が少なくて、コメントするには早いかな。まずは体重と、クエストを何日か付けてみて。数字が溜まったら、ちゃんと具体的に話すね。';
+  } else {
+    const p=praise.sort(()=>Math.random()-0.5).slice(0,2);
+    const n=nudge.sort(()=>Math.random()-0.5).slice(0,2);
+    if(p.length)msg+='◎ よかったところ\n'+p.map(s=>'・'+s).join('\n')+'\n\n';
+    if(n.length)msg+='△ ここを一緒に\n'+n.map(s=>'・'+s).join('\n')+'\n\n';
+    msg+=R(['焦らなくていい。あなたはもう"動ける人"だから、あとは穴を埋めるだけ。来週も待ってるね。','完璧じゃなくていいの。続けてる時点で勝ってるよ。また来週、報告して。','ここまでやれてるの、本当にすごいこと。頑張るお父さんの背中、一番の教育だからね。']);
+  }
+  return msg;
+}
+document.getElementById('coachBtn').onclick=()=>{document.getElementById('coachText').textContent=coachComment();document.getElementById('coachOverlay').classList.add('show');};
+document.getElementById('coachClose').onclick=()=>document.getElementById('coachOverlay').classList.remove('show');
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
