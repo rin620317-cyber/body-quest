@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.3.0</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.4.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -309,7 +309,9 @@
     </div>
   </div>
 
-  <div style="display:flex;justify-content:space-between;margin-top:18px;">
+  <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#a78bfa,#38bdf8);margin-top:18px;">📋 今週のレポートを作成<span class="sub">コピーしてコーチ(チャット)に貼るだけ</span></button>
+
+  <div style="display:flex;justify-content:space-between;margin-top:14px;">
     <button class="ghost" id="exportBtn">データ書き出し</button>
     <button class="ghost" id="importBtn">読み込み</button>
   </div>
@@ -354,6 +356,17 @@
   <div style="display:flex;gap:10px;margin-top:18px;">
     <button class="ghost" id="waitStop" style="flex:1;">やめる</button>
     <button id="waitDone" style="flex:1;">乗り切った💪</button>
+  </div>
+</div></div>
+
+<!-- 週次レポート -->
+<div class="overlay" id="reportOverlay"><div class="modal">
+  <h2 style="font-size:1.2rem;margin:0 0 8px;">📋 今週のレポート</h2>
+  <div class="muted" style="margin-bottom:10px;">下の文をコピーして、チャットに貼ってください。</div>
+  <textarea id="reportText" readonly style="width:100%;height:230px;background:rgba(0,0,0,.3);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:.78rem;font-family:monospace;resize:vertical;"></textarea>
+  <div style="display:flex;gap:10px;margin-top:12px;">
+    <button id="reportCopy" style="flex:1;">📋 コピー</button>
+    <button class="ghost" id="reportClose" style="flex:1;">閉じる</button>
   </div>
 </div></div>
 
@@ -885,6 +898,43 @@ document.getElementById('waterBottle').onclick=()=>addWater(500);
 document.getElementById('waterUndo').onclick=()=>addWater(-200);
 document.getElementById('waterTargetEdit').onclick=()=>{const v=prompt('1日の水分目標(ml)',state.waterTarget||2500);
   if(v!==null){const n=parseFloat(v);if(!isNaN(n)&&n>0){state.waterTarget=Math.round(n);save();render();}}};
+
+/* ============ 週次レポート（コーチ用） ============ */
+function genWeeklyReport(){
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)).reverse();
+  const days=d7.map(d=>({d,x:state.days[d]||{}}));
+  const wIn=days.filter(o=>o.x.w!=null), waistIn=days.filter(o=>o.x.waist!=null);
+  const cnt=k=>days.filter(o=>o.x[k]).length;
+  const sum=f=>days.reduce((a,o)=>a+(f(o.x)||0),0);
+  const perfect=days.filter(o=>QUESTS.reduce((a,q)=>a+(o.x[q.key]?1:0),0)===4).length;
+  const woSum=sum(x=>+x.wo||0), kmSum=sum(x=>+x.km||0);
+  const wD=days.filter(o=>o.x.water!=null);
+  const waterAvg=wD.length?wD.reduce((a,o)=>a+(+o.x.water||0),0)/wD.length:0;
+  const mD=days.filter(o=>o.x.meals&&o.x.meals.length);
+  const kcalAvg=mD.length?Math.round(mD.reduce((a,o)=>a+o.x.meals.reduce((s,m)=>s+(+m.k||0),0),0)/mD.length):0;
+  const proAvg=mD.length?Math.round(mD.reduce((a,o)=>a+o.x.meals.reduce((s,m)=>s+(+m.p||0),0),0)/mD.length):0;
+  const snackK=days.reduce((a,o)=>a+((o.x.meals||[]).reduce((s,m)=>s+(m.s?(+m.k||0):0),0)),0);
+  const xp=totalXP(state),L=levelFor(xp);
+  const dw=(a,b)=>((b-a>=0?'+':'')+(b-a).toFixed(1));
+  let t='◤ KARADAクエスト 週次レポート ◢\n';
+  t+='期間: '+d7[0]+' 〜 '+d7[6]+'\n';
+  t+='Lv'+L.lvl+' / '+xp+'XP / 連続'+curStreak(state)+'日\n\n';
+  t+='【体重】'+(wIn.length?wIn[0].x.w+'→'+wIn[wIn.length-1].x.w+'kg ('+dw(wIn[0].x.w,wIn[wIn.length-1].x.w)+') 目標'+state.goalWeight:'記録なし')+'\n';
+  t+='【腹囲】'+(waistIn.length?waistIn[0].x.waist+'→'+waistIn[waistIn.length-1].x.waist+'cm':'記録なし')+'\n';
+  t+='【クエスト】完璧日'+perfect+'/7・朝ラン'+cnt('run')+'・体幹/全身'+woSum+'回・21時就寝'+cnt('sleep')+'・夜食なし'+cnt('noNight')+'\n';
+  t+='【配達】'+kmSum.toFixed(1)+'km (約'+Math.round(kmSum*30)+'kcal)\n';
+  t+='【水分】平均'+(waterAvg/1000).toFixed(1)+'L/日\n';
+  t+='【食事】記録'+mD.length+'日: 平均'+kcalAvg+'kcal / P'+proAvg+'g\n';
+  t+='【お菓子・お酒】週合計'+Math.round(snackK)+'kcal (自転車'+Math.round(snackK/30)+'km分)\n';
+  t+='【むしゃくしゃ】乗り切り累計'+(state.calmHeld||0)+'・ベスト'+(state.calmBest||0)+'連\n';
+  t+='\n※30代後半の女性トレーナー視点でアドバイスください。';
+  return t;
+}
+document.getElementById('reportBtn').onclick=()=>{document.getElementById('reportText').value=genWeeklyReport();document.getElementById('reportOverlay').classList.add('show');};
+document.getElementById('reportClose').onclick=()=>document.getElementById('reportOverlay').classList.remove('show');
+document.getElementById('reportCopy').onclick=()=>{const ta=document.getElementById('reportText');ta.select();ta.setSelectionRange(0,99999);
+  try{navigator.clipboard.writeText(ta.value);}catch(e){try{document.execCommand('copy');}catch(_){}}
+  toast('📋 コピーしました。チャットに貼り付けてください');};
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
