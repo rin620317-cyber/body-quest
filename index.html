@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.6.0</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.6.1</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -168,6 +168,14 @@
       </div>
     </div>
     <div class="quote" id="quote" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;">
+    <div id="chiFaceHome" style="width:64px;flex:0 0 auto;"></div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:.92rem;">千夏コーチ <span class="muted" style="font-weight:400;font-size:.7rem;">38歳</span></div>
+      <div id="chiTip" class="muted" style="font-size:.8rem;line-height:1.5;margin-top:3px;"></div>
+    </div>
   </div>
 
   <button class="big" id="calmBtn" style="background:linear-gradient(135deg,#fb7185,#f43f5e);margin-bottom:14px;">🔥 むしゃくしゃボタン<span class="sub">ケンカしたときは無心でデリ一択</span></button>
@@ -1030,6 +1038,40 @@ function coachComment(){
 }
 document.getElementById('coachBtn').onclick=()=>{document.getElementById('coachText').textContent=coachComment();document.getElementById('coachOverlay').classList.add('show');};
 document.getElementById('coachClose').onclick=()=>document.getElementById('coachOverlay').classList.remove('show');
+
+/* 千夏の立ち絵（SVG）— idをプレフィックスで一意化して複数箇所に使える */
+function chiSVG(p){return `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;border-radius:14px;">
+<defs><linearGradient id="${p}Bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38314f"/><stop offset="1" stop-color="#5a2f57"/></linearGradient>
+<clipPath id="${p}Rc"><rect x="0" y="0" width="200" height="220" rx="18"/></clipPath></defs>
+<g clip-path="url(#${p}Rc)">
+<rect width="200" height="220" fill="url(#${p}Bg)"/>
+<circle cx="100" cy="128" r="92" fill="#ffffff" opacity="0.06"/>
+<path d="M42 122 Q30 58 100 44 Q170 58 158 122 L164 220 L36 220 Z" fill="#3f2a20"/>
+<path d="M54 220 Q60 174 100 169 Q140 174 146 220 Z" fill="#fb7185"/>
+<path d="M83 171 L88 200 M117 171 L112 200" stroke="#f43f5e" stroke-width="6" fill="none" stroke-linecap="round"/>
+<rect x="90" y="150" width="20" height="24" rx="8" fill="#f4c2a0"/>
+<path d="M67 108 Q67 150 100 159 Q133 150 133 108 Q133 76 100 72 Q67 76 67 108 Z" fill="#ffdcc0"/>
+<circle cx="67" cy="116" r="7" fill="#ffdcc0"/><circle cx="133" cy="116" r="7" fill="#ffdcc0"/>
+<ellipse cx="80" cy="128" rx="8" ry="5" fill="#ff9db0" opacity="0.5"/><ellipse cx="120" cy="128" rx="8" ry="5" fill="#ff9db0" opacity="0.5"/>
+<ellipse cx="84" cy="116" rx="10" ry="12.5" fill="#fff"/><ellipse cx="116" cy="116" rx="10" ry="12.5" fill="#fff"/>
+<ellipse cx="85" cy="117" rx="7" ry="10.5" fill="#6f4a30"/><ellipse cx="115" cy="117" rx="7" ry="10.5" fill="#6f4a30"/>
+<ellipse cx="85" cy="118" rx="3.6" ry="6.5" fill="#33231a"/><ellipse cx="115" cy="118" rx="3.6" ry="6.5" fill="#33231a"/>
+<circle cx="82" cy="112" r="2.7" fill="#fff"/><circle cx="112" cy="112" r="2.7" fill="#fff"/>
+<circle cx="88" cy="122" r="1.3" fill="#fff" opacity="0.85"/><circle cx="118" cy="122" r="1.3" fill="#fff" opacity="0.85"/>
+<path d="M73 107 Q84 101 95 107" stroke="#2f2018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+<path d="M105 107 Q116 101 127 107" stroke="#2f2018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+<path d="M74 99 Q84 95 93 98" stroke="#5b3a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<path d="M107 98 Q116 95 126 99" stroke="#5b3a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<path d="M100 121 l -3 8 l 5 0" stroke="#deA684" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M91 140 Q100 148 109 140" stroke="#c85a5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<path d="M61 112 Q57 62 100 50 Q143 62 139 112 Q127 90 118 95 Q121 72 100 68 Q79 72 82 95 Q73 90 61 112 Z" fill="#4a2f22"/>
+<path d="M63 110 Q58 152 70 178 L82 174 Q70 142 75 110 Z" fill="#4a2f22"/>
+<path d="M137 110 Q142 152 130 178 L118 174 Q130 142 125 110 Z" fill="#4a2f22"/>
+<path d="M84 58 Q100 53 116 59" stroke="#6b442f" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+</g></svg>`;}
+(function(){const h=document.getElementById('chiFaceHome');if(h)h.innerHTML=chiSVG('h');
+  const tips=['今日もお疲れさま。まず1つ、できることから。','下の「千夏コーチの一言」で今週の講評が見れるよ。','水分と体幹、忘れてない？無理はしないでね。','ケンカした日は"無心でデリ一択"、覚えてる？','記録をつけてるあなた、ちゃんと前に進んでるよ。','完璧じゃなくていい。続けてる時点で勝ってる。'];
+  const t=document.getElementById('chiTip');if(t)t.textContent=tips[Math.floor(Math.random()*tips.length)];})();
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
