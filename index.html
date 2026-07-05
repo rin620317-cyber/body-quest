@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.6.1</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.7.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -225,6 +225,15 @@
     </div>
     <div style="text-align:center;margin-top:8px;"><span class="link" id="toggleMetric">グラフ切替：体重 / 腹囲</span></div>
     <canvas id="chart" width="680" height="190" style="margin-top:6px;"></canvas>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="card">
+    <h3>📷 経過写真 <span class="muted" style="font-weight:400;font-size:.72rem;">ビフォーアフター</span></h3>
+    <div class="muted" style="font-size:.75rem;margin-bottom:10px;">端末内だけに保存（自動で縮小）。同じ姿勢・同じ場所・朝に撮ると変化が分かりやすいよ。</div>
+    <div id="photoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+    <input type="file" id="photoInput" accept="image/*" style="display:none;">
+    <button id="photoAddBtn" style="width:100%;margin-top:12px;">＋ 写真を追加</button>
   </div>
 
   <!-- DELIVERY -->
@@ -424,6 +433,16 @@
   <div class="muted" style="font-size:.72rem;margin-bottom:10px;">38歳・二児の母／あなたの専属トレーナー</div>
   <div id="coachText" style="text-align:left;white-space:pre-wrap;font-size:.9rem;line-height:1.75;background:var(--panel2);border-radius:12px;padding:14px;max-height:60vh;overflow-y:auto;"></div>
   <button class="big" id="coachClose" style="margin-top:14px;background:linear-gradient(135deg,#fb7185,#a78bfa);">ありがとう 💪</button>
+</div></div>
+
+<!-- 経過写真ビュー -->
+<div class="overlay" id="photoOverlay"><div class="modal" style="max-width:480px;">
+  <img id="photoBig" alt="経過写真" style="width:100%;border-radius:12px;background:#000;">
+  <div id="photoBigDate" class="muted" style="margin-top:8px;"></div>
+  <div style="display:flex;gap:10px;margin-top:14px;">
+    <button class="ghost" id="photoDelBtn" style="flex:1;color:var(--fire);">この写真を削除</button>
+    <button id="photoCloseBtn" style="flex:1;">閉じる</button>
+  </div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -1072,6 +1091,37 @@ function chiSVG(p){return `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2
 (function(){const h=document.getElementById('chiFaceHome');if(h)h.innerHTML=chiSVG('h');
   const tips=['今日もお疲れさま。まず1つ、できることから。','下の「千夏コーチの一言」で今週の講評が見れるよ。','水分と体幹、忘れてない？無理はしないでね。','ケンカした日は"無心でデリ一択"、覚えてる？','記録をつけてるあなた、ちゃんと前に進んでるよ。','完璧じゃなくていい。続けてる時点で勝ってる。'];
   const t=document.getElementById('chiTip');if(t)t.textContent=tips[Math.floor(Math.random()*tips.length)];})();
+
+/* ============ 経過写真（IndexedDBに縮小保存） ============ */
+let _pdb;
+function pdb(){return new Promise((res,rej)=>{if(_pdb)return res(_pdb);const r=indexedDB.open('bodyquest-photos',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id'});
+  r.onsuccess=()=>{_pdb=r.result;res(_pdb);};r.onerror=()=>rej(r.error);});}
+function pAll(){return pdb().then(db=>new Promise((res,rej)=>{const q=db.transaction('photos').objectStore('photos').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);}));}
+function pPut(rec){return pdb().then(db=>new Promise((res,rej)=>{const q=db.transaction('photos','readwrite').objectStore('photos').put(rec);q.onsuccess=()=>res();q.onerror=()=>rej(q.error);}));}
+function pDel(id){return pdb().then(db=>new Promise((res,rej)=>{const q=db.transaction('photos','readwrite').objectStore('photos').delete(id);q.onsuccess=()=>res();q.onerror=()=>rej(q.error);}));}
+function compressImg(file,maxDim,quality){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{let w=img.width,h=img.height;const s=Math.min(1,maxDim/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',quality));};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej();};img.src=url;});}
+function renderPhotos(){pAll().then(list=>{list.sort((a,b)=>a.id-b.id);
+  const g=document.getElementById('photoGrid');if(!g)return;g.innerHTML='';
+  if(!list.length){g.innerHTML='<div class="muted" style="grid-column:1/-1;font-size:.8rem;padding:4px 2px;">まだ写真がありません。今の状態を1枚、記録しておこう。</div>';return;}
+  list.forEach(rec=>{const d=document.createElement('div');d.style.cssText='position:relative;cursor:pointer;';
+    d.innerHTML='<img src="'+rec.data+'" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;">'+
+      '<span style="position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.55);color:#fff;font-size:.6rem;padding:1px 5px;border-radius:6px;">'+rec.date.slice(5)+'</span>';
+    d.onclick=()=>openPhoto(rec);g.appendChild(d);});}).catch(()=>{});}
+let curPhotoId=null;
+function openPhoto(rec){curPhotoId=rec.id;document.getElementById('photoBig').src=rec.data;
+  document.getElementById('photoBigDate').textContent='📅 '+rec.date;document.getElementById('photoOverlay').classList.add('show');}
+document.getElementById('photoAddBtn').onclick=()=>document.getElementById('photoInput').click();
+document.getElementById('photoInput').onchange=e=>{const f=e.target.files[0];if(!f)return;
+  compressImg(f,900,0.72).then(data=>pPut({id:Date.now(),date:cur,data})).then(()=>{toast('📷 写真を保存しました');renderPhotos();beep(660,.08);})
+    .catch(()=>toast('画像の保存に失敗しました'));e.target.value='';};
+document.getElementById('photoDelBtn').onclick=()=>{if(curPhotoId==null)return;pDel(curPhotoId).then(()=>{document.getElementById('photoOverlay').classList.remove('show');renderPhotos();toast('削除しました');});};
+document.getElementById('photoCloseBtn').onclick=()=>document.getElementById('photoOverlay').classList.remove('show');
+renderPhotos();
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
