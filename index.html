@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.7.0</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.8.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -170,11 +170,12 @@
     <div class="quote" id="quote" style="margin-top:14px;"></div>
   </div>
 
-  <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;">
+  <div class="card" id="chiCard" style="display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;">
     <div id="chiFaceHome" style="width:64px;flex:0 0 auto;"></div>
     <div style="flex:1;min-width:0;">
       <div style="font-weight:700;font-size:.92rem;">千夏コーチ <span class="muted" style="font-weight:400;font-size:.7rem;">38歳</span></div>
       <div id="chiTip" class="muted" style="font-size:.8rem;line-height:1.5;margin-top:3px;"></div>
+      <div style="color:var(--accent2);font-size:.72rem;font-weight:700;margin-top:5px;">💬 タップして相談する</div>
     </div>
   </div>
 
@@ -435,6 +436,20 @@
   <button class="big" id="coachClose" style="margin-top:14px;background:linear-gradient(135deg,#fb7185,#a78bfa);">ありがとう 💪</button>
 </div></div>
 
+<!-- チカとチャット -->
+<div class="overlay" id="chatOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh;">
+  <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
+    <div id="chatFace" style="width:40px;flex:0 0 auto;"></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">千夏コーチ</div><div class="muted" style="font-size:.66rem;">いつでも相談してね（無料・ルール式の相棒）</div></div>
+    <span class="link" id="chatClose">閉じる</span>
+  </div>
+  <div id="chatLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <input id="chatInput" placeholder="例：今からカツ丼食べたい…" style="flex:1;">
+    <button id="chatSend">送信</button>
+  </div>
+</div></div>
+
 <!-- 経過写真ビュー -->
 <div class="overlay" id="photoOverlay"><div class="modal" style="max-width:480px;">
   <img id="photoBig" alt="経過写真" style="width:100%;border-radius:12px;background:#000;">
@@ -593,7 +608,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
-  s.waterTarget=s.waterTarget||2500;
+  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[];
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -1122,6 +1137,75 @@ document.getElementById('photoInput').onchange=e=>{const f=e.target.files[0];if(
 document.getElementById('photoDelBtn').onclick=()=>{if(curPhotoId==null)return;pDel(curPhotoId).then(()=>{document.getElementById('photoOverlay').classList.remove('show');renderPhotos();toast('削除しました');});};
 document.getElementById('photoCloseBtn').onclick=()=>document.getElementById('photoOverlay').classList.remove('show');
 renderPhotos();
+
+/* ============ チカとチャット（ルール式・無料オフライン） ============ */
+function chikaReply(raw){
+  const R=a=>a[Math.floor(Math.random()*a.length)];
+  const km=k=>Math.round(k/30);
+  const FOODS=[
+    {kw:['カツ丼','かつ丼','かつや','とんかつ','トンカツ','カツ'],n:'カツ丼',k:900},
+    {kw:['ラーメン','らーめん','二郎'],n:'ラーメン',k:600},
+    {kw:['カレー'],n:'カレー',k:700},
+    {kw:['牛丼','吉野家','すき家','松屋'],n:'牛丼',k:650},
+    {kw:['ピザ'],n:'ピザ',k:800},
+    {kw:['唐揚げ','からあげ','から揚げ'],n:'唐揚げ',k:500},
+    {kw:['マック','マクド','ハンバーガー','ポテト','フライドポテト'],n:'ファストフード',k:800},
+    {kw:['焼肉','焼き肉'],n:'焼肉',k:1000},
+    {kw:['ケーキ','スイーツ','パンケーキ','ワッフル'],n:'ケーキ',k:400},
+    {kw:['アイス'],n:'アイス',k:250},
+    {kw:['ドーナツ'],n:'ドーナツ',k:350},
+    {kw:['チョコ'],n:'チョコ',k:300},
+    {kw:['ポテチ','ポテトチップ','スナック'],n:'スナック菓子',k:350},
+    {kw:['寿司','すし','回転'],n:'お寿司',k:500},
+    {kw:['餃子'],n:'餃子',k:400},
+    {kw:['ビール','酒','飲も','飲みたい','ハイボール'],n:'お酒',k:200},
+  ];
+  for(const f of FOODS){if(f.kw.some(k=>raw.includes(k))){
+    return R([
+      'わかる、'+f.n+'って罪な美味しさだよね…。でもあれ約'+f.k+'kcal＝あなたの自転車'+km(f.k)+'km分だよ。今すごく食べたいのは"お腹"じゃなくて"気分"かも。まず水を1杯飲んで、10分だけ待ってみて。それでも本気なら、ごはん少なめ＋汁物つけて、明日いつもより長めに漕ぐ。それで手を打とう？',
+      'ちょっと待って。'+f.n+'は約'+f.k+'kcal、自転車'+km(f.k)+'km分。せっかく落としてきた腹囲、ここで一気に戻すのはもったいないよ。どうしても食べたいなら"半分"か、明日にずらせない？今日はまず炭酸水かお茶で口を紛らわせてみよ。',
+      '正直に言ってくれてありがとう。'+f.n+'が食べたい＝今日ちょっと疲れてるサインかもね。食べる前にひとつだけ：本当にお腹空いてる？それとも気分？気分なら、'+f.n+'じゃなくて高タンパクな物（サラダチキン・卵・豆腐）でお腹を満たすと、罪悪感なく落ち着くよ。'
+    ]);}}
+  if(['イライラ','いらいら','むしゃくしゃ','ムカ','むか','ストレス','疲れ','つかれ','ケンカ','喧嘩','しんどい','最悪','もう無理'].some(k=>raw.includes(k))){
+    return R([
+      'お疲れさま。今日もよく頑張ったね。むしゃくしゃした時は"食べる"じゃなくて"出す"のが正解だよ。ホーム画面の🔥むしゃくしゃボタンで、まず動くか深呼吸してみて。それでも食べたくなったら、また話しかけて。私はここにいるから。',
+      'そっか…イライラしてるんだね。それ、食べ物で埋めても一瞬だけなんだ。まず水を1杯、それから10分。波は必ず引くから。あなたは一人じゃないよ。'
+    ]);}
+  if(['食べたい','飲みたい','我慢できない','がまん','やばい','誘惑','間食','夜食','夜中','小腹'].some(k=>raw.includes(k))){
+    return R([
+      '食べたい波、来てるね。まず水1杯＋10分ルール。それでも欲しければ、ゆで卵・豆腐・サラダチキンみたいな高タンパク低カロリーで。翌朝の自分が喜ぶ物を選ぼう。',
+      'その気持ち、否定しないよ。でも今食べたいのは"お腹"より"気分"かも。炭酸水を一気に飲んでみて。案外それで落ち着くこと、多いんだ。'
+    ]);}
+  if(['我慢した','やめた','やめとく','乗り切','頑張','がんば','走った','ラン','トレした','記録した','できた','偉い','えらい','痩せ','減った'].some(k=>raw.includes(k))){
+    return R([
+      'えらい！！それ本当にすごいこと。我慢できた自分を、ちゃんと褒めてあげてね。こういう1回の積み重ねが、1か月後の腹囲を変えるんだよ。',
+      'よく乗り切ったね。あなたはもう"動ける人"だから、あとはこれを続けるだけ。私は毎日ここで見てるよ。'
+    ]);}
+  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','千夏','元気','ただいま'].some(k=>raw.includes(k))){
+    return R(['やっほー、今日も来てくれてありがとう。調子どう？','はいはい、千夏だよ。何かあった？食べたくなったら遠慮なく相談してね。']);}
+  return R([
+    'うんうん、聞いてるよ。食べたくなったり飲みたくなったら、遠慮なく"○○食べたい"って言ってね。ちゃんと一緒に考えるから。',
+    'なるほどね。今日の記録はもうつけた？迷ったら、まず水1杯と深呼吸。それから決めよ。',
+    'その気持ち、大事にしよ。無理はしないで、でも流されないで。私はあなたの味方だからね。'
+  ]);
+}
+function renderChat(){const log=document.getElementById('chatLog');if(!log)return;log.innerHTML='';
+  (state.chat||[]).forEach(m=>{const b=document.createElement('div');
+    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#38bdf8;color:#052028;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
+    else b.style.cssText='align-self:flex-start;max-width:82%;background:var(--panel2);padding:8px 12px;border-radius:14px 14px 14px 4px;font-size:.86rem;line-height:1.55;white-space:pre-wrap;';
+    b.textContent=m.t;log.appendChild(b);});
+  log.scrollTop=log.scrollHeight;}
+function openChat(){if(!state.chat||!state.chat.length){state.chat=[{r:'c',t:'やっほー、千夏だよ。今どんな感じ？…もしかして、何か食べたくなってる？ 正直に言ってみ、一緒に考えよ。'}];save();}
+  document.getElementById('chatOverlay').classList.add('show');renderChat();setTimeout(()=>{const i=document.getElementById('chatInput');if(i)i.focus();},120);}
+function chatSend(){const inp=document.getElementById('chatInput');const t=inp.value.trim();if(!t)return;
+  state.chat=state.chat||[];state.chat.push({r:'u',t});state.chat.push({r:'c',t:chikaReply(t)});
+  if(state.chat.length>60)state.chat=state.chat.slice(-60);
+  save();inp.value='';renderChat();beep(660,.05);}
+document.getElementById('chiCard').onclick=openChat;
+document.getElementById('chatFace').innerHTML=chiSVG('c');
+document.getElementById('chatClose').onclick=()=>document.getElementById('chatOverlay').classList.remove('show');
+document.getElementById('chatSend').onclick=chatSend;
+document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chatSend();}});
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
