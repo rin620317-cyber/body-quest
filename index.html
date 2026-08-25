@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.8.0</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.9.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -263,6 +263,21 @@
     </div>
     <div style="text-align:center;margin-top:12px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
     <div class="muted" style="font-size:.72rem;margin-top:6px;">配達や暑い日はもっと。おしっこが薄い黄色ならOK。就寝1〜2時間前は控えめに。</div>
+  </div>
+
+  <!-- 休肝日 -->
+  <div class="card">
+    <h3>🍶 休肝日 <span class="muted" id="dryDayLabel"></span></h3>
+    <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;">
+      <span class="muted">今週の休肝日</span><span id="dryWeekTxt">0 / 3 日</span>
+    </div>
+    <div class="xpbar" style="height:16px;"><div class="xpfill" id="dryFill" style="background:linear-gradient(90deg,#34d399,#10b981);animation:none;"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <button id="dryYes" style="flex:1;background:linear-gradient(135deg,#10b981,#059669);">🚱 今日は飲まなかった</button>
+      <button id="dryNo" class="ghost" style="flex:1;">🍶 飲んだ</button>
+    </div>
+    <div id="dryStats" class="muted" style="font-size:.78rem;margin-top:12px;text-align:center;"></div>
+    <div class="muted" style="font-size:.72rem;margin-top:6px;">まずは週3日から。休肝日はお腹（内臓脂肪）に一番効くよ。<span class="link" id="dryTargetEdit">目標を変更</span></div>
   </div>
 
   <!-- FOOD -->
@@ -530,6 +545,10 @@ const BADGES=[
   {id:'calm1', e:'🧘',t:'衝動を制す', chk:s=>(s.calmHeld||0)>=1},
   {id:'calm5', e:'🛡️',t:'乗り切り5連',chk:s=>(s.calmBest||0)>=5},
   {id:'water1',e:'💧',t:'水分クリア', chk:s=>Object.keys(s.days).some(d=>(+s.days[d].water||0)>=(s.waterTarget||2500))},
+  {id:'dry1',  e:'🚱',t:'初休肝日',   chk:s=>dryTotal(s)>=1},
+  {id:'dry3',  e:'🌿',t:'3連続休肝',  chk:s=>dryBest(s)>=3},
+  {id:'dry7',  e:'🏆',t:'7連続休肝',  chk:s=>dryBest(s)>=7},
+  {id:'dry20', e:'💎',t:'休肝20日',   chk:s=>dryTotal(s)>=20},
 ];
 /* Core workout: name, seconds, cue. type work/rest */
 const WORKOUT=[
@@ -608,7 +627,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
-  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[];
+  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3;
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -730,6 +749,7 @@ function render(){
   document.getElementById('wkKm').textContent=d7.reduce((a,d)=>a+(state.days[d]?+state.days[d].km||0:0),0).toFixed(1);
   renderFood();
   renderWater();
+  renderDry();
 }
 function afterChange(){render();}
 
@@ -989,6 +1009,34 @@ document.getElementById('waterUndo').onclick=()=>addWater(-200);
 document.getElementById('waterTargetEdit').onclick=()=>{const v=prompt('1日の水分目標(ml)',state.waterTarget||2500);
   if(v!==null){const n=parseFloat(v);if(!isNaN(n)&&n>0){state.waterTarget=Math.round(n);save();render();}}};
 
+/* ============ 休肝日ストリーク ============ */
+function dryTotal(s){return sd(s).filter(d=>s.days[d].dry===true).length;}
+function dryStreakBack(s){const rec=sd(s).filter(d=>s.days[d].dry!==undefined);let n=0;
+  for(let i=rec.length-1;i>=0;i--){if(s.days[rec[i]].dry===true)n++;else break;}return n;}
+function dryBest(s){const rec=sd(s).filter(d=>s.days[d].dry!==undefined);let best=0,c=0;
+  rec.forEach(d=>{if(s.days[d].dry===true){c++;if(c>best)best=c;}else c=0;});return best;}
+function renderDry(){const dd=day(cur);const tg=state.dryTarget||3;
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i));
+  const wk=d7.filter(d=>state.days[d]&&state.days[d].dry===true).length;
+  document.getElementById('dryDayLabel').textContent=cur===today()?'(今日)':cur;
+  const st=dd.dry===true?'🚱 休肝日にした':dd.dry===false?'🍶 飲んだ日':'未記録';
+  document.getElementById('dryDayLabel').textContent=(cur===today()?'(今日) ':cur+' ')+'· '+st;
+  document.getElementById('dryWeekTxt').textContent=wk+' / '+tg+' 日';
+  document.getElementById('dryFill').style.width=Math.min(100,tg?wk/tg*100:0)+'%';
+  const streak=dryStreakBack(state);
+  document.getElementById('dryStats').innerHTML='現在の連続休肝 <b>'+streak+'</b> 日 🔥 ／ ベスト <b>'+dryBest(state)+'</b> 連続 ／ 累計 <b>'+dryTotal(state)+'</b> 日';
+  document.getElementById('dryYes').style.opacity=dd.dry===true?'1':'.92';
+  document.getElementById('dryNo').style.opacity=dd.dry===false?'1':'.92';}
+document.getElementById('dryYes').onclick=()=>{const dd=day(cur);const was=dd.dry;dd.dry=true;const tg=state.dryTarget||3;
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i));const wk=d7.filter(d=>state.days[d]&&state.days[d].dry===true).length;
+  save();checkBadges();render();
+  if(was!==true){toast('🚱 休肝日、えらい！お腹に一番効くよ');confettiRain();playFX();beep(880,.12);
+    if(wk===tg)setTimeout(()=>toast('🎯 今週の目標達成！最高'),700);}};
+document.getElementById('dryNo').onclick=()=>{const dd=day(cur);dd.dry=false;save();render();
+  toast('正直に記録できたのが一歩。明日は休肝日にしよう');beep(440,.08);};
+document.getElementById('dryTargetEdit').onclick=()=>{const v=prompt('週に何日を休肝日の目標にする？',state.dryTarget||3);
+  if(v!==null){const n=parseInt(v,10);if(!isNaN(n)&&n>=1&&n<=7){state.dryTarget=n;save();render();}}};
+
 /* ============ 週次レポート（コーチ用） ============ */
 function genWeeklyReport(){
   const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)).reverse();
@@ -1017,6 +1065,7 @@ function genWeeklyReport(){
   t+='【食事】記録'+mD.length+'日: 平均'+kcalAvg+'kcal / P'+proAvg+'g\n';
   t+='【お菓子・お酒】週合計'+Math.round(snackK)+'kcal (自転車'+Math.round(snackK/30)+'km分)\n';
   t+='【むしゃくしゃ】乗り切り累計'+(state.calmHeld||0)+'・ベスト'+(state.calmBest||0)+'連\n';
+  t+='【休肝日】今週'+days.filter(o=>o.x.dry===true).length+'/'+(state.dryTarget||3)+'日・連続'+dryStreakBack(state)+'・ベスト'+dryBest(state)+'・累計'+dryTotal(state)+'\n';
   t+='\n※30代後半の女性トレーナー視点でアドバイスください。';
   return t;
 }
@@ -1057,6 +1106,10 @@ function coachComment(){
   else if(mD.length&&proAvg>=100)praise.push('タンパク質、平均'+Math.round(proAvg)+'g取れてる。理想的。');
   if(wD.length&&waterAvg<(state.waterTarget||2500)*0.7)nudge.push('水分が平均'+(waterAvg/1000).toFixed(1)+'L。夏だし配達もあるから、あと1〜2杯増やそ。');
   if((state.calmStreak||0)>=2)praise.push('むしゃくしゃボタン、ちゃんと使って乗り切れてる（'+state.calmStreak+'連）。これが一番大きいことだよ。');
+  {const dryWk=days.filter(o=>o.x.dry===true).length, dryTg=state.dryTarget||3;
+    if(dryWk>=dryTg)praise.push('休肝日が今週'+dryWk+'日、目標クリア。お酒を抜いた日はお腹（内臓脂肪）に一番効くの。ここが続くと必ず変わるよ。');
+    else if(dryWk>=1)praise.push('休肝日'+dryWk+'日、ちゃんと作れてる。あと'+(dryTg-dryWk)+'日で今週の目標だよ、いける。');
+    else nudge.push('今週まだ休肝日がゼロ。毎日を週'+dryTg+'日休むだけで、腹囲の落ちが変わるよ。まず1日、飲まない日を作ろ。');}
   if(perfect>=4)praise.push('完璧な日が'+perfect+'日。習慣として体に入ってきてる。');
   let msg=R(['今週もお疲れさま。','はい、千夏だよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
   if(!praise.length&&!nudge.length){
