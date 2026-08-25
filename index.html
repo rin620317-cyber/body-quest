@@ -160,7 +160,7 @@
       </div>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.9.0</span></h1>
+          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.10.0</span></h1>
           <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
         </div>
         <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
@@ -180,6 +180,8 @@
   </div>
 
   <button class="big" id="calmBtn" style="background:linear-gradient(135deg,#fb7185,#f43f5e);margin-bottom:14px;">🔥 むしゃくしゃボタン<span class="sub">ケンカしたときは無心でデリ一択</span></button>
+
+  <button class="big" id="bodyChatBtn" style="background:linear-gradient(135deg,#22c55e,#0ea5e9);margin-bottom:14px;">🩺 からだ相談室<span class="sub">腰・膝・肩の痛み、フォーム、故障の相談に千夏が答える</span></button>
 
   <div class="datehop">
     <button class="ghost" id="prevDay">‹ 前日</button>
@@ -465,6 +467,20 @@
   </div>
 </div></div>
 
+<div class="overlay" id="bodyOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:88vh;">
+  <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
+    <div id="bodyFace" style="width:40px;flex:0 0 auto;"></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">🩺 からだ相談室</div><div class="muted" style="font-size:.66rem;">千夏が答えるよ（無料・ルール式）。※医療の代わりにはならないから、ひどい時は病院へ</div></div>
+    <span class="link" id="bodyClose">閉じる</span>
+  </div>
+  <div id="bodyLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
+  <div id="bodyChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <input id="bodyInput" placeholder="例：ブイアップで腰を痛めた…" style="flex:1;">
+    <button id="bodySend">送信</button>
+  </div>
+</div></div>
+
 <!-- 経過写真ビュー -->
 <div class="overlay" id="photoOverlay"><div class="modal" style="max-width:480px;">
   <img id="photoBig" alt="経過写真" style="width:100%;border-radius:12px;background:#000;">
@@ -627,7 +643,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
-  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3;
+  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[];
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -1259,6 +1275,82 @@ document.getElementById('chatFace').innerHTML=chiSVG('c');
 document.getElementById('chatClose').onclick=()=>document.getElementById('chatOverlay').classList.remove('show');
 document.getElementById('chatSend').onclick=chatSend;
 document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chatSend();}});
+
+/* ============ からだ相談室（ルールベース・無料） ============ */
+function bodyReply(raw){
+  const R=a=>a[Math.floor(Math.random()*a.length)];
+  const t=raw;
+  /* ① 危険サイン最優先：受診を促す */
+  if(['しびれ','痺れ','力が入らない','力が入ら','足に力','脚に力','麻痺','排尿','おしっこが出','尿が','便が出','失禁','漏れ'].some(k=>t.includes(k))){
+    return '⚠️ ちょっと待って、それは早めに病院（整形外科・ひどければ救急）に診てもらってほしいサインだよ。脚のしびれ・力が入らない・おしっこや便のコントロールがおかしい――こういう時は自己流で様子見しないで。無理に動かさず、まず受診してね。私はそのあとの回復を一緒にやるから。';
+  }
+  if(['発熱','熱がある','高熱','事故','転んで','ぶつけ','ころんだ','ぶつけた'].some(k=>t.includes(k))){
+    return '⚠️ 発熱を伴う痛みや、転倒・ぶつけた後の強い痛みは、念のため病院で診てもらったほうが安心だよ。ただの筋肉痛と決めつけないでね。診てもらって問題なければ、また相談して。';
+  }
+  /* ② 腰・ぎっくり（今回の本題） */
+  if(['腰','こし','ぎっくり','ギックリ','ぎっくり腰','腰痛'].some(k=>t.includes(k))){
+    return R([
+      'あー、腰やっちゃったか…お大事にね。まず今日〜2日の応急ケアを言うね。\n\n①寝込まないで。長く安静にするより、痛くない範囲で普通に動くほうが治りが早いの。\n②ズキズキ強い最初の1〜2日は冷やす（保冷剤をタオル越しに15分）。落ち着いたらお風呂やカイロで温めて血流を上げる。\n③楽な姿勢＝横向きで膝を軽く曲げる／仰向けで膝の下にクッション。\n④前かがみ・体をひねる・重い物、そして腹筋のブイアップは今はナシ。\n⑤つらければ市販の鎮痛薬や湿布も使っていい（用法通りにね）。\n\n数日〜1週間で軽くなるのが普通。もし脚まで痛みやしびれが走る／2週間たっても良くならない時は整形外科へ。',
+      'ブイアップで腰か…あれ、実は腰に負担が大きい種目なんだ。あなたは悪くない、種目と"いきなり毎日フル"の組み合わせが腰に厳しかっただけ。\n\n今は無理に鍛えようとしないで。痛くない日常動作はOK、でもブイアップ・重い物・ひねりは中止。冷やす→温めるの順で、楽な姿勢で休ませてあげて。\n\n動けないほど痛い・脚がしびれる時だけは病院ね。落ち着いてきたら、腰にやさしい体幹のやり直し方も教えるよ。'
+    ]);
+  }
+  /* ③ 復帰プラン・再発予防 */
+  if(['再開','復帰','いつから','また筋トレ','治ったら','いつ動','ドローイン','デッドバグ','プランク','やり直','段階'].some(k=>t.includes(k))){
+    return R([
+      '治ってきたら、いきなり元のメニューに戻さないのがコツ。腰にやさしい順でいこう。\n\n1️⃣ドローイン（お腹を薄くへこませて呼吸）※これは痛くなければ寝てても座っててもOK\n2️⃣デッドバグ（仰向けで手足を交互に伸ばす。腰は床に押しつける）\n3️⃣プランク（短い秒数から）\n\nこの3つを"痛みゼロ"で2週間できたら、そこで初めてブイアップやクランチを再開。1年ぶりの体は、いきなり毎日フルより週2〜3から積むほうが、結局いちばん早く戻るよ。',
+      '去年3〜4か月毎日できてたのは、体が"できあがってた"から。今回痛めたのは、その頃の体とのギャップに気づかず全開でいったサイン。\n\n復帰は【ドローイン→デッドバグ→プランク】の腰にやさしい体幹から。痛みが出たらその日は中止、で全然いい。焦らず積めば、去年の自分に必ず戻れるよ。'
+    ]);
+  }
+  /* ④ 膝 */
+  if(['膝','ひざ','ヒザ'].some(k=>t.includes(k))){
+    return '膝が痛い時は、ジャンプ系（バーピーやジャンピングジャック）を今はお休みして、アプリの静音版に切り替えて。スクワットは"膝がつま先より前に出過ぎない・内に入らない"を意識して、痛む角度まで曲げないこと。痛みが続く・腫れがある時は無理せず整形外科ね。動いた後のアイシング15分も◎。';
+  }
+  /* ⑤ 肩・首 */
+  if(['肩','首','くび','ネック','肩こり','肩甲骨'].some(k=>t.includes(k))){
+    return 'eBayでずっとPCの前だもんね、肩・首はデスクワークの宿命。1時間に1回、肩をぐるっと回す＋あごを軽く引いて首の後ろを伸ばすだけでだいぶ違うよ。画面は目線の高さに、キーボードは体の近くに。ジンジンしびれる・腕まで痛い時は神経のサインだから、その時は病院へ。';
+  }
+  /* ⑥ 筋肉痛 */
+  if(['筋肉痛','筋肉','だるい','痛気持ち','筋肉が痛'].some(k=>t.includes(k))){
+    return 'それはたぶん筋肉痛（遅れて来るやつ）。ケガじゃないから安心して。ふつう48〜72時間で抜けるよ。痛い部位はその間しっかり休めて、別の部位や配達で軽く動かすと血流が回って回復が早い。あとはタンパク質と睡眠。動かせないほど鋭い痛みや、関節がおかしい感じなら筋肉痛じゃないから、そこは区別してね。';
+  }
+  /* ⑦ ウォームアップ・フォーム */
+  if(['準備運動','ウォームアップ','あたため','温め','ストレッチ','フォーム','効いてる','やり方','正しい'].some(k=>t.includes(k))){
+    return R([
+      '今回みたいなケガ、ウォームアップで結構防げるよ。トレ前に、その場足踏み1分＋腰を大きく回す＋肩回し、で体を温めてから。冷えた体でいきなり腹筋がいちばん危ない。',
+      'フォームで迷ったら基本は"反動を使わない・呼吸を止めない・痛い所まで無理にいかない"。回数より丁寧さ。効かせたい所に手を当てて、そこが動いてるか確認するのもいいよ。'
+    ]);
+  }
+  /* ⑧ 睡眠・回復・便秘など体調 */
+  if(['寝れ','眠','睡眠','疲れ','回復','便秘','お通じ','おなら','ガス'].some(k=>t.includes(k))){
+    return '体づくりって、実は"休む力"も込みなの。筋肉は寝てる間に回復するから、21時就寝を狙ってるあなたは方向性ばっちり。お通じやガスが気になる時は、水分・食物繊維・そして今やってる配達（軽い運動）が効くよ。腰など痛みが絡む場合は、そっちを先にケアしてね。';
+  }
+  /* ⑨ あいさつ・その他 */
+  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','千夏','元気'].some(k=>t.includes(k))){
+    return 'やっほー、千夏だよ。からだのこと、どこか痛い・気になる所ある？ 部位や「いつ・何をして」痛めたか教えてくれると、ちゃんと一緒に考えられるよ。';
+  }
+  return 'うんうん、聞かせて。「どこが」「いつ・何をしていて」「どんな痛み（ズキッ／じわじわ／しびれ）」を教えてくれると、より具体的に答えられるよ。※私は医療の代わりにはならないから、強い痛みやしびれ、長引く時は無理せず病院にかかってね。';
+}
+const BODY_CHIPS=['腰を痛めた','ブイアップで腰が…','膝が痛い','肩こり','筋肉痛かな','いつから再開していい？','ウォームアップのやり方'];
+function renderBodyChips(){const box=document.getElementById('bodyChips');if(!box)return;box.innerHTML='';
+  BODY_CHIPS.forEach(c=>{const b=document.createElement('button');b.className='ghost';b.textContent=c;
+    b.style.cssText='font-size:.72rem;padding:5px 9px;';b.onclick=()=>{document.getElementById('bodyInput').value=c;bodyChatSend();};box.appendChild(b);});}
+function renderBodyChat(){const log=document.getElementById('bodyLog');if(!log)return;log.innerHTML='';
+  (state.bodyChat||[]).forEach(m=>{const b=document.createElement('div');
+    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#38bdf8;color:#052028;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
+    else b.style.cssText='align-self:flex-start;max-width:82%;background:var(--panel2);padding:8px 12px;border-radius:14px 14px 14px 4px;font-size:.86rem;line-height:1.6;white-space:pre-wrap;';
+    b.textContent=m.t;log.appendChild(b);});
+  log.scrollTop=log.scrollHeight;}
+function openBodyChat(){if(!state.bodyChat||!state.bodyChat.length){state.bodyChat=[{r:'c',t:'ここは「からだ相談室」だよ。腰・膝・肩の痛みやフォーム、トレの再開時期まで、なんでも聞いて。\n※私はお医者さんじゃないから、強い痛み・しびれ・長引く時は病院を優先してね。\n\nさっそくだけど、今どこか痛い所ある？'}];save();}
+  document.getElementById('bodyOverlay').classList.add('show');renderBodyChips();renderBodyChat();setTimeout(()=>{const i=document.getElementById('bodyInput');if(i)i.focus();},120);}
+function bodyChatSend(){const inp=document.getElementById('bodyInput');const t=inp.value.trim();if(!t)return;
+  state.bodyChat=state.bodyChat||[];state.bodyChat.push({r:'u',t});state.bodyChat.push({r:'c',t:bodyReply(t)});
+  if(state.bodyChat.length>60)state.bodyChat=state.bodyChat.slice(-60);
+  save();inp.value='';renderBodyChat();beep(620,.05);}
+document.getElementById('bodyChatBtn').onclick=openBodyChat;
+document.getElementById('bodyFace').innerHTML=chiSVG('b');
+document.getElementById('bodyClose').onclick=()=>document.getElementById('bodyOverlay').classList.remove('show');
+document.getElementById('bodySend').onclick=bodyChatSend;
+document.getElementById('bodyInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();bodyChatSend();}});
 
 /* ============ EVENTS ============ */
 document.getElementById('saveW').onclick=()=>{const dd=day(cur);
