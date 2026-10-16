@@ -232,6 +232,26 @@
   .wo-btns button{flex:1;}
 
   .link{color:var(--accent2);font-size:.8rem;cursor:pointer;text-decoration:underline;font-weight:700;}
+  textarea{width:100%;background:var(--panel2);border:1.5px solid var(--line);color:var(--txt);border-radius:14px;padding:10px 12px;font-size:.95rem;resize:vertical;}
+  textarea:focus{outline:none;border-color:#FF9DB5;}
+  input[type=password]{background:var(--panel2);border:1.5px solid var(--line);color:var(--txt);border-radius:14px;padding:10px 12px;font-size:1rem;}
+  button:disabled{opacity:.6;}
+  details.more.ai{background:#F1ECFF;}
+  .ai-card{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px;}
+  .ai-dish{font-weight:800;margin-bottom:6px;}
+  .ai-row{display:flex;justify-content:space-between;gap:8px;font-size:.84rem;padding:4px 0;border-bottom:1px dashed var(--line);}
+  .ai-row small{color:var(--sub);margin-left:6px;}
+  .rgrp{display:inline-flex;align-items:center;gap:3px;}
+  .recipe-modal{text-align:left;max-height:90vh;overflow-y:auto;}
+  .rc-item{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel2);border-radius:14px;margin-bottom:6px;}
+  .rc-n{flex:1;font-weight:700;font-size:.85rem;min-width:0;overflow-wrap:anywhere;}
+  .rc-n small{display:block;color:var(--sub);font-size:.7rem;}
+  .rc-item input.rc-q{width:66px;padding:7px 8px;font-size:.92rem;background:#fff;}
+  .rc-u{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:7px 6px;font-size:.85rem;color:var(--txt);}
+  .rc-tot{background:#FFF0F4;border-radius:16px;padding:12px;margin:12px 0;text-align:center;font-weight:800;line-height:1.6;}
+  .rc-tot b{font-size:1.35rem;color:var(--accent2);}
+  .stepper{display:flex;align-items:center;gap:10px;}
+  .stepper button{padding:6px 14px;}
 </style>
 </head>
 <body>
@@ -242,7 +262,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.0.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.1.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -288,12 +308,25 @@
       <input id="foodSearch" type="text" autocomplete="off" placeholder="🔍 たべたものを入力（牛丼・ビール・鶏むね…）">
       <div id="searchRes" hidden></div>
 
+      <details class="more ai" id="aiBox">
+        <summary>🤖 AIにまかせる（文章で書くだけ）</summary>
+        <div style="margin-top:10px;">
+          <textarea id="aiText" rows="3" placeholder="例：グラタン。ペンネ、ハインツのグラタンソース、鶏もも肉、しいたけ、いんげん、カリフラワー。2人前つくって1人前たべた"></textarea>
+          <button id="aiGo" style="width:100%;margin-top:8px;">🤖 AIで計算</button>
+          <div id="aiNoKey" class="muted" style="font-size:.74rem;margin-top:6px;">※ 使うにはAPIキーの設定が必要です（1回 約0.03円）。<span class="link" id="aiToSettings">設定へ</span></div>
+          <div id="aiResult" style="margin-top:10px;"></div>
+        </div>
+      </details>
+
       <div class="sec-label">🕘 よく食べる・さっき食べた（1タップ）</div>
       <div class="chips" id="recentChips"></div>
 
       <div class="sec-label">📚 メニューからえらぶ</div>
       <div class="chips" id="foodTabs" style="margin-bottom:10px;"></div>
       <div class="chips" id="foodChips"></div>
+
+      <div class="sec-label">🍳 マイ料理（材料から自動計算）</div>
+      <div class="chips" id="recipeChips"></div>
 
       <details class="more" id="freeBox">
         <summary>✏️ 名前とカロリーだけで登録（パッケージの表示を見て）</summary>
@@ -484,6 +517,29 @@
     <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#B79CF2,#5FB8E6);margin-bottom:12px;">📋 今週のレポートを作成<span class="sub">深く相談したい週は、コピーしてチャットに貼る</span></button>
 
     <div class="card">
+      <h3>🤖 AI設定（任意）</h3>
+      <div class="muted" style="margin-bottom:8px;">文章で書いた食事をAIが計算します。使う人だけ設定してください。設定しなくても、ほかの機能はすべて無料で使えます。</div>
+      <div style="font-size:.85rem;font-weight:700;">APIキー：<span id="aiKeyState"></span></div>
+      <div class="row" style="margin-top:8px;flex-wrap:nowrap;">
+        <input id="aiKeyInput" type="password" autocomplete="off" placeholder="sk-ant-..." style="flex:1;min-width:0;">
+        <button id="aiKeySave">保存</button>
+      </div>
+      <label class="mini" style="margin-top:10px;">つかうAI</label>
+      <select id="aiModelSel" class="rc-u" style="width:100%;"></select>
+      <div id="aiUsageTxt" class="muted" style="margin-top:8px;font-weight:700;"></div>
+      <details class="more"><summary>📝 APIキーの作り方</summary>
+        <ol style="font-size:.8rem;line-height:1.7;padding-left:18px;margin:8px 0 0;">
+          <li>パソコンで Claude Console（console.anthropic.com）を開き、アカウントを作る</li>
+          <li>「Billing（請求）」でクレジットを少額だけ購入する</li>
+          <li>使いすぎ防止に、月の利用上限を低めに設定しておく</li>
+          <li>「API Keys」でキーを作り、スマホに送ってここに貼りつける</li>
+        </ol>
+        <div class="muted" style="font-size:.72rem;margin-top:6px;">キーはこのスマホの中だけに保存され、データ書き出しにも含まれません。人には見せないでね。</div>
+      </details>
+      <div style="text-align:center;margin-top:10px;"><span class="link" id="aiKeyDel">キーを削除</span></div>
+    </div>
+
+    <div class="card">
       <h3>🏆 実績バッジ</h3>
       <div class="badges" id="badges"></div>
     </div>
@@ -610,6 +666,31 @@
     <button class="ghost" id="photoDelBtn" style="flex:1;color:var(--fire);">この写真を削除</button>
     <button id="photoCloseBtn" style="flex:1;">閉じる</button>
   </div>
+</div></div>
+
+<!-- マイ料理 -->
+<div class="overlay" id="recipeOverlay"><div class="modal recipe-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <h2 style="font-size:1.15rem;margin:0;">🍳 マイ料理</h2><span class="link" id="rcClose">閉じる</span>
+  </div>
+  <label class="mini">料理名</label>
+  <input id="rcName" type="text" style="width:100%;" placeholder="例：うちのグラタン">
+  <div style="display:flex;margin-top:12px;align-items:center;justify-content:space-between;">
+    <span class="mini" style="margin:0;font-size:.82rem;color:var(--sub);font-weight:700;">何人前つくった？</span>
+    <div class="stepper"><button class="ghost" id="rcServMinus">−</button><b id="rcServ" style="font-size:1.2rem;min-width:2em;text-align:center;">1</b><button class="ghost" id="rcServPlus">＋</button></div>
+  </div>
+  <div class="sec-label">🥕 材料（作った分ぜんぶで、どれだけ使った？）</div>
+  <input id="rcSearch" type="text" autocomplete="off" style="width:100%;" placeholder="🔍 材料をさがす（ペンネ、鶏もも、しいたけ…）">
+  <div id="rcRes" style="margin-top:6px;"></div>
+  <div id="rcItems" style="margin-top:8px;"></div>
+  <div class="rc-tot" id="rcTot"></div>
+  <label class="mini">きょう食べた量</label>
+  <div class="chips" id="rcPortion"></div>
+  <div style="display:flex;gap:8px;margin-top:14px;">
+    <button id="rcEat" style="flex:2;">🍙 記録して保存</button>
+    <button class="ghost" id="rcSave" style="flex:1;">保存だけ</button>
+  </div>
+  <div style="text-align:center;margin-top:12px;"><span class="link" id="rcDelete" style="color:var(--fire);">この料理を削除</span></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -779,6 +860,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
   s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[]; s.delPreset=s.delPreset||{min:60,km:15};
+  if(!s.recipes)s.recipes=[{id:1,n:'うちのグラタン',serv:2,items:[{n:'ペンネ(乾)',k:347,p:12.9,q:120,u:'g',ug:1},{n:'グラタン・ホワイトソース(缶)',k:99,p:1.8,q:1,u:'缶',ug:290},{n:'鶏もも(皮付)',k:190,p:16.6,q:200,u:'g',ug:1},{n:'しいたけ',k:25,p:3.1,q:4,u:'個',ug:15},{n:'いんげん',k:23,p:1.8,q:8,u:'本',ug:7},{n:'カリフラワー',k:28,p:3.0,q:6,u:'房',ug:15}]}];
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -898,6 +980,7 @@ function render(){
   renderDry();
   renderMove();
   renderChika();
+  renderAiSettings();
   document.getElementById('tbLv').textContent='Lv'+L.lvl;
 }
 function afterChange(){render();}
@@ -942,8 +1025,9 @@ function renderSearch(){const raw=document.getElementById('foodSearch').value.tr
   const hit=x=>toKata(x.n).includes(q);const res=[];const seen=new Set();
   const push=(x,kind)=>{if(!seen.has(x.n)){seen.add(x.n);res.push({...x,kind});}};
   recentFoods().filter(hit).forEach(x=>push(x,'one'));
+  (state.recipes||[]).forEach(r=>{const per=recipePer(r);const x={n:r.n+'（1人前）',k:per.k,p:per.p,s:null};if(hit(x)||toKata(r.n).includes(q))push(x,'one');});
   menuAll().filter(hit).forEach(x=>push(x,'one'));
-  state.customFoods100.concat(FOODS_DB).filter(hit).forEach(x=>push(x,'g'));
+  ingAll().filter(hit).forEach(x=>push(x,'g'));
   res.slice(0,10).forEach(x=>{const row=document.createElement('div');row.className='sres';
     if(x.kind==='one'){
       row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">'+Math.round(x.k)+'kcal</span><button class="sadd">＋</button>';
@@ -951,6 +1035,7 @@ function renderSearch(){const raw=document.getElementById('foodSearch').value.tr
     else{
       row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">100gで'+x.k+'kcal・量をえらぶ↓</span>';
       const g=document.createElement('div');g.className='grams';
+      unitsOf(x.n).forEach(([u,g0])=>g.appendChild(chipEl(uLabel(u),'≒'+Math.round(x.k*g0/100),'',e=>{e.stopPropagation();addMeal(x.n+' '+uLabel(u),x.k*g0/100,x.p*g0/100,null);clearSearch();})));
       GRAMS.forEach(gr=>{const b=chipEl(gr+'g','≒'+Math.round(x.k*gr/100),'',e=>{e.stopPropagation();addMeal(x.n+' '+gr+'g',x.k*gr/100,x.p*gr/100,null);clearSearch();});g.appendChild(b);});
       row.appendChild(g);}
     box.appendChild(row);});
@@ -1011,7 +1096,7 @@ function renderFood(){
       const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
       x.onclick=()=>{dd.meals.splice(i,1);save();render();};
       el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
-  renderSlots();renderRecent();renderMenu();
+  renderSlots();renderRecent();renderMenu();renderRecipes();
 }
 
 /* ざっくり概算：料理タイプ別（100gあたり kcal / タンパク質g） */
@@ -1048,6 +1133,217 @@ document.getElementById('editTargets').onclick=()=>{
   const p=prompt('1日の目標タンパク質(g)',state.proTarget);if(p!==null){const v=parseFloat(p);if(!isNaN(v)&&v>0)state.proTarget=v;}
   save();render();};
 renderEst();
+
+/* ============ マイ料理（材料から自動計算・ゼロ円） ============ */
+const ING_EXTRA=[
+  ['ペンネ(乾)',347,12.9],['スパゲッティ(乾)',347,12.9],['マカロニ(乾)',347,12.9],['米(炊く前)',342,6.1],['春雨(乾)',346,0.2],
+  ['グラタン・ホワイトソース(缶)',99,1.8],['ピザ用チーズ',340,23],['粉チーズ',445,44],['生クリーム',404,1.9],
+  ['小麦粉',349,8.3],['パン粉',369,14.6],['片栗粉',330,0.1],
+  ['しょうゆ',77,7.7],['みりん',241,0.3],['料理酒',88,0.2],['みそ',182,12.5],['ごま油',890,0],
+  ['コンソメ(固形)',235,7.0],['鶏ガラスープの素',211,10.0],['カレールー',474,6.5],['シチュールー',512,5.7],
+  ['豚こま切れ',220,18.0],['合いびき肉',250,17.3],['牛こま切れ',230,18.0],['鶏手羽先',207,17.4],['ちくわ',119,12.2],['かまぼこ',93,12.0],
+  ['こんにゃく',5,0.1],['しらたき',7,0.2],
+  ['しいたけ',25,3.1],['エリンギ',31,2.8],['まいたけ',22,2.0],['マッシュルーム',15,2.9],
+  ['いんげん',23,1.8],['カリフラワー',28,3.0],['アスパラガス',21,2.6],['ズッキーニ',16,1.3],['パプリカ',28,1.0],
+  ['長ねぎ',35,1.4],['青ねぎ',30,1.9],['にら',18,1.7],['小松菜',13,1.5],['チンゲン菜',9,0.6],['水菜',23,2.2],
+  ['ごぼう',58,1.8],['れんこん',66,1.9],['にんにく',129,6.4],['しょうが',28,0.9],['豆苗',27,3.8],
+].map(a=>({n:a[0],k:a[1],p:a[2]}));
+/* 普段の単位 → グラム（目安） */
+const UNITS={
+  'ペンネ(乾)':[['人前',80]],'スパゲッティ(乾)':[['人前',100]],'マカロニ(乾)':[['人前',60]],'米(炊く前)':[['合',150]],
+  'グラタン・ホワイトソース(缶)':[['缶',290]],'ピザ用チーズ':[['つかみ',20]],'粉チーズ':[['大さじ',6]],'生クリーム':[['パック',200],['大さじ',15]],
+  '小麦粉':[['大さじ',9]],'パン粉':[['大さじ',3]],'片栗粉':[['大さじ',9]],
+  'しょうゆ':[['大さじ',18],['小さじ',6]],'みりん':[['大さじ',18]],'料理酒':[['大さじ',15]],'みそ':[['大さじ',18]],
+  'ごま油':[['大さじ',12],['小さじ',4]],'サラダ油':[['大さじ',12],['小さじ',4]],'オリーブ油':[['大さじ',12],['小さじ',4]],
+  'バター':[['大さじ',12]],'マヨネーズ':[['大さじ',12]],'ケチャップ':[['大さじ',15]],'砂糖':[['大さじ',9],['小さじ',3]],
+  'コンソメ(固形)':[['個',5]],'鶏ガラスープの素':[['小さじ',2.5]],'カレールー':[['かけ',20]],'シチュールー':[['かけ',20]],
+  '鶏手羽先':[['本',40]],'ちくわ':[['本',30]],'こんにゃく':[['枚',250]],
+  'しいたけ':[['個',15]],'エリンギ':[['本',40]],'まいたけ':[['パック',100]],'マッシュルーム':[['個',10]],'しめじ':[['パック',100]],'えのき':[['袋',100]],
+  'いんげん':[['本',7]],'カリフラワー':[['房',15]],'アスパラガス':[['本',20]],'ズッキーニ':[['本',200]],'パプリカ':[['個',150]],
+  '長ねぎ':[['本',100]],'にら':[['束',100]],'小松菜':[['束',250]],'チンゲン菜':[['株',100]],'にんにく':[['かけ',5]],'しょうが':[['かけ',10]],
+  '玉ねぎ':[['個',200]],'にんじん':[['本',150]],'じゃがいも':[['個',130]],'なす':[['本',80]],'ピーマン':[['個',30]],'トマト':[['個',150]],
+  'ブロッコリー':[['房',15],['株',200]],'キャベツ':[['枚(葉)',50]],'白菜':[['枚(葉)',100]],
+  '卵':[['個',50]],'鶏もも(皮付)':[['枚',250]],'鶏もも(皮なし)':[['枚',220]],'鶏むね(皮付)':[['枚',250]],'鶏むね(皮なし)':[['枚',220]],'ささみ':[['本',50]],
+  '木綿豆腐':[['丁',300]],'絹豆腐':[['丁',300]],'納豆':[['パック',45]],'牛乳':[['カップ',210]],'白ごはん':[['杯(茶碗)',150]],'食パン':[['枚(6枚切)',60]],
+  'うどん(ゆで)':[['玉',250]],'そば(ゆで)':[['玉',200]],'中華麺(ゆで)':[['玉',200]],
+  'ベーコン':[['枚',17]],'ウインナー':[['本',20]],'ロースハム':[['枚',10]],'鮭':[['切れ',80]],'さば':[['切れ',80]],
+  'ツナ缶(水煮)':[['缶',70]],'ツナ缶(油)':[['缶',70]],'プロセスチーズ':[['個',18]],
+};
+function ingAll(){const seen=new Set(),out=[];
+  state.customFoods100.concat(FOODS_DB,ING_EXTRA).forEach(x=>{if(!seen.has(x.n)){seen.add(x.n);out.push(x);}});return out;}
+function unitsOf(n){return UNITS[n]||[];}
+function uLabel(u){return /^(大さじ|小さじ)$/.test(u)?u+'1':'1'+u;}
+function itemG(it){return (+it.q||0)*(+it.ug||1);}
+function itemK(it){return it.fk!=null?(+it.fk||0)*(+it.q||0):itemG(it)*it.k/100;}
+function itemP(it){return it.fk!=null?(+it.fp||0)*(+it.q||0):itemG(it)*it.p/100;}
+function recipeTot(r){return r.items.reduce((a,it)=>({k:a.k+itemK(it),p:a.p+itemP(it)}),{k:0,p:0});}
+function recipePer(r){const t=recipeTot(r),s=Math.max(1,+r.serv||1);return{k:t.k/s,p:t.p/s};}
+
+let rcEdit=null,rcPortion=1;
+const PORTIONS=[{l:'半分',v:.5},{l:'1人前',v:1},{l:'1.5人前',v:1.5},{l:'2人前',v:2}];
+function renderRecipes(){const box=document.getElementById('recipeChips');box.innerHTML='';
+  (state.recipes||[]).forEach(r=>{const per=recipePer(r);const g=document.createElement('span');g.className='rgrp';
+    g.appendChild(chipEl(r.n,Math.round(per.k)+'kcal/1人前','',()=>addMeal(r.n+'（1人前）',per.k,per.p,null)));
+    const e=document.createElement('button');e.className='mini-btn';e.textContent='✏️';e.onclick=()=>openRecipe(r.id);
+    g.appendChild(e);box.appendChild(g);});
+  box.appendChild(chipEl('＋ 新しい料理をつくる','','on',()=>openRecipe(null)));}
+function openRecipe(id){const r=(state.recipes||[]).find(x=>x.id===id);
+  rcEdit=r?JSON.parse(JSON.stringify(r)):{id:Date.now(),n:'',serv:1,items:[]};rcPortion=1;
+  document.getElementById('rcName').value=rcEdit.n;document.getElementById('rcSearch').value='';
+  document.getElementById('rcDelete').hidden=!r;renderRcSearch();renderRcEditor();
+  document.getElementById('recipeOverlay').classList.add('show');}
+function closeRecipe(){document.getElementById('recipeOverlay').classList.remove('show');rcEdit=null;}
+function updateRcTotals(){const t=recipeTot(rcEdit),s=Math.max(1,rcEdit.serv),pk=t.k/s,pp=t.p/s;
+  document.getElementById('rcServ').textContent=rcEdit.serv;
+  document.getElementById('rcTot').innerHTML='ぜんぶで '+Math.round(t.k)+'kcal ・ P'+Math.round(t.p)+'g<br>1人前 <b>'+Math.round(pk)+'</b> kcal ・ P'+Math.round(pp)+'g'
+    +'<div class="muted" style="margin-top:4px;">きょう食べた量（'+PORTIONS.find(x=>x.v===rcPortion).l+'）＝ '+Math.round(pk*rcPortion)+' kcal</div>';}
+function renderRcEditor(){const box=document.getElementById('rcItems');box.innerHTML='';
+  if(!rcEdit.items.length)box.innerHTML='<div class="empty">上の検索から材料を足してね</div>';
+  rcEdit.items.forEach((it,i)=>{const row=document.createElement('div');row.className='rc-item';
+    const nm=document.createElement('div');nm.className='rc-n';nm.innerHTML=esc(it.n)+'<small></small>';
+    const kc=()=>{nm.querySelector('small').textContent='≒ '+Math.round(itemK(it))+'kcal';};kc();row.appendChild(nm);
+    if(it.fk!=null){const s=document.createElement('span');s.className='muted';s.textContent='カロリー入力';row.appendChild(s);}
+    else{const q=document.createElement('input');q.type='number';q.step='any';q.min='0';q.className='rc-q';q.value=it.q;
+      q.oninput=()=>{it.q=parseFloat(q.value)||0;kc();updateRcTotals();};
+      const opts=[['g',1],...unitsOf(it.n)];const sel=document.createElement('select');sel.className='rc-u';
+      opts.forEach(([u])=>{const o=document.createElement('option');o.value=u;o.textContent=u;if(u===it.u)o.selected=true;sel.appendChild(o);});
+      sel.onchange=()=>{const grams=itemG(it);const nu=opts.find(x=>x[0]===sel.value);it.u=nu[0];it.ug=nu[1];
+        it.q=Math.round(grams/nu[1]*10)/10;q.value=it.q;kc();updateRcTotals();};
+      row.appendChild(q);row.appendChild(sel);}
+    const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
+    x.onclick=()=>{rcEdit.items.splice(i,1);renderRcEditor();};row.appendChild(x);box.appendChild(row);});
+  updateRcTotals();
+  const pc=document.getElementById('rcPortion');pc.innerHTML='';
+  PORTIONS.forEach(p=>pc.appendChild(chipEl(p.l,'',p.v===rcPortion?'on':'',()=>{rcPortion=p.v;renderRcEditor();})));}
+function renderRcSearch(){const raw=document.getElementById('rcSearch').value.trim(),q=toKata(raw);
+  const box=document.getElementById('rcRes');box.innerHTML='';if(!q)return;
+  ingAll().filter(x=>toKata(x.n).includes(q)).slice(0,8).forEach(x=>{const row=document.createElement('div');row.className='sres';
+    row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">100gで'+x.k+'kcal</span><button class="sadd">＋</button>';
+    row.onclick=()=>{const us=unitsOf(x.n);
+      rcEdit.items.push({n:x.n,k:x.k,p:x.p,q:us.length?1:100,u:us.length?us[0][0]:'g',ug:us.length?us[0][1]:1});
+      document.getElementById('rcSearch').value='';renderRcSearch();renderRcEditor();};
+    box.appendChild(row);});
+  const tail=document.createElement('div');tail.className='sres-tail';
+  tail.appendChild(chipEl('✏️「'+raw+'」をカロリーで追加','','',()=>{
+    const k=parseFloat(prompt('「'+raw+'」使った分ぜんぶで何kcal？（パッケージの表示から）',''));if(isNaN(k)||k<0)return;
+    const p=parseFloat(prompt('タンパク質は何g？（わからなければ空でOK）',''))||0;
+    rcEdit.items.push({n:raw,fk:k,fp:p,q:1,u:'分'});document.getElementById('rcSearch').value='';renderRcSearch();renderRcEditor();}));
+  box.appendChild(tail);}
+function saveRecipe(){rcEdit.n=document.getElementById('rcName').value.trim();
+  if(!rcEdit.n){toast('料理名を入れてね');return false;}
+  if(!rcEdit.items.length){toast('材料を1つ以上たしてね');return false;}
+  state.recipes=state.recipes||[];const i=state.recipes.findIndex(x=>x.id===rcEdit.id);
+  if(i>=0)state.recipes[i]=rcEdit;else state.recipes.push(rcEdit);save();return true;}
+document.getElementById('rcSave').onclick=()=>{if(!saveRecipe())return;toast('🍳 '+rcEdit.n+' を保存したよ');closeRecipe();render();};
+document.getElementById('rcEat').onclick=()=>{if(!saveRecipe())return;
+  const per=recipePer(rcEdit),pl=PORTIONS.find(x=>x.v===rcPortion).l,n=rcEdit.n;closeRecipe();
+  addMeal(n+'（'+pl+'）',per.k*rcPortion,per.p*rcPortion,null);};
+document.getElementById('rcDelete').onclick=()=>{if(!confirm('「'+(rcEdit.n||'この料理')+'」を削除しますか？（食事の記録は消えません）'))return;
+  state.recipes=(state.recipes||[]).filter(x=>x.id!==rcEdit.id);save();closeRecipe();render();toast('削除しました');};
+document.getElementById('rcClose').onclick=closeRecipe;
+document.getElementById('rcServMinus').onclick=()=>{rcEdit.serv=Math.max(1,rcEdit.serv-1);updateRcTotals();};
+document.getElementById('rcServPlus').onclick=()=>{rcEdit.serv=Math.min(20,rcEdit.serv+1);updateRcTotals();};
+document.getElementById('rcSearch').oninput=renderRcSearch;
+
+/* ============ AIにまかせる（任意・自分のAPIキー。キーはstateに入れない＝書き出しに含めない） ============ */
+const AI_KEY='bq_ai_key';
+const AI_MODELS={
+  'claude-haiku-5-5':{l:'Haiku 5.5（安い・月数円）',in:0.10,out:0.50},
+  'claude-sonnet-5-5':{l:'Sonnet 5.5（かしこい・月50〜100円）',in:2,out:10},
+};
+const YEN=150;
+const AI_SCHEMA={type:'object',additionalProperties:false,required:['dish','servings_made','servings_eaten','items','note'],
+  properties:{
+    dish:{type:'string'},servings_made:{type:'number'},servings_eaten:{type:'number'},
+    items:{type:'array',items:{type:'object',additionalProperties:false,required:['name','grams','kcal','protein'],
+      properties:{name:{type:'string'},grams:{type:'number'},kcal:{type:'number'},protein:{type:'number'}}}},
+    note:{type:'string'}}};
+const AI_SYS='あなたは日本の家庭料理・外食・コンビニ食品にくわしい栄養計算アシスタントです。ユーザーが食べたものを日本語の文章で書きます。\n'
+  +'- dish：料理名（短く。複数の料理なら「グラタンとサラダ」のように）\n'
+  +'- servings_made：作った量（何人前）。書かれていなければ1\n'
+  +'- servings_eaten：そのうち本人が食べた量（何人前、0.5刻みでよい）。書かれていなければ1\n'
+  +'- items：材料ごとに「作った量ぜんぶで使った分」の grams・kcal・protein(g)。日本食品標準成分表の値をもとに推定する。量が書かれていない材料は、その料理の一般的な家庭の分量で推定する。市販品（例：ハインツのグラタンソース）は一般的な製品の栄養表示の目安を使う。外食やコンビニ商品で材料が書かれていなければ、料理そのものを1つの item にする\n'
+  +'- 作った量と食べた量の比率がちがう料理が混ざっているときは、servings_made=1・servings_eaten=1 とし、各 item を本人が実際に食べた分にする\n'
+  +'- note：仮定した量などの前提を日本語で1〜2文';
+let aiLast=null;
+function aiKey(){try{return localStorage.getItem(AI_KEY)||'';}catch(e){return '';}}
+function aiModel(){return AI_MODELS[state.aiModel]?state.aiModel:'claude-haiku-5-5';}
+function aiErrMsg(st,d){const m=(d&&d.error&&d.error.message)||'';
+  if(st===401)return 'APIキーがちがうみたい。その他タブで入れ直してね';
+  if(st===400&&/credit|balance/i.test(m))return 'クレジット残高が足りないみたい（Claude Consoleで追加してね）';
+  if(st===429)return '混みあってるか、上限に達したみたい。少し待ってからもう一度';
+  if(st>=500)return 'AI側が混みあってるみたい。少し待ってからもう一度';
+  return 'エラー（'+st+'）'+(m?'：'+m:'');}
+function trackAi(model,u){if(!u)return;const p=AI_MODELS[model];
+  const usd=((u.input_tokens||0)*p.in+(u.output_tokens||0)*p.out)/1e6;const mo=today().slice(0,7);
+  if(!state.aiUsage||state.aiUsage.m!==mo)state.aiUsage={m:mo,n:0,usd:0};
+  state.aiUsage.n++;state.aiUsage.usd+=usd;save();renderAiSettings();}
+async function aiEstimate(){const text=document.getElementById('aiText').value.trim();
+  if(!text){toast('食べたものを書いてね');return;}
+  const key=aiKey();if(!key){toast('AIを使うには、その他タブでAPIキーの設定が必要だよ');return;}
+  const btn=document.getElementById('aiGo'),out=document.getElementById('aiResult');
+  btn.disabled=true;btn.textContent='🍙 チカが計算中…';out.innerHTML='';aiLast=null;
+  try{const model=aiModel();
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model,max_tokens:4000,system:AI_SYS,
+        output_config:{effort:'low',format:{type:'json_schema',schema:AI_SCHEMA}},
+        messages:[{role:'user',content:text}]})});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(aiErrMsg(res.status,data));
+    trackAi(model,data.usage);
+    if(data.stop_reason==='refusal')throw new Error('この内容は計算できなかったみたい。書き方を変えてみてね');
+    if(data.stop_reason==='max_tokens')throw new Error('答えが長くなりすぎたみたい。もう少し短く書いてみてね');
+    const tb=(data.content||[]).find(b=>b.type==='text');
+    const r=tb?JSON.parse(tb.text):null;
+    if(!r||!Array.isArray(r.items)||!r.items.length)throw new Error('うまく読み取れなかったよ。材料をもう少しくわしく書いてみてね');
+    aiLast=r;renderAiResult();
+  }catch(e){out.innerHTML='<div class="infoline info-snack">'+esc(e instanceof TypeError?'通信できなかったよ（電波を確認してね）':(e.message||'エラー'))+'</div>';}
+  finally{btn.disabled=false;btn.textContent='🤖 AIで計算';}}
+function aiTotals(r){const t=r.items.reduce((a,it)=>({k:a.k+(+it.kcal||0),p:a.p+(+it.protein||0)}),{k:0,p:0});
+  const s=Math.max(1,+r.servings_made||1),e=+r.servings_eaten>0?+r.servings_eaten:1;return{t,s,e,k:t.k/s*e,p:t.p/s*e};}
+function renderAiResult(){const r=aiLast,out=document.getElementById('aiResult');out.innerHTML='';if(!r)return;
+  const T=aiTotals(r);
+  let h='<div class="ai-card"><div class="ai-dish">🍽 '+esc(r.dish||'ごはん')+'</div>';
+  r.items.forEach(it=>{h+='<div class="ai-row"><span>'+esc(it.name)+(+it.grams?'<small>'+Math.round(it.grams)+'g</small>':'')+'</span><span>'+Math.round(+it.kcal||0)+'kcal</span></div>';});
+  h+='<div class="rc-tot">'+(T.s>1?'ぜんぶ（'+T.s+'人前）'+Math.round(T.t.k)+'kcal<br>':'')
+    +'食べた分（'+T.e+'人前）<b>'+Math.round(T.k)+'</b> kcal ・ P'+Math.round(T.p)+'g</div>';
+  if(r.note)h+='<div class="muted" style="font-size:.74rem;">💡 '+esc(r.note)+'</div>';
+  out.innerHTML=h+'</div>';
+  const ctl=document.createElement('div');ctl.style.marginTop='10px';
+  ctl.innerHTML='<label style="display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:700;"><input type="checkbox" id="aiSaveRc" style="width:auto;transform:scale(1.2);"'
+    +(r.items.length>1?' checked':'')+'> マイ料理に保存（次から1タップ・あとで量も直せる）</label>';
+  const b=document.createElement('button');b.style.cssText='width:100%;margin-top:8px;';b.textContent='🍙 この内容で記録';b.onclick=aiCommit;
+  const c=document.createElement('button');c.className='ghost';c.style.cssText='width:100%;margin-top:6px;';c.textContent='やめる';
+  c.onclick=()=>{aiLast=null;renderAiResult();};
+  ctl.appendChild(b);ctl.appendChild(c);out.appendChild(ctl);}
+function aiCommit(){const r=aiLast;if(!r)return;const T=aiTotals(r);const dish=(r.dish||'ごはん').trim();
+  if(document.getElementById('aiSaveRc').checked){state.recipes=state.recipes||[];
+    const items=r.items.map(it=>{const g=+it.grams||0;
+      return g>0?{n:it.name,k:(+it.kcal||0)/g*100,p:(+it.protein||0)/g*100,q:Math.round(g),u:'g',ug:1}:{n:it.name,fk:+it.kcal||0,fp:+it.protein||0,q:1,u:'分'};});
+    const ex=state.recipes.find(x=>x.n===dish);const rec={id:ex?ex.id:Date.now(),n:dish,serv:T.s,items};
+    if(ex)Object.assign(ex,rec);else state.recipes.push(rec);save();}
+  const label=(T.s===1&&T.e===1)?'':'（'+(T.e===0.5?'半分':T.e+'人前')+'）';
+  aiLast=null;document.getElementById('aiText').value='';renderAiResult();
+  addMeal(dish+label,T.k,T.p,null);}
+function renderAiSettings(){const has=!!aiKey();
+  document.getElementById('aiKeyState').textContent=has?'✅ 設定ずみ（このスマホの中だけに保存）':'未設定';
+  document.getElementById('aiModelSel').value=aiModel();
+  const u=(state.aiUsage&&state.aiUsage.m===today().slice(0,7))?state.aiUsage:{n:0,usd:0};
+  const y=u.usd*YEN;document.getElementById('aiUsageTxt').textContent='今月のAI利用：'+u.n+'回・約'+(y<10?y.toFixed(2):Math.round(y))+'円';
+  document.getElementById('aiNoKey').hidden=has;
+  const box=document.getElementById('aiBox');if(has&&!box.dataset.init){box.open=true;box.dataset.init='1';}}
+(function(){const s=document.getElementById('aiModelSel');
+  Object.entries(AI_MODELS).forEach(([id,m])=>{const o=document.createElement('option');o.value=id;o.textContent=m.l;s.appendChild(o);});})();
+document.getElementById('aiKeySave').onclick=()=>{const v=document.getElementById('aiKeyInput').value.trim();
+  if(!v){toast('キーを貼りつけてね');return;}
+  try{localStorage.setItem(AI_KEY,v);}catch(e){toast('保存できませんでした');return;}
+  document.getElementById('aiKeyInput').value='';toast('🤖 AIが使えるようになったよ');renderAiSettings();};
+document.getElementById('aiKeyDel').onclick=()=>{if(!confirm('APIキーをこのスマホから消しますか？'))return;
+  try{localStorage.removeItem(AI_KEY);}catch(e){}renderAiSettings();toast('キーを消しました');};
+document.getElementById('aiModelSel').onchange=e=>{state.aiModel=e.target.value;save();};
+document.getElementById('aiGo').onclick=aiEstimate;
+document.getElementById('aiToSettings').onclick=()=>showTab('more');
 
 /* ============ うごく：配達・筋トレ ============ */
 function bodyW(){return latestW(state)||70;}
