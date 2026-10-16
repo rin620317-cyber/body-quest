@@ -3,144 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#07090d">
+<meta name="theme-color" content="#FFF8EE">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="KARADAクエスト">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>KARADAクエスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#07090d; --panel:rgba(24,28,38,.72); --panel2:rgba(38,44,58,.6); --line:rgba(255,255,255,.08);
-    --txt:#eef2f9; --sub:#94a1b5; --accent:#4ade80; --accent2:#38bdf8; --violet:#a78bfa;
-    --gold:#fbbf24; --fire:#fb7185; --shadow:0 10px 40px rgba(0,0,0,.5);
+    --bg:#FFF8EE; --panel:#FFFFFF; --panel2:#FFF4E8; --line:#F0E2D2;
+    --txt:#5A4636; --sub:#A38F7D; --accent:#26A57E; --accent2:#E8648A; --violet:#8F6FE0;
+    --gold:#E8A62E; --fire:#EE5B76; --shadow:0 6px 18px rgba(160,120,80,.12);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;}
-  body{background:var(--bg); color:var(--txt); overflow-x:hidden;
-    font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;}
-  /* animated aurora bg */
-  #aurora{position:fixed; inset:0; z-index:-2; filter:blur(70px); opacity:.55;}
-  #aurora span{position:absolute; border-radius:50%; mix-blend-mode:screen; animation:float 14s ease-in-out infinite;}
-  #aurora .a1{width:46vw;height:46vw;left:-8vw;top:-10vw;background:#16a34a;}
-  #aurora .a2{width:42vw;height:42vw;right:-10vw;top:6vw;background:#2563eb;animation-delay:-4s;}
-  #aurora .a3{width:40vw;height:40vw;left:20vw;bottom:-12vw;background:#7c3aed;animation-delay:-8s;}
-  @keyframes float{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(4vw,3vh) scale(1.1);}66%{transform:translate(-3vw,-2vh) scale(.95);}}
+  [hidden]{display:none!important;}
+  body{background-color:var(--bg); color:var(--txt); overflow-x:hidden;
+    background-image:radial-gradient(#FFE3CF 1.6px,transparent 1.8px),radial-gradient(#DDF3EA 1.6px,transparent 1.8px);
+    background-size:30px 30px; background-position:0 0,15px 15px;
+    font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Noto Sans JP",-apple-system,"Segoe UI",sans-serif;}
+  #aurora{position:fixed; inset:0; z-index:-2; filter:blur(60px); opacity:.5; pointer-events:none;}
+  #aurora span{position:absolute; border-radius:50%; animation:float 16s ease-in-out infinite;}
+  #aurora .a1{width:50vw;height:50vw;left:-12vw;top:-12vw;background:#FFD6E0;}
+  #aurora .a2{width:44vw;height:44vw;right:-12vw;top:30vh;background:#CFF1E4;animation-delay:-5s;}
+  #aurora .a3{width:40vw;height:40vw;left:18vw;bottom:-14vw;background:#FFF0B8;animation-delay:-10s;}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(4vw,3vh) scale(1.08);}66%{transform:translate(-3vw,-2vh) scale(.95);}}
   #fx{position:fixed; inset:0; z-index:60; pointer-events:none;}
 
-  .wrap{max-width:720px; margin:0 auto; padding:16px 16px 80px;}
-  h1{font-size:1.4rem; margin:0; letter-spacing:.5px;}
-  h3{margin:0 0 14px; font-size:1rem; display:flex; align-items:center; gap:8px;}
-  .muted{color:var(--sub); font-size:.82rem;}
-  .card{background:var(--panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-    border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow);
-    animation:rise .5s both;}
-  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .wrap{max-width:640px; margin:0 auto; padding:0 14px 110px;}
+  h1{font-size:1.25rem; margin:0; letter-spacing:.3px;}
+  h3{margin:0 0 12px; font-size:1rem; display:flex; align-items:center; gap:8px; font-weight:800;}
+  .muted{color:var(--sub); font-size:.8rem;}
+  .card{background:var(--panel); border:1.5px solid var(--line); border-radius:24px; padding:16px; margin-bottom:12px;
+    box-shadow:var(--shadow); animation:rise .45s both;}
+  @keyframes rise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .sec-label{font-size:.78rem; font-weight:800; color:var(--sub); margin:14px 0 8px;}
 
-  /* HERO */
+  /* TOP BAR */
+  .topbar{position:sticky; top:0; z-index:40; background:rgba(255,248,238,.9); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    margin:0 -14px 12px; padding:calc(10px + env(safe-area-inset-top)) 14px 8px; border-bottom:1.5px solid var(--line);}
+  .tb-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .brand{font-weight:800; font-size:1rem; letter-spacing:.3px;}
+  .brand .ver{font-size:.6rem; color:var(--sub); font-weight:700; margin-left:4px;}
+  .tb-lv{font-size:.72rem; font-weight:800; color:#fff; background:linear-gradient(135deg,#F7809F,#B79CF2); padding:3px 10px; border-radius:999px;}
+  .datehop{display:flex; gap:8px; align-items:center; justify-content:center;}
+  .datehop button{flex:0 0 auto; white-space:nowrap; padding:7px 12px; font-size:.8rem;}
+  #curDate{flex:0 0 auto; width:auto; min-width:150px; max-width:60%; padding:8px 10px; font-size:.92rem; text-align:center;}
+
+  /* TABS */
+  .tab{display:none;}
+  .tab.on{display:block;}
+  #bnav{position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; justify-content:center; gap:4px;
+    background:rgba(255,255,255,.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1.5px solid var(--line);
+    padding:6px 8px calc(8px + env(safe-area-inset-bottom)); box-shadow:0 -4px 16px rgba(160,120,80,.08);}
+  #bnav button{flex:1; max-width:150px; background:none; color:var(--sub); border-radius:16px; padding:6px 4px; font-size:.7rem; font-weight:800;
+    display:flex; flex-direction:column; align-items:center; gap:2px; box-shadow:none;}
+  #bnav button span{font-size:1.4rem; line-height:1;}
+  #bnav button.on{background:#FFE6EC; color:var(--accent2);}
+
+  /* MASCOT */
+  .mascot{display:flex; align-items:center; gap:8px; cursor:pointer; background:linear-gradient(135deg,#FFFFFF,#FFF0F4);}
+  .chika-wrap{width:92px; flex:0 0 auto;}
+  .chika-wrap svg{display:block; width:100%; animation:bob 2.8s ease-in-out infinite; transform-origin:50% 100%;}
+  .mascot:active .chika-wrap svg{animation:squish .35s;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-4px) rotate(-1.5deg);}}
+  @keyframes squish{0%{transform:scale(1,1);}40%{transform:scale(1.1,.88);}100%{transform:scale(1,1);}}
+  .bubble{position:relative; flex:1; background:#fff; border:1.5px solid var(--line); border-radius:18px; padding:10px 12px;
+    font-size:.88rem; line-height:1.55; font-weight:700; min-width:0;}
+  .bubble::before{content:''; position:absolute; left:-8px; top:26px; width:13px; height:13px; background:#fff;
+    border-left:1.5px solid var(--line); border-bottom:1.5px solid var(--line); transform:rotate(45deg);}
+  .chika-name{font-size:.68rem; color:var(--sub); font-weight:800; margin-bottom:2px;}
+  .bubble-sub{font-size:.68rem; color:var(--accent2); margin-top:5px; font-weight:800;}
+
+  /* BALANCE */
+  .bal{display:flex; align-items:center; justify-content:space-between; gap:2px; background:var(--panel2); border-radius:18px; padding:12px 6px; margin-bottom:12px;}
+  .bal-i{text-align:center; flex:1; min-width:0;}
+  .bal-i span{display:block; font-size:.68rem; color:var(--sub); font-weight:800;}
+  .bal-i b{display:block; font-size:1.4rem; font-weight:800; line-height:1.15; font-variant-numeric:tabular-nums;}
+  .bal-i small{font-size:.6rem; color:var(--sub);}
+  .bal-i.in b{color:#E8648A;} .bal-i.out b{color:#26A57E;} .bal-i.net b{color:var(--txt);}
+  .bal-op{font-weight:800; color:var(--sub); font-size:1rem;}
+  .barrow{display:flex; justify-content:space-between; font-size:.78rem; font-weight:700; margin-top:8px;}
+  .xpbar{height:12px; background:#F5E9DC; border-radius:8px; overflow:hidden; margin-top:5px;}
+  .xpfill{height:100%; width:0%; border-radius:8px; background:linear-gradient(90deg,#FF9DB5,#FFC48C,#B79CF2);
+    background-size:200% 100%; animation:shine 3s linear infinite; transition:width .8s cubic-bezier(.2,.8,.2,1);}
+  @keyframes shine{to{background-position:200% 0;}}
+  .infoline{font-size:.8rem; font-weight:700; padding:9px 12px; border-radius:14px; margin-top:8px;}
+  .info-snack{background:#FFF1F4; color:#D4506F;}
+  .info-good{background:#E9F8F1; color:var(--accent);}
+  .info-night{background:#F1ECFF; color:var(--violet);}
+
+  /* FOOD INPUT */
+  .slotbar{display:flex; gap:6px; margin-bottom:10px;}
+  .slot{flex:1; background:var(--panel2); color:var(--sub); border:1.5px solid var(--line); border-radius:16px; padding:7px 2px;
+    font-size:.72rem; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:1px; box-shadow:none;}
+  .slot span{font-size:1.15rem;}
+  .slot.on{background:#FFE6EC; border-color:#FFB3C6; color:var(--accent2);}
+  .slot.night.on{background:#EEE8FF; border-color:#C9B8F5; color:var(--violet);}
+  #foodSearch{width:100%; font-size:1rem; padding:13px 14px; border-radius:16px; border:2px solid #FFC9D6; background:#fff; color:var(--txt);}
+  #searchRes{margin-top:8px;}
+  .sres{display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:10px 12px; border-radius:14px; background:var(--panel2); margin-bottom:6px; cursor:pointer;}
+  .sres .sn{flex:1; font-weight:700; font-size:.88rem; min-width:0;}
+  .sres .sk{font-size:.74rem; color:var(--sub); font-weight:700;}
+  .sres .sadd{padding:4px 12px; border-radius:999px; font-size:.85rem;}
+  .grams{display:flex; flex-wrap:wrap; gap:6px; width:100%;}
+  .sres-tail{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; align-items:center;}
+  .chips{display:flex; flex-wrap:wrap; gap:7px;}
+  .chip{background:#fff; color:var(--txt); border:1.5px solid var(--line); border-radius:999px; padding:7px 12px; font-size:.8rem; font-weight:700;
+    box-shadow:0 2px 0 rgba(160,120,80,.08);}
+  .chip small{color:var(--sub); font-weight:700; margin-left:5px; font-size:.68rem;}
+  .chip.snack{background:#FFF6F8; border-color:#FFD3DE;}
+  .chip.on{background:#FFE6EC; border-color:#FFB3C6; color:var(--accent2);}
+  .chip.ctab{font-size:.74rem; padding:6px 10px;}
+  details.more{margin-top:12px; background:var(--panel2); border-radius:16px; padding:10px 12px;}
+  details.more summary{font-size:.82rem; font-weight:800; cursor:pointer; color:var(--txt);}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end;}
+
+  /* MEAL LIST */
+  .mg-h{display:flex; justify-content:space-between; font-size:.76rem; font-weight:800; color:var(--sub); margin:10px 2px 6px;}
+  .mg-h.night{color:var(--violet);}
+  .mrow{display:flex; align-items:center; gap:6px; padding:8px 10px; background:var(--panel2); border-radius:14px; margin-bottom:6px; font-size:.86rem;}
+  .mrow.snack{background:#FFF1F4;}
+  .mrow .mn{flex:1; font-weight:700; min-width:0; overflow-wrap:anywhere;}
+  .mrow .mn small{color:var(--sub); font-weight:600; margin-left:6px; font-size:.68rem;}
+  .mrow .mk{font-size:.76rem; color:var(--sub); font-weight:700; white-space:nowrap;}
+  .mini-btn{padding:4px 9px; border-radius:999px; font-size:.72rem; background:#fff; color:var(--accent); border:1.5px solid var(--line); box-shadow:none;}
+  .mini-btn.del{color:var(--fire);}
+  .empty{text-align:center; color:var(--sub); font-size:.85rem; padding:14px 4px;}
+
+  /* MOVE */
+  .exrow{display:flex; align-items:center; gap:8px; padding:9px 0; border-bottom:1.5px dashed var(--line);}
+  .exrow:last-child{border-bottom:none;}
+  .exn{flex:1; font-weight:800; font-size:.86rem;}
+  .exn small{display:block; color:var(--accent); font-size:.7rem;}
+  .exb{display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;}
+
+  /* HERO / QUESTS */
   .hero{display:flex; align-items:center; gap:16px;}
   .ring{position:relative; width:96px; height:96px; flex:0 0 auto;}
   .ring svg{transform:rotate(-90deg);}
   .ring .lvl{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
   .ring .lvl b{font-size:1.9rem; font-weight:800; line-height:1;
-    background:linear-gradient(90deg,#4ade80,#38bdf8); -webkit-background-clip:text; background-clip:text; color:transparent;}
+    background:linear-gradient(90deg,#F7809F,#B79CF2); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .ring .lvl small{font-size:.6rem; color:var(--sub); letter-spacing:2px;}
-  .xpbar{height:10px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; margin-top:8px;}
-  .xpfill{height:100%; width:0%; border-radius:8px; background:linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa);
-    background-size:200% 100%; animation:shine 3s linear infinite; transition:width .8s cubic-bezier(.2,.8,.2,1);}
-  @keyframes shine{to{background-position:200% 0;}}
   .streak{display:flex; align-items:baseline; gap:4px;}
-  .streak b{font-size:1.7rem; font-weight:800; color:var(--fire); text-shadow:0 0 16px rgba(251,113,133,.5);}
+  .streak b{font-size:1.7rem; font-weight:800; color:var(--fire);}
   .flames{font-size:1.1rem;}
-
-  /* QUESTS */
-  .quest{position:relative; display:flex; align-items:center; gap:14px; padding:14px; border-radius:16px;
-    background:var(--panel2); margin-bottom:10px; cursor:pointer; user-select:none; overflow:hidden;
-    border:1px solid transparent; transition:transform .12s, border-color .25s, background .25s;}
+  .quest{position:relative; display:flex; align-items:center; gap:14px; padding:13px; border-radius:18px;
+    background:var(--panel2); margin-bottom:9px; cursor:pointer; user-select:none; overflow:hidden;
+    border:1.5px solid transparent; transition:transform .12s, border-color .25s, background .25s;}
   .quest:active{transform:scale(.98);}
-  .quest.done{border-color:var(--accent); background:rgba(74,222,128,.12);}
-  .quest.done .qtitle{color:#c7f9d8;}
-  .qcheck{width:30px;height:30px;border-radius:10px;border:2px solid rgba(255,255,255,.2);flex:0 0 auto;
-    display:flex;align-items:center;justify-content:center;font-weight:900;color:#052012;transition:.25s;}
-  .quest.done .qcheck{background:var(--accent);border-color:var(--accent);transform:rotate(360deg);}
-  .qemoji{font-size:1.5rem;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
-  .qtitle{font-weight:600;}
+  .quest.done{border-color:#7FD8B9; background:#E9F8F1;}
+  .quest.done .qtitle{color:var(--accent);}
+  .qcheck{width:30px;height:30px;border-radius:10px;border:2px solid #E2D2BF;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;transition:.25s;}
+  .quest.done .qcheck{background:#3FC59B;border-color:#3FC59B;transform:rotate(360deg);}
+  .qemoji{font-size:1.5rem;}
+  .qtitle{font-weight:800;}
   .qsub{font-size:.7rem;color:var(--sub);}
-  .qxp{margin-left:auto;font-size:.78rem;color:var(--sub);font-weight:700;}
-  .quest.done::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(74,222,128,.4),transparent 60%);animation:flash .6s ease-out;}
+  .qxp{margin-left:auto;font-size:.76rem;color:var(--sub);font-weight:800;}
+  .quest.done::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(127,216,185,.5),transparent 60%);animation:flash .6s ease-out;}
   @keyframes flash{from{opacity:1;}to{opacity:0;}}
 
-  input,button{font-family:inherit;}
-  input[type=number],input[type=date]{background:rgba(0,0,0,.25);border:1px solid var(--line);color:var(--txt);
-    border-radius:12px;padding:11px 12px;font-size:1rem;width:120px;}
-  input:focus{outline:none;border-color:var(--accent2);}
-  button{border:none;border-radius:12px;padding:11px 18px;font-weight:800;font-size:.95rem;cursor:pointer;
-    background:linear-gradient(135deg,#38bdf8,#4ade80);color:#052028;transition:transform .12s,filter .2s;}
+  input,button,select,textarea{font-family:inherit;}
+  input[type=number],input[type=date],input[type=text],input:not([type]){background:var(--panel2);border:1.5px solid var(--line);color:var(--txt);
+    border-radius:14px;padding:10px 12px;font-size:1rem;width:110px;}
+  input:focus{outline:none;border-color:#FF9DB5;}
+  button{border:none;border-radius:16px;padding:11px 18px;font-weight:800;font-size:.95rem;cursor:pointer;
+    background:linear-gradient(135deg,#F7809F,#FFA285);color:#fff;transition:transform .12s,filter .2s;box-shadow:0 3px 0 rgba(200,90,110,.18);}
   button:active{transform:scale(.96);}
-  button.ghost{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--line);}
-  button.big{width:100%;padding:16px;font-size:1.05rem;letter-spacing:1px;background:linear-gradient(135deg,#fb7185,#a78bfa);color:#fff;}
-  button.big .sub{display:block;font-size:.7rem;opacity:.85;font-weight:600;margin-top:2px;letter-spacing:0;}
-  label.mini{font-size:.76rem;color:var(--sub);display:block;margin-bottom:5px;}
+  button.ghost{background:#fff;color:var(--txt);border:1.5px solid var(--line);box-shadow:none;}
+  button.big{width:100%;padding:15px;font-size:1.02rem;letter-spacing:.5px;background:linear-gradient(135deg,#F7809F,#B79CF2);color:#fff;}
+  button.big.mint{background:linear-gradient(135deg,#3FC59B,#5FB8E6);}
+  button.big .sub{display:block;font-size:.7rem;opacity:.92;font-weight:700;margin-top:2px;letter-spacing:0;}
+  label.mini{font-size:.74rem;color:var(--sub);display:block;margin-bottom:5px;font-weight:700;}
 
   canvas#chart{width:100%;height:190px;}
   .stat{text-align:center;flex:1;}
-  .stat b{display:block;font-size:1.35rem;font-weight:800;}
-  .stat span{font-size:.7rem;color:var(--sub);}
+  .stat b{display:block;font-size:1.3rem;font-weight:800;}
+  .stat span{font-size:.7rem;color:var(--sub);font-weight:700;}
 
-  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
-  .badge{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;
-    opacity:.32;filter:grayscale(1);transition:.4s;position:relative;}
-  .badge.on{opacity:1;filter:none;border-color:var(--gold);box-shadow:0 0 18px rgba(251,191,36,.3);animation:pop .5s;}
+  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;}
+  .badge{background:var(--panel2);border:1.5px solid var(--line);border-radius:16px;padding:12px 6px;text-align:center;
+    opacity:.4;filter:grayscale(1);transition:.4s;position:relative;}
+  .badge.on{opacity:1;filter:none;border-color:#F2C46B;box-shadow:0 4px 14px rgba(232,166,46,.22);animation:pop .5s;}
   @keyframes pop{0%{transform:scale(.6);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
   .badge .be{font-size:1.7rem;}
-  .badge .bt{font-size:.64rem;color:var(--sub);margin-top:4px;line-height:1.2;}
-
-  .datehop{display:flex;gap:8px;align-items:center;justify-content:center;margin:2px 0 12px;}
-  #curDate{flex:0 0 auto;width:auto;min-width:150px;max-width:70%;padding:11px 10px;font-size:.95rem;text-align:center;}
-  .datehop button{flex:0 0 auto;white-space:nowrap;}
-  select{color-scheme:dark;}
-  #estType,#estType option{background:#1f232c;color:#eef2f9;}
-  #estType option:checked{background:#38bdf8;color:#052028;}
-  .datehop button{padding:7px 14px;}
-  .quote{font-size:.88rem;color:var(--sub);font-style:italic;text-align:center;}
+  .badge .bt{font-size:.64rem;color:var(--sub);margin-top:4px;line-height:1.2;font-weight:700;}
+  .quote{font-size:.86rem;color:var(--sub);text-align:center;font-weight:700;}
 
   /* TOAST */
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);
-    background:linear-gradient(135deg,#fbbf24,#fb7185);color:#2a1400;padding:13px 22px;border-radius:14px;
+  .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(160px);
+    background:linear-gradient(135deg,#FFE08A,#FFB3C6);color:#5A2A35;padding:12px 20px;border-radius:999px;max-width:92vw;
     font-weight:800;box-shadow:var(--shadow);opacity:0;transition:.4s cubic-bezier(.2,.9,.2,1);z-index:70;text-align:center;}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 
-  /* MODAL (level up + workout) */
-  .overlay{position:fixed;inset:0;background:rgba(4,6,10,.82);backdrop-filter:blur(8px);z-index:80;
-    display:none;align-items:center;justify-content:center;padding:20px;}
+  /* MODAL */
+  .overlay{position:fixed;inset:0;background:rgba(90,70,54,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:80;
+    display:none;align-items:center;justify-content:center;padding:18px;}
   .overlay.show{display:flex;animation:fade .3s;}
   @keyframes fade{from{opacity:0;}to{opacity:1;}}
-  .modal{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:26px;max-width:440px;width:100%;
-    text-align:center;box-shadow:var(--shadow);animation:pop .4s;}
-  .lvlup h2{font-size:2rem;margin:6px 0;background:linear-gradient(90deg,#fbbf24,#fb7185,#a78bfa);
+  .modal{background:#fff;border:1.5px solid var(--line);border-radius:28px;padding:24px;max-width:440px;width:100%;
+    text-align:center;box-shadow:0 14px 40px rgba(120,80,50,.2);animation:pop .4s;}
+  .lvlup h2{font-size:2rem;margin:6px 0;background:linear-gradient(90deg,#E8A62E,#F7809F,#B79CF2);
     -webkit-background-clip:text;background-clip:text;color:transparent;}
-  .lvlup .num{font-size:4rem;font-weight:900;line-height:1;
-    background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lvlup .num{font-size:4rem;font-weight:800;line-height:1;
+    background:linear-gradient(90deg,#3FC59B,#5FB8E6);-webkit-background-clip:text;background-clip:text;color:transparent;}
 
   /* WORKOUT */
   .wo-timer{position:relative;width:200px;height:200px;margin:8px auto 4px;}
   .wo-timer svg{transform:rotate(-90deg);}
   .wo-timer .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-  .wo-timer .c .t{font-size:3.4rem;font-weight:900;font-variant-numeric:tabular-nums;}
-  .wo-timer.rest .t{color:var(--accent2);}
+  .wo-timer .c .t{font-size:3.4rem;font-weight:800;font-variant-numeric:tabular-nums;}
+  .wo-timer.rest .t{color:#5FB8E6;}
   .wo-name{font-size:1.5rem;font-weight:800;margin:4px 0;}
   .wo-next{color:var(--sub);font-size:.85rem;min-height:1.2em;}
-  .wo-cue{color:var(--gold);font-size:.85rem;margin-top:6px;min-height:2.4em;}
+  .wo-cue{color:#C47F14;font-size:.85rem;margin-top:6px;min-height:2.4em;font-weight:700;}
   .wo-prog{display:flex;gap:4px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap;}
-  .wo-prog i{width:22px;height:5px;border-radius:3px;background:rgba(255,255,255,.15);}
-  .wo-prog i.done{background:var(--accent);}
-  .wo-prog i.cur{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+  .wo-prog i{width:22px;height:5px;border-radius:3px;background:#F0E2D2;}
+  .wo-prog i.done{background:#3FC59B;}
+  .wo-prog i.cur{background:#F2B33D;}
   .wo-btns{display:flex;gap:10px;margin-top:16px;}
   .wo-btns button{flex:1;}
 
-  .link{color:var(--accent2);font-size:.8rem;cursor:pointer;text-decoration:underline;}
+  .link{color:var(--accent2);font-size:.8rem;cursor:pointer;text-decoration:underline;font-weight:700;}
 </style>
 </head>
 <body>
@@ -149,211 +240,278 @@
 
 <div class="wrap">
 
-  <!-- HERO -->
-  <div class="card">
-    <div class="hero">
-      <div class="ring">
-        <svg width="96" height="96"><circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,.08)" stroke-width="8" fill="none"/>
-          <circle id="ringFill" cx="48" cy="48" r="42" stroke="url(#g)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"/>
-          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs></svg>
-        <div class="lvl"><b id="lvl">1</b><small>LEVEL</small></div>
+  <header class="topbar">
+    <div class="tb-row">
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.0.0</span></div>
+      <div class="tb-lv" id="tbLv">Lv1</div>
+    </div>
+    <div class="datehop">
+      <button class="ghost" id="prevDay">‹ 前日</button>
+      <input type="date" id="curDate">
+      <button class="ghost" id="nextDay">翌日 ›</button>
+    </div>
+  </header>
+
+  <!-- ================= ごはん ================= -->
+  <section class="tab on" id="tab-food">
+
+    <div class="card mascot" id="chiCard">
+      <div class="chika-wrap" id="chiFaceHome"></div>
+      <div class="bubble">
+        <div class="chika-name">チカ</div>
+        <div id="chiTip"></div>
+        <div class="bubble-sub">💬 タップでチカとおしゃべり</div>
       </div>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <h1>KARADAクエスト <span style="font-size:.58rem;color:var(--sub);font-weight:600;vertical-align:middle;letter-spacing:.5px;">v13.10.0</span></h1>
-          <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
+    </div>
+
+    <div class="card">
+      <h3>🍙 きょうのバランス <span class="muted" id="foodDayLabel"></span></h3>
+      <div class="bal">
+        <div class="bal-i in"><span>たべた</span><b id="balIn">0</b><small>kcal</small></div>
+        <div class="bal-op">−</div>
+        <div class="bal-i out"><span>うごいた</span><b id="balOut">0</b><small>kcal</small></div>
+        <div class="bal-op">=</div>
+        <div class="bal-i net"><span>さしひき</span><b id="balNet">0</b><small>kcal</small></div>
+      </div>
+      <div class="barrow"><span class="muted">カロリー</span><span id="calTxt">0 / 2100</span></div>
+      <div class="xpbar"><div class="xpfill" id="calFill" style="background:linear-gradient(90deg,#FFC48C,#F7809F);animation:none;"></div></div>
+      <div class="barrow"><span class="muted">タンパク質</span><span id="proTxt">0 / 100g</span></div>
+      <div class="xpbar"><div class="xpfill" id="proFill" style="background:linear-gradient(90deg,#7FD8B9,#5FB8E6);animation:none;"></div></div>
+      <div id="calLeft" class="muted" style="text-align:center;margin-top:10px;font-weight:700;"></div>
+      <div id="snackLine" class="infoline"></div>
+      <div id="nightLine" class="infoline info-night" hidden></div>
+    </div>
+
+    <div class="card">
+      <h3>✍️ さくっと記録</h3>
+      <div class="slotbar" id="slotBar"></div>
+      <input id="foodSearch" type="text" autocomplete="off" placeholder="🔍 たべたものを入力（牛丼・ビール・鶏むね…）">
+      <div id="searchRes" hidden></div>
+
+      <div class="sec-label">🕘 よく食べる・さっき食べた（1タップ）</div>
+      <div class="chips" id="recentChips"></div>
+
+      <div class="sec-label">📚 メニューからえらぶ</div>
+      <div class="chips" id="foodTabs" style="margin-bottom:10px;"></div>
+      <div class="chips" id="foodChips"></div>
+
+      <details class="more" id="freeBox">
+        <summary>✏️ 名前とカロリーだけで登録（パッケージの表示を見て）</summary>
+        <div style="margin-top:10px;">
+          <label class="mini">なにを食べた？</label>
+          <input id="freeName" type="text" style="width:100%;" placeholder="例：セブンのパスタサラダ">
+          <div class="row" style="margin-top:8px;">
+            <div><label class="mini">カロリー(kcal)</label><input type="number" id="freeKcal" placeholder="350"></div>
+            <div><label class="mini">タンパク質(g) 任意</label><input type="number" step="0.1" id="freeP" placeholder="12"></div>
+            <button id="freeAdd">追加</button>
+          </div>
         </div>
-        <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
-        <div class="xpbar"><div class="xpfill" id="xpfill"></div></div>
+      </details>
+
+      <details class="more" id="estBox">
+        <summary>🍳 ざっくり概算（カロリーがわからない料理）</summary>
+        <div style="margin-top:10px;">
+          <label class="mini">料理名（任意）</label>
+          <input id="estName" type="text" style="width:100%;" placeholder="例：妻の肉じゃが">
+          <label class="mini" style="margin-top:10px;">どんな料理？</label>
+          <div class="chips" id="estTypeChips"></div>
+          <label class="mini" style="margin-top:10px;">量は？</label>
+          <div class="chips" id="estSizeChips"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;">
+            <span id="estPrev" style="font-size:.92rem;font-weight:800;color:var(--accent2);">≒ — kcal</span>
+            <button id="estAdd">追加</button>
+          </div>
+        </div>
+      </details>
+
+      <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
+    </div>
+
+    <div class="card">
+      <h3>📒 きょう食べたもの</h3>
+      <div id="mealList"></div>
+      <div class="muted" style="text-align:center;margin-top:8px;font-size:.7rem;">※カロリーは一般的な目安です</div>
+    </div>
+
+    <div class="card">
+      <h3>🍶 休肝日 <span class="muted" id="dryDayLabel"></span></h3>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;">
+        <span class="muted">今週の休肝日</span><span id="dryWeekTxt">0 / 3 日</span>
+      </div>
+      <div class="xpbar" style="height:14px;"><div class="xpfill" id="dryFill" style="background:linear-gradient(90deg,#7FD8B9,#3FC59B);animation:none;"></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button id="dryYes" style="flex:1;background:linear-gradient(135deg,#3FC59B,#5FB8E6);">🚱 きょうは飲まなかった</button>
+        <button id="dryNo" class="ghost" style="flex:1;">🍶 飲んだ</button>
+      </div>
+      <div id="dryStats" class="muted" style="font-size:.78rem;margin-top:10px;text-align:center;"></div>
+      <div class="muted" style="font-size:.72rem;margin-top:6px;">まずは週2〜3日から。お腹まわりに一番効くよ。<span class="link" id="dryTargetEdit">目標を変更</span></div>
+    </div>
+
+    <div class="card">
+      <h3>💧 水分 <span class="muted" id="waterDayLabel"></span></h3>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;">
+        <span class="muted">きょうの水分</span><span id="waterTxt">0 / 2500 ml</span>
+      </div>
+      <div class="xpbar" style="height:14px;"><div class="xpfill" id="waterFill" style="background:linear-gradient(90deg,#9ED9F5,#7FD8B9);animation:none;"></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button id="waterCup" style="background:linear-gradient(135deg,#5FB8E6,#7FD8B9);">＋ コップ 200ml</button>
+        <button id="waterBottle" class="ghost">＋ 500ml</button>
+        <button id="waterUndo" class="ghost">−200</button>
+      </div>
+      <div style="text-align:center;margin-top:10px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
+    </div>
+  </section>
+
+  <!-- ================= うごく ================= -->
+  <section class="tab" id="tab-move">
+
+    <div class="card">
+      <h3>🔥 きょう うごいた分</h3>
+      <div class="bal">
+        <div class="bal-i out"><span>🚴 配達</span><b id="mvDel">0</b><small>kcal</small></div>
+        <div class="bal-op">+</div>
+        <div class="bal-i out"><span>💪 筋トレ</span><b id="mvStr">0</b><small>kcal</small></div>
+        <div class="bal-op">=</div>
+        <div class="bal-i in"><span>ごうけい</span><b id="mvTot">0</b><small>kcal</small></div>
+      </div>
+      <div id="moveWeek" class="muted" style="text-align:center;font-weight:700;"></div>
+    </div>
+
+    <div class="card">
+      <h3>🚴 配達</h3>
+      <button class="big mint" id="delPresetBtn">🚴 いつもの <span id="delPresetTxt">60分・15km</span> を追加<span class="sub">ワンタップで記録</span></button>
+      <div class="sec-label">✍️ くわしく入れる（どれか1つだけでもOK）</div>
+      <div class="row">
+        <div><label class="mini">時間(分)</label><input type="number" id="delMin" placeholder="60" style="width:84px;"></div>
+        <div><label class="mini">距離(km)</label><input type="number" step="0.1" id="delKm" placeholder="15" style="width:84px;"></div>
+        <div><label class="mini">件数</label><input type="number" id="delCnt" placeholder="6" style="width:70px;"></div>
+        <button id="delAdd">追加</button>
+      </div>
+      <div class="muted" style="font-size:.72rem;margin-top:6px;">昼の部・夜の部など、何回でも足せます。消費カロリーは体重から自動計算。</div>
+      <div id="delList" style="margin-top:12px;"></div>
+      <div style="display:flex;margin-top:10px;">
+        <div class="stat"><b id="minToday">0</b><span>きょう(分)</span></div>
+        <div class="stat"><b id="kmToday">0</b><span>きょう(km)</span></div>
+        <div class="stat"><b id="cntToday">0</b><span>きょう(件)</span></div>
+        <div class="stat"><b id="kmTotal">0</b><span>累計km</span></div>
+      </div>
+      <div style="text-align:center;margin-top:10px;"><span class="link" id="delPresetEdit">「いつもの」を変更</span></div>
+    </div>
+
+    <div class="card">
+      <h3>💪 筋トレ記録</h3>
+      <div class="muted" style="margin-bottom:6px;">やった分だけポチッ。何回でも足せます。</div>
+      <div id="exList"></div>
+      <div class="sec-label">📒 きょうのセット</div>
+      <div id="setList"></div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <h3 style="justify-content:center;">🔥 ぽっこりお腹 撃退プログラム</h3>
+      <div class="muted" style="margin-bottom:12px;">器具なし・約9分・静かにできる体幹メニュー。終わると自動で記録されます。</div>
+      <button class="big" id="startWO">▶ 体幹プログラムを開始<span class="sub">きょう <span id="woCount">0</span> 回 ・ 累計 <span id="woTotal">0</span> 回</span></button>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <h3 style="justify-content:center;">🏋️ 全身10種 HIIT（20秒 × 2周）</h3>
+      <div class="muted" style="margin-bottom:10px;">大きい筋肉を一気に。約13分。</div>
+      <label style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="silentChk" style="width:auto;transform:scale(1.3);"> 🔇 静音版（ジャンプなし）</label>
+      <button class="big mint" id="startFull">▶ 全身プログラムを開始<span class="sub">開始後に音楽を選べます 🎹 / 🎸</span></button>
+    </div>
+  </section>
+
+  <!-- ================= からだ ================= -->
+  <section class="tab" id="tab-body">
+    <div class="card">
+      <h3>⚖️ 体重 & お腹の記録</h3>
+      <div class="row">
+        <div><label class="mini">体重(kg)</label><input type="number" step="0.1" id="wInput" placeholder="72.0"></div>
+        <div><label class="mini">腹囲(cm) 任意</label><input type="number" step="0.5" id="waistInput" placeholder="85"></div>
+        <div><label class="mini">目標体重</label><input type="number" step="0.1" id="goalInput"></div>
+        <button id="saveW">記録</button>
+      </div>
+      <div class="muted" style="font-size:.72rem;margin-top:6px;">朝おきて、トイレのあと・何も食べる前に測るのがいちばん正確。</div>
+      <div style="display:flex;margin-top:14px;">
+        <div class="stat"><b id="sStart">–</b><span>スタート</span></div>
+        <div class="stat"><b id="sNow">–</b><span>現在</span></div>
+        <div class="stat"><b id="sDiff">–</b><span>増減</span></div>
+        <div class="stat"><b id="sGoal">–</b><span>目標まで</span></div>
+      </div>
+      <div style="text-align:center;margin-top:8px;"><span class="link" id="toggleMetric">グラフ切替：体重 / 腹囲</span></div>
+      <canvas id="chart" width="680" height="190" style="margin-top:6px;"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>📷 経過写真 <span class="muted" style="font-weight:700;font-size:.72rem;">ビフォーアフター</span></h3>
+      <div class="muted" style="font-size:.75rem;margin-bottom:10px;">端末の中だけに保存（自動で縮小）。同じ姿勢・同じ場所・朝に撮ると変化が分かりやすいよ。</div>
+      <div id="photoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none;">
+      <button id="photoAddBtn" style="width:100%;margin-top:12px;">＋ 写真を追加</button>
+    </div>
+  </section>
+
+  <!-- ================= その他 ================= -->
+  <section class="tab" id="tab-more">
+    <div class="card">
+      <div class="hero">
+        <div class="ring">
+          <svg width="96" height="96"><circle cx="48" cy="48" r="42" stroke="#F3E6D8" stroke-width="8" fill="none"/>
+            <circle id="ringFill" cx="48" cy="48" r="42" stroke="url(#g)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"/>
+            <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7809F"/><stop offset="1" stop-color="#B79CF2"/></linearGradient></defs></svg>
+          <div class="lvl"><b id="lvl">1</b><small>LEVEL</small></div>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <h1>ぼうけんの記録</h1>
+            <div class="streak"><b id="streak">0</b><span class="muted">日</span><span class="flames" id="flames"></span></div>
+          </div>
+          <div class="muted" style="margin-top:4px;"><span id="xptxt">0</span> XP ・ 次のLVまで <span id="xpnext">0</span></div>
+          <div class="xpbar"><div class="xpfill" id="xpfill"></div></div>
+        </div>
+      </div>
+      <div class="quote" id="quote" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>⚔️ きょうのクエスト <span class="muted" id="dayLabel"></span></h3>
+      <div id="quests"></div>
+    </div>
+
+    <button class="big" id="calmBtn" style="background:linear-gradient(135deg,#F7809F,#EE5B76);margin-bottom:12px;">🔥 むしゃくしゃボタン<span class="sub">ケンカしたときは無心でデリ一択</span></button>
+    <button class="big mint" id="bodyChatBtn" style="margin-bottom:12px;">🩺 からだ相談室<span class="sub">腰・膝・肩の痛み、フォーム、故障の相談にチカが答える</span></button>
+    <button class="big" id="coachBtn" style="margin-bottom:12px;">🍙 チカの今週のひとこと<span class="sub">無料・オフライン・ボタン1つ</span></button>
+    <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#B79CF2,#5FB8E6);margin-bottom:12px;">📋 今週のレポートを作成<span class="sub">深く相談したい週は、コピーしてチャットに貼る</span></button>
+
+    <div class="card">
+      <h3>🏆 実績バッジ</h3>
+      <div class="badges" id="badges"></div>
+    </div>
+
+    <div class="card">
+      <h3>📅 今週のサマリー</h3>
+      <div style="display:flex;">
+        <div class="stat"><b id="wkPerfect">0</b><span>完璧日</span></div>
+        <div class="stat"><b id="wkWO">0</b><span>プログラム</span></div>
+        <div class="stat"><b id="wkRun">0</b><span>朝ラン</span></div>
+        <div class="stat"><b id="wkKm">0</b><span>今週km</span></div>
       </div>
     </div>
-    <div class="quote" id="quote" style="margin-top:14px;"></div>
-  </div>
 
-  <div class="card" id="chiCard" style="display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;">
-    <div id="chiFaceHome" style="width:64px;flex:0 0 auto;"></div>
-    <div style="flex:1;min-width:0;">
-      <div style="font-weight:700;font-size:.92rem;">千夏コーチ <span class="muted" style="font-weight:400;font-size:.7rem;">38歳</span></div>
-      <div id="chiTip" class="muted" style="font-size:.8rem;line-height:1.5;margin-top:3px;"></div>
-      <div style="color:var(--accent2);font-size:.72rem;font-weight:700;margin-top:5px;">💬 タップして相談する</div>
+    <div style="display:flex;justify-content:space-between;gap:10px;">
+      <button class="ghost" id="exportBtn" style="flex:1;">データ書き出し</button>
+      <button class="ghost" id="importBtn" style="flex:1;">読み込み</button>
     </div>
-  </div>
-
-  <button class="big" id="calmBtn" style="background:linear-gradient(135deg,#fb7185,#f43f5e);margin-bottom:14px;">🔥 むしゃくしゃボタン<span class="sub">ケンカしたときは無心でデリ一択</span></button>
-
-  <button class="big" id="bodyChatBtn" style="background:linear-gradient(135deg,#22c55e,#0ea5e9);margin-bottom:14px;">🩺 からだ相談室<span class="sub">腰・膝・肩の痛み、フォーム、故障の相談に千夏が答える</span></button>
-
-  <div class="datehop">
-    <button class="ghost" id="prevDay">‹ 前日</button>
-    <input type="date" id="curDate">
-    <button class="ghost" id="nextDay">翌日 ›</button>
-  </div>
-
-  <!-- QUESTS -->
-  <div class="card">
-    <h3>⚔️ 今日のクエスト <span class="muted" id="dayLabel"></span></h3>
-    <div id="quests"></div>
-  </div>
-
-  <!-- CORE WORKOUT CTA -->
-  <div class="card" style="text-align:center;">
-    <h3 style="justify-content:center;">🔥 ぽっこりお腹 撃退プログラム</h3>
-    <div class="muted" style="margin-bottom:14px;">配達では鍛えにくい体幹をピンポイントで。器具なし・約9分・マンションでも静かにできる種目。<b style="color:var(--accent);">完了すると「筋トレ」が自動達成</b>。</div>
-    <button class="big" id="startWO">▶ 体幹プログラムを開始<span class="sub">今日やった回数：<span id="woCount">0</span> ・ 累計 <span id="woTotal">0</span> 回</span></button>
-  </div>
-
-  <!-- FULL BODY CTA -->
-  <div class="card" style="text-align:center;">
-    <h3 style="justify-content:center;">🏋️ 全身10種 HIIT（20秒 × 2周）</h3>
-    <div class="muted" style="margin-bottom:12px;">ジャンプスクワット〜バーピーまで、大きい筋肉を一気に。約13分。完了で「筋トレ」達成＋45XP。</div>
-    <label style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:.85rem;margin-bottom:14px;cursor:pointer;">
-      <input type="checkbox" id="silentChk" style="width:auto;transform:scale(1.3);"> 🔇 静音版（ジャンプなし・マンション向け）</label>
-    <button class="big" id="startFull" style="background:linear-gradient(135deg,#38bdf8,#a78bfa);">▶ 全身プログラムを開始<span class="sub">開始後に音楽を選べます 🎹 / 🎸</span></button>
-  </div>
-
-  <!-- WEIGHT -->
-  <div class="card">
-    <h3>⚖️ 体重 & お腹の記録</h3>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-      <div><label class="mini">体重(kg)</label><input type="number" step="0.1" id="wInput" placeholder="66.5"></div>
-      <div><label class="mini">腹囲(cm) 任意</label><input type="number" step="0.5" id="waistInput" placeholder="85"></div>
-      <div><label class="mini">目標体重</label><input type="number" step="0.1" id="goalInput"></div>
-      <button id="saveW">記録</button>
-    </div>
-    <div style="display:flex;margin-top:16px;">
-      <div class="stat"><b id="sStart">–</b><span>スタート</span></div>
-      <div class="stat"><b id="sNow">–</b><span>現在</span></div>
-      <div class="stat"><b id="sDiff">–</b><span>増減</span></div>
-      <div class="stat"><b id="sGoal">–</b><span>目標まで</span></div>
-    </div>
-    <div style="text-align:center;margin-top:8px;"><span class="link" id="toggleMetric">グラフ切替：体重 / 腹囲</span></div>
-    <canvas id="chart" width="680" height="190" style="margin-top:6px;"></canvas>
-  </div>
-
-  <!-- PHOTOS -->
-  <div class="card">
-    <h3>📷 経過写真 <span class="muted" style="font-weight:400;font-size:.72rem;">ビフォーアフター</span></h3>
-    <div class="muted" style="font-size:.75rem;margin-bottom:10px;">端末内だけに保存（自動で縮小）。同じ姿勢・同じ場所・朝に撮ると変化が分かりやすいよ。</div>
-    <div id="photoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
-    <input type="file" id="photoInput" accept="image/*" style="display:none;">
-    <button id="photoAddBtn" style="width:100%;margin-top:12px;">＋ 写真を追加</button>
-  </div>
-
-  <!-- DELIVERY -->
-  <div class="card">
-    <h3>🚴 配達 = 有酸素ボーナス</h3>
-    <div class="muted" style="margin-bottom:12px;">ほぼ毎日1時間の配達＝約15km/450kcal。走った分だけXPが入ります（5XP/km）。</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-      <div><label class="mini">今日の走行(km)</label><input type="number" step="0.5" id="kmInput" placeholder="15"></div>
-      <button id="saveKm">記録</button>
-      <div class="stat"><b id="kmToday">0</b><span>今日km / <span id="kcalToday">0</span>kcal</span></div>
-      <div class="stat"><b id="kmTotal">0</b><span>累計km</span></div>
-    </div>
-  </div>
-
-  <!-- WATER -->
-  <div class="card">
-    <h3>💧 水分 <span class="muted" id="waterDayLabel"></span></h3>
-    <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;">
-      <span class="muted">今日の水分</span><span id="waterTxt">0 / 2500 ml</span>
-    </div>
-    <div class="xpbar" style="height:16px;"><div class="xpfill" id="waterFill" style="background:linear-gradient(90deg,#38bdf8,#22d3ee);animation:none;"></div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-      <button id="waterCup">＋ コップ 200ml</button>
-      <button id="waterBottle" class="ghost">＋ 500ml</button>
-      <button id="waterUndo" class="ghost">−200</button>
-    </div>
-    <div style="text-align:center;margin-top:12px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
-    <div class="muted" style="font-size:.72rem;margin-top:6px;">配達や暑い日はもっと。おしっこが薄い黄色ならOK。就寝1〜2時間前は控えめに。</div>
-  </div>
-
-  <!-- 休肝日 -->
-  <div class="card">
-    <h3>🍶 休肝日 <span class="muted" id="dryDayLabel"></span></h3>
-    <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;">
-      <span class="muted">今週の休肝日</span><span id="dryWeekTxt">0 / 3 日</span>
-    </div>
-    <div class="xpbar" style="height:16px;"><div class="xpfill" id="dryFill" style="background:linear-gradient(90deg,#34d399,#10b981);animation:none;"></div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-      <button id="dryYes" style="flex:1;background:linear-gradient(135deg,#10b981,#059669);">🚱 今日は飲まなかった</button>
-      <button id="dryNo" class="ghost" style="flex:1;">🍶 飲んだ</button>
-    </div>
-    <div id="dryStats" class="muted" style="font-size:.78rem;margin-top:12px;text-align:center;"></div>
-    <div class="muted" style="font-size:.72rem;margin-top:6px;">まずは週3日から。休肝日はお腹（内臓脂肪）に一番効くよ。<span class="link" id="dryTargetEdit">目標を変更</span></div>
-  </div>
-
-  <!-- FOOD -->
-  <div class="card">
-    <h3>🍽 食事ログ <span class="muted" id="foodDayLabel"></span></h3>
-    <div style="display:flex;gap:16px;margin-bottom:14px;">
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;font-size:.8rem;"><span class="muted">カロリー</span><span id="calTxt">0 / 2100</span></div>
-        <div class="xpbar"><div class="xpfill" id="calFill" style="background:linear-gradient(90deg,#fbbf24,#fb7185);animation:none;"></div></div>
-      </div>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;font-size:.8rem;"><span class="muted">タンパク質</span><span id="proTxt">0 / 100g</span></div>
-        <div class="xpbar"><div class="xpfill" id="proFill" style="background:linear-gradient(90deg,#4ade80,#38bdf8);animation:none;"></div></div>
-      </div>
-    </div>
-    <div id="snackLine" style="font-size:.82rem;font-weight:700;padding:9px 12px;border-radius:12px;margin-bottom:12px;"></div>
-    <div id="mealList"></div>
-
-    <div class="muted" style="margin:14px 0 6px;">🔍 検索して追加（グラム指定で自動計算）</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-      <div style="flex:1;min-width:150px;"><label class="mini">食材・料理名</label>
-        <input list="foodDL" id="foodSearch" style="width:100%;" placeholder="例: 鶏むね / カレーライス"><datalist id="foodDL"></datalist></div>
-      <div><label class="mini">グラム</label><input type="number" id="foodGram" value="100" style="width:74px;"></div>
-      <button id="foodAddG">追加</button>
-    </div>
-    <div id="foodPreview" style="margin-top:6px;font-size:.9rem;color:var(--sub);font-weight:700;">= — kcal ／ P — g</div>
-
-    <div class="muted" style="margin:16px 0 8px;">⚡ よく食べる（1タップ）</div>
-    <div id="foodTabs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-    <div id="foodChips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-
-    <div class="muted" style="margin:16px 0 8px;">🍳 料理をざっくり概算で追加（カロリーがわからなくてOK）</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-      <div style="flex:1;min-width:120px;"><label class="mini">料理名（任意）</label><input id="estName" style="width:100%;" placeholder="例: 妻の肉じゃが"></div>
-      <div><label class="mini">グラム</label><input type="number" id="estGram" value="200" style="width:80px;"></div>
-    </div>
-    <div style="margin-top:8px;"><label class="mini">どんな料理？（近いタイプを選ぶ）</label>
-      <select id="estType" style="width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:11px 12px;font-size:1rem;"></select></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px;">
-      <span id="estPrev" style="font-size:.92rem;font-weight:700;color:var(--sub);">≒ — kcal ／ P — g</span>
-      <button id="estAdd">追加</button>
-    </div>
-    <div class="muted" style="font-size:.7rem;margin-top:6px;">目安の目安です。ざっくり把握できればOK。分かる範囲でグラムを入れてください（例: 1皿≒300g）。</div>
-    <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
-    <div class="muted" style="text-align:center;margin-top:8px;font-size:.72rem;">※数値は一般的な目安です（±）</div>
-  </div>
-
-  <!-- BADGES -->
-  <div class="card">
-    <h3>🏆 実績バッジ</h3>
-    <div class="badges" id="badges"></div>
-  </div>
-
-  <!-- WEEK -->
-  <div class="card">
-    <h3>📅 今週のサマリー</h3>
-    <div style="display:flex;">
-      <div class="stat"><b id="wkPerfect">0</b><span>完璧日</span></div>
-      <div class="stat"><b id="wkWO">0</b><span>体幹トレ</span></div>
-      <div class="stat"><b id="wkRun">0</b><span>朝ラン</span></div>
-      <div class="stat"><b id="wkKm">0</b><span>今週km</span></div>
-    </div>
-  </div>
-
-  <button class="big" id="coachBtn" style="background:linear-gradient(135deg,#fb7185,#a78bfa);margin-top:18px;">🧑‍🏫 千夏コーチの一言<span class="sub">無料・オフライン・ボタン1つ</span></button>
-
-  <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#a78bfa,#38bdf8);margin-top:10px;">📋 今週のレポートを作成<span class="sub">深く相談したい週は、コピーしてチャットに貼る</span></button>
-
-  <div style="display:flex;justify-content:space-between;margin-top:14px;">
-    <button class="ghost" id="exportBtn">データ書き出し</button>
-    <button class="ghost" id="importBtn">読み込み</button>
-  </div>
-  <input type="file" id="fileInput" accept=".json" style="display:none;">
+    <input type="file" id="fileInput" accept=".json" style="display:none;">
+  </section>
 </div>
+
+<nav id="bnav">
+  <button class="on" data-t="food"><span>🍙</span>ごはん</button>
+  <button data-t="move"><span>🚴</span>うごく</button>
+  <button data-t="body"><span>⚖️</span>からだ</button>
+  <button data-t="more"><span>☰</span>その他</button>
+</nav>
 
 <!-- ケンカの日モード -->
 <div class="overlay" id="calmOverlay"><div class="modal">
@@ -361,9 +519,9 @@
   <h2 style="font-size:1.3rem;margin:6px 0;">ちょっと待った。まず落ち着こう。</h2>
   <div class="muted" style="margin-bottom:16px;">今のは"怒り"で、お腹は減ってない。3つのどれかで波をやり過ごそう。</div>
   <div style="display:flex;flex-direction:column;gap:10px;">
-    <button class="big" id="calmMove" style="background:linear-gradient(135deg,#38bdf8,#4ade80);">💪 まず動く（全身HIIT）<span class="sub">怒りを筋トレで燃やす</span></button>
-    <button class="big" id="calmBreath" style="background:linear-gradient(135deg,#a78bfa,#38bdf8);">🧘 深呼吸ガイド<span class="sub">吸って4秒・吐いて6秒 × 6回</span></button>
-    <button class="big" id="calmWait" style="background:linear-gradient(135deg,#fbbf24,#fb7185);">⏳ 10分だけ待つ<span class="sub">衝動の波はすぐ引く</span></button>
+    <button class="big" id="calmMove" style="background:linear-gradient(135deg,#3FC59B,#5FB8E6);">💪 まず動く（全身HIIT）<span class="sub">怒りを筋トレで燃やす</span></button>
+    <button class="big" id="calmBreath" style="background:linear-gradient(135deg,#B79CF2,#5FB8E6);">🧘 深呼吸ガイド<span class="sub">吸って4秒・吐いて6秒 × 6回</span></button>
+    <button class="big" id="calmWait" style="background:linear-gradient(135deg,#F2B33D,#F7809F);">⏳ 10分だけ待つ<span class="sub">衝動の波はすぐ引く</span></button>
   </div>
   <div style="border-top:1px solid var(--line);margin:18px 0 12px;"></div>
   <div class="muted" style="margin-bottom:8px;">落ち着いたら、正直に記録：</div>
@@ -378,7 +536,7 @@
 <!-- 深呼吸ガイド -->
 <div class="overlay" id="breathOverlay"><div class="modal" style="text-align:center;">
   <div style="height:210px;display:flex;align-items:center;justify-content:center;">
-    <div id="breathCircle" style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#38bdf8,#4ade80);transition:transform 4s ease-in-out;transform:scale(.8);"></div>
+    <div id="breathCircle" style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#9ED9F5,#7FD8B9);transition:transform 4s ease-in-out;transform:scale(.8);"></div>
   </div>
   <div id="breathText" style="font-size:1.5rem;font-weight:800;">準備…</div>
   <div id="breathCount" class="muted" style="margin-top:6px;min-height:1.2em;"></div>
@@ -400,64 +558,27 @@
 <div class="overlay" id="reportOverlay"><div class="modal">
   <h2 style="font-size:1.2rem;margin:0 0 8px;">📋 今週のレポート</h2>
   <div class="muted" style="margin-bottom:10px;">下の文をコピーして、チャットに貼ってください。</div>
-  <textarea id="reportText" readonly style="width:100%;height:230px;background:rgba(0,0,0,.3);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:.78rem;font-family:monospace;resize:vertical;"></textarea>
+  <textarea id="reportText" readonly style="width:100%;height:230px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:.78rem;font-family:monospace;resize:vertical;"></textarea>
   <div style="display:flex;gap:10px;margin-top:12px;">
     <button id="reportCopy" style="flex:1;">📋 コピー</button>
     <button class="ghost" id="reportClose" style="flex:1;">閉じる</button>
   </div>
 </div></div>
 
-<!-- 千夏コーチ -->
+<!-- チカコーチ -->
 <div class="overlay" id="coachOverlay"><div class="modal">
-  <div style="width:132px;margin:0 auto 4px;">
-  <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;border-radius:16px;">
-    <defs>
-      <linearGradient id="chiBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38314f"/><stop offset="1" stop-color="#5a2f57"/></linearGradient>
-      <clipPath id="chiRc"><rect x="0" y="0" width="200" height="220" rx="18"/></clipPath>
-    </defs>
-    <g clip-path="url(#chiRc)">
-      <rect width="200" height="220" fill="url(#chiBg)"/>
-      <circle cx="100" cy="128" r="92" fill="#ffffff" opacity="0.06"/>
-      <path d="M42 122 Q30 58 100 44 Q170 58 158 122 L164 220 L36 220 Z" fill="#3f2a20"/>
-      <path d="M54 220 Q60 174 100 169 Q140 174 146 220 Z" fill="#fb7185"/>
-      <path d="M83 171 L88 200 M117 171 L112 200" stroke="#f43f5e" stroke-width="6" fill="none" stroke-linecap="round"/>
-      <rect x="90" y="150" width="20" height="24" rx="8" fill="#f4c2a0"/>
-      <path d="M67 108 Q67 150 100 159 Q133 150 133 108 Q133 76 100 72 Q67 76 67 108 Z" fill="#ffdcc0"/>
-      <circle cx="67" cy="116" r="7" fill="#ffdcc0"/><circle cx="133" cy="116" r="7" fill="#ffdcc0"/>
-      <ellipse cx="80" cy="128" rx="8" ry="5" fill="#ff9db0" opacity="0.5"/>
-      <ellipse cx="120" cy="128" rx="8" ry="5" fill="#ff9db0" opacity="0.5"/>
-      <ellipse cx="84" cy="116" rx="10" ry="12.5" fill="#fff"/>
-      <ellipse cx="116" cy="116" rx="10" ry="12.5" fill="#fff"/>
-      <ellipse cx="85" cy="117" rx="7" ry="10.5" fill="#6f4a30"/>
-      <ellipse cx="115" cy="117" rx="7" ry="10.5" fill="#6f4a30"/>
-      <ellipse cx="85" cy="118" rx="3.6" ry="6.5" fill="#33231a"/>
-      <ellipse cx="115" cy="118" rx="3.6" ry="6.5" fill="#33231a"/>
-      <circle cx="82" cy="112" r="2.7" fill="#fff"/><circle cx="112" cy="112" r="2.7" fill="#fff"/>
-      <circle cx="88" cy="122" r="1.3" fill="#fff" opacity="0.85"/><circle cx="118" cy="122" r="1.3" fill="#fff" opacity="0.85"/>
-      <path d="M73 107 Q84 101 95 107" stroke="#2f2018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <path d="M105 107 Q116 101 127 107" stroke="#2f2018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <path d="M74 99 Q84 95 93 98" stroke="#5b3a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <path d="M107 98 Q116 95 126 99" stroke="#5b3a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <path d="M100 121 l -3 8 l 5 0" stroke="#deA684" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M91 140 Q100 148 109 140" stroke="#c85a5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M61 112 Q57 62 100 50 Q143 62 139 112 Q127 90 118 95 Q121 72 100 68 Q79 72 82 95 Q73 90 61 112 Z" fill="#4a2f22"/>
-      <path d="M63 110 Q58 152 70 178 L82 174 Q70 142 75 110 Z" fill="#4a2f22"/>
-      <path d="M137 110 Q142 152 130 178 L118 174 Q130 142 125 110 Z" fill="#4a2f22"/>
-      <path d="M84 58 Q100 53 116 59" stroke="#6b442f" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
-    </g>
-  </svg>
-  </div>
-  <h2 style="font-size:1.2rem;margin:2px 0 2px;">千夏コーチ</h2>
-  <div class="muted" style="font-size:.72rem;margin-bottom:10px;">38歳・二児の母／あなたの専属トレーナー</div>
+  <div id="coachFace" style="width:120px;margin:0 auto 4px;"></div>
+  <h2 style="font-size:1.2rem;margin:2px 0 2px;">チカ</h2>
+  <div class="muted" style="font-size:.72rem;margin-bottom:10px;">おにぎりの子／あなたのゆる専属トレーナー</div>
   <div id="coachText" style="text-align:left;white-space:pre-wrap;font-size:.9rem;line-height:1.75;background:var(--panel2);border-radius:12px;padding:14px;max-height:60vh;overflow-y:auto;"></div>
-  <button class="big" id="coachClose" style="margin-top:14px;background:linear-gradient(135deg,#fb7185,#a78bfa);">ありがとう 💪</button>
+  <button class="big" id="coachClose" style="margin-top:14px;background:linear-gradient(135deg,#F7809F,#B79CF2);">ありがとう 💪</button>
 </div></div>
 
 <!-- チカとチャット -->
 <div class="overlay" id="chatOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh;">
   <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
     <div id="chatFace" style="width:40px;flex:0 0 auto;"></div>
-    <div style="flex:1;text-align:left;"><div style="font-weight:700;">千夏コーチ</div><div class="muted" style="font-size:.66rem;">いつでも相談してね（無料・ルール式の相棒）</div></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">チカ</div><div class="muted" style="font-size:.66rem;">いつでも相談してね（無料・ルール式の相棒）</div></div>
     <span class="link" id="chatClose">閉じる</span>
   </div>
   <div id="chatLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
@@ -470,7 +591,7 @@
 <div class="overlay" id="bodyOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:88vh;">
   <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
     <div id="bodyFace" style="width:40px;flex:0 0 auto;"></div>
-    <div style="flex:1;text-align:left;"><div style="font-weight:700;">🩺 からだ相談室</div><div class="muted" style="font-size:.66rem;">千夏が答えるよ（無料・ルール式）。※医療の代わりにはならないから、ひどい時は病院へ</div></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">🩺 からだ相談室</div><div class="muted" style="font-size:.66rem;">チカが答えるよ（無料・ルール式）。※医療の代わりにはならないから、ひどい時は病院へ</div></div>
     <span class="link" id="bodyClose">閉じる</span>
   </div>
   <div id="bodyLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
@@ -504,8 +625,8 @@
 <!-- WORKOUT MODAL -->
 <div class="overlay" id="woOverlay"><div class="modal" id="woModal">
   <div class="wo-timer" id="woTimer">
-    <svg width="200" height="200"><circle cx="100" cy="100" r="88" stroke="rgba(255,255,255,.08)" stroke-width="10" fill="none"/>
-      <circle id="woRing" cx="100" cy="100" r="88" stroke="#4ade80" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="0"/></svg>
+    <svg width="200" height="200"><circle cx="100" cy="100" r="88" stroke="#F0E2D2" stroke-width="10" fill="none"/>
+      <circle id="woRing" cx="100" cy="100" r="88" stroke="#3FC59B" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="0"/></svg>
     <div class="c"><div class="t" id="woTime">00</div><div class="muted" id="woPhase">READY</div></div>
   </div>
   <div class="wo-name" id="woName">準備はいい？</div>
@@ -582,26 +703,40 @@ const WORKOUT=[
   {n:'休憩',           s:20,c:'ラスト！もう一度プランク。'},
   {n:'プランク(ラスト)',s:45,c:'残り全部出し切る。あと少し！'},
 ];
-/* 食事クイック追加：カテゴリ分け（1食あたりの目安）k=kcal, p=タンパク質g */
-const FOOD_GROUPS=[
-  {c:'🍚 主食', items:[
-    {n:'ごはん 茶碗1',k:234,p:3.8},{n:'玄米 茶碗1',k:220,p:4.2},{n:'食パン 6枚切1',k:158,p:5.3},{n:'おにぎり 1個',k:180,p:3},
+/* 1タップメニュー（1食あたりの目安）k=kcal, p=タンパク質g。snack:trueのグループは戒めカウント対象 */
+const MENU=[
+  {c:'🍚 ごはん・パン', items:[
+    {n:'ごはん 少なめ(100g)',k:156,p:2.5},{n:'ごはん ふつう(150g)',k:234,p:3.8},{n:'ごはん 大盛(250g)',k:390,p:6.3},
+    {n:'おにぎり 1個',k:180,p:3},{n:'食パン 6枚切1枚',k:158,p:5.3},{n:'うどん 1玉',k:240,p:6.5},{n:'そば 1玉',k:260,p:9.6},
+    {n:'パスタ 1人前',k:350,p:12},{n:'オートミール 30g',k:105,p:4.1},
   ]},
-  {c:'🥚 たんぱく', items:[
-    {n:'卵 1個',k:76,p:6.2},{n:'納豆 1P',k:90,p:7.4},{n:'木綿豆腐 半丁',k:110,p:10.5},{n:'鶏むね 100g',k:108,p:22},
-    {n:'サラダチキン',k:115,p:24},{n:'鮭 1切れ',k:106,p:18},{n:'ツナ水煮 1缶',k:71,p:16},{n:'サバ缶 1缶',k:350,p:26},{n:'プロテイン 1杯',k:120,p:24},
+  {c:'🍱 外食・べんとう', items:[
+    {n:'牛丼 並',k:650,p:20},{n:'カツ丼',k:900,p:30},{n:'親子丼',k:700,p:28},{n:'カレーライス',k:750,p:18},
+    {n:'ラーメン',k:600,p:22},{n:'焼き魚定食',k:650,p:32},{n:'唐揚げ定食',k:900,p:35},{n:'コンビニ弁当',k:700,p:20},
+    {n:'チャーハン',k:700,p:18},{n:'焼きそば',k:550,p:15},{n:'パスタ（外食）',k:700,p:22},{n:'寿司 10貫',k:450,p:22},
+    {n:'ハンバーガー',k:300,p:13},{n:'バーガーセット',k:900,p:25},{n:'ピザ 2切れ',k:500,p:20},{n:'餃子 6個',k:300,p:12},
   ]},
-  {c:'🥛 乳・朝食', items:[
-    {n:'牛乳 200ml',k:122,p:6.6},{n:'ギリシャヨーグルト',k:59,p:10},{n:'🥣ヨーグルトボウル',k:275,p:10.5},{n:'バナナ 1本',k:86,p:1.1},
+  {c:'🥚 たんぱく質', items:[
+    {n:'卵 1個',k:76,p:6.2},{n:'ゆで卵 2個',k:152,p:12.4},{n:'納豆 1パック',k:90,p:7.4},{n:'木綿豆腐 半丁',k:110,p:10.5},
+    {n:'鶏むね 100g',k:108,p:22},{n:'サラダチキン',k:115,p:24},{n:'焼き鮭 1切れ',k:130,p:20},{n:'ツナ水煮 1缶',k:71,p:16},
+    {n:'サバ缶 1缶',k:350,p:26},{n:'プロテイン 1杯',k:120,p:24},{n:'焼き鳥 2本',k:200,p:16},
   ]},
-  {c:'🥦 野菜・汁', items:[
-    {n:'ブロッコリー 100g',k:33,p:4.3},{n:'味噌汁 1杯',k:40,p:3},
+  {c:'🥛 あさ・のみもの', items:[
+    {n:'牛乳 200ml',k:122,p:6.6},{n:'ヨーグルト 100g',k:56,p:3.6},{n:'ギリシャヨーグルト',k:59,p:10},{n:'ヨーグルトボウル',k:275,p:10.5},
+    {n:'冷凍ブルーベリー 50g',k:25,p:0.3},{n:'バナナ 1本',k:86,p:1.1},{n:'カフェラテ',k:120,p:6},{n:'ブラックコーヒー',k:5,p:0.3},
   ]},
-  {c:'🍜 麺・惣菜', items:[
-    {n:'ラーメン 1杯',k:500,p:20},{n:'唐揚げ 3個',k:300,p:18},
+  {c:'🥦 野菜・汁もの', items:[
+    {n:'サラダ（ドレッシング付）',k:100,p:2},{n:'ブロッコリー 100g',k:37,p:5.4},{n:'野菜炒め',k:250,p:8},
+    {n:'味噌汁 1杯',k:40,p:3},{n:'豚汁 1杯',k:120,p:7},{n:'冷奴',k:70,p:6.5},
   ]},
-  {c:'🍫 お菓子・お酒', items:[
-    {n:'ビール 350',k:140,p:1},{n:'🍫チョコ 1片',k:28,p:0.3},{n:'🍨アイス 1個',k:180,p:3.5},{n:'アーモンド 25g',k:150,p:5.5},
+  {c:'🍺 お酒・おつまみ', snack:true, items:[
+    {n:'赤ワイン グラス1杯',k:82,p:0.2},{n:'ビール 350缶',k:140,p:1},{n:'ビール 500缶',k:200,p:1.5},{n:'生ビール 中ジョッキ',k:200,p:1.5},
+    {n:'ハイボール 1杯',k:100,p:0},{n:'缶チューハイ 350',k:170,p:0},{n:'日本酒 1合',k:185,p:0.7},{n:'焼酎 水割り1杯',k:85,p:0},
+    {n:'スモークチーズ 3個',k:90,p:6},{n:'ナッツ ひとつかみ',k:150,p:5},{n:'枝豆 1皿',k:120,p:10,s:0},{n:'柿の種 1袋',k:140,p:3},{n:'唐揚げ 3個',k:300,p:18},
+  ]},
+  {c:'🍫 おやつ', snack:true, items:[
+    {n:'チョコ 1かけ',k:28,p:0.3},{n:'板チョコ 1枚',k:280,p:3.5},{n:'アイス 1個',k:180,p:3.5},{n:'ポテチ 1袋',k:330,p:3},
+    {n:'菓子パン 1個',k:350,p:7},{n:'ケーキ 1個',k:330,p:5},{n:'どら焼き',k:220,p:5},{n:'せんべい 2枚',k:120,p:2.5},{n:'ドーナツ',k:250,p:4},
   ]},
 ];
 let foodTab=0;
@@ -643,7 +778,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
-  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[];
+  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[]; s.delPreset=s.delPreset||{min:60,km:15};
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
@@ -680,7 +815,7 @@ function rnd(){si=(si+1)%seed.length;return seed[si];}
 function burst(x,y,n,colors){for(let i=0;i<n;i++){const a=(i/n)*6.283+rnd();const sp=3+rnd()*6;
   parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,g:.18,life:60+rnd()*30,
     c:colors[i%colors.length],r:3+rnd()*4,rot:rnd()*6,vr:(rnd()-.5)*.4});}}
-function confettiRain(){const cols=['#4ade80','#38bdf8','#fbbf24','#fb7185','#a78bfa'];
+function confettiRain(){const cols=['#FF9DB5','#7FD8B9','#FFD36E','#B79CF2','#9ED9F5'];
   for(let i=0;i<120;i++)parts.push({x:rnd()*fx.width,y:-20-rnd()*fx.height*.5,vx:(rnd()-.5)*2,vy:2+rnd()*4,g:.05,life:140,c:cols[i%5],r:3+rnd()*5,rot:rnd()*6,vr:(rnd()-.5)*.3});}
 let running=false;
 function loop(){fxc.clearRect(0,0,fx.width,fx.height);let alive=false;
@@ -717,7 +852,7 @@ function render(){
       <div><div class="qtitle">${q.title}</div><div class="qsub">${q.sub}</div></div><div class="qxp">+${q.xp}XP</div>`;
     el.onclick=e=>{const r=el.getBoundingClientRect();el.style.setProperty('--mx',(e.clientX-r.left)+'px');el.style.setProperty('--my',(e.clientY-r.top)+'px');
       const now=!dd[q.key];dd[q.key]=now;save();
-      if(now){beep(660,.12);burst(e.clientX,e.clientY,14,['#4ade80','#38bdf8','#fbbf24']);playFX();}
+      if(now){beep(660,.12);burst(e.clientX,e.clientY,14,['#FF9DB5','#7FD8B9','#FFD36E']);playFX();}
       checkBadges();afterChange();
       if(score(cur)===4&&now){toast('🎉 パーフェクトデイ！ +50XP');confettiRain();playFX();beep(880,.15);setTimeout(()=>beep(1170,.2),120);}};
     qc.appendChild(el);});
@@ -745,11 +880,6 @@ function render(){
   diffEl.style.color=(f!=null&&n!=null)?(n-f<=0?'var(--accent)':'var(--fire)'):'';
   document.getElementById('sGoal').textContent=n!=null?((n-g)<=0?'達成🎯':(n-g).toFixed(1)+'kg'):'–';
   drawChart();
-  /* delivery */
-  document.getElementById('kmInput').value=dd.km!=null?dd.km:'';
-  const km=+dd.km||0;document.getElementById('kmToday').textContent=km;
-  document.getElementById('kcalToday').textContent=Math.round(km*30);
-  document.getElementById('kmTotal').textContent=totalKm(state).toFixed(1);
   /* workout counts */
   document.getElementById('woCount').textContent=dd.wo||0;
   document.getElementById('woTotal').textContent=totalWO(state);
@@ -766,67 +896,237 @@ function render(){
   renderFood();
   renderWater();
   renderDry();
+  renderMove();
+  renderChika();
+  document.getElementById('tbLv').textContent='Lv'+L.lvl;
 }
 function afterChange(){render();}
 
-function foodByName(n){n=(n||'').trim(); if(!n)return null;
-  return state.customFoods100.find(x=>x.n===n) || FOODS_DB.find(x=>x.n===n) || null;}
-function updateFoodPreview(){const nEl=document.getElementById('foodSearch'),gEl=document.getElementById('foodGram'),pv=document.getElementById('foodPreview');
-  if(!nEl)return; const f=foodByName(nEl.value); const g=parseFloat(gEl.value);
-  if(f&&!isNaN(g)&&g>0){const k=Math.round(f.k*g/100), p=Math.round(f.p*g/10)/10;
-    pv.textContent='= '+k+' kcal ／ P '+p+' g'; pv.style.color='var(--accent)';}
-  else{pv.textContent = nEl.value ? '= リストから食材を選んでください' : '= — kcal ／ P — g'; pv.style.color='var(--sub)';}}
+/* ============ ごはん記録（さくっと入力） ============ */
+const SLOTS=[{id:'朝',e:'☀️',l:'あさ'},{id:'昼',e:'🍱',l:'ひる'},{id:'夜',e:'🌆',l:'よる'},{id:'夜食',e:'🌙',l:'21時〜'}];
+const GRAMS=[50,100,150,200,300,350,500];
+let curSlot=null;
+function hhmm(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function autoSlot(){if(cur!==today())return state.lastSlot||'夜';
+  const n=new Date(),h=n.getHours()+n.getMinutes()/60;
+  if(h<4)return '夜食';if(h<10.5)return '朝';if(h<15)return '昼';if(h<21)return '夜';return '夜食';}
+function slotNow(){return curSlot||autoSlot();}
+function toKata(s){return String(s||'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)).toLowerCase().replace(/\s+/g,'');}
+function foodByName(n){n=(n||'').trim();if(!n)return null;
+  return state.customFoods100.find(x=>x.n===n)||FOODS_DB.find(x=>x.n===n)||null;}
+function menuAll(){return MENU.flatMap(g=>g.items.map(it=>({...it,s:it.s!=null?it.s:(g.snack?1:0)})));}
+function chipEl(label,sub,cls,onclick){const c=document.createElement('button');c.className='chip'+(cls?' '+cls:'');
+  c.innerHTML=esc(label)+(sub?'<small>'+esc(sub)+'</small>':'');c.onclick=onclick;return c;}
+
+function addMeal(n,k,p,s,slot){const dd=day(cur);dd.meals=dd.meals||[];
+  const before=dd.meals.reduce((a,m)=>a+(+m.p||0),0);
+  const t=slot||slotNow();const snack=s!=null?!!+s:isSnack(n);
+  const m={n,k:Math.round(+k||0),p:Math.round((+p||0)*10)/10,s:snack?1:0,t};
+  if(cur===today())m.at=hhmm();
+  if(t==='夜食')m.night=1;
+  dd.meals.push(m);save();
+  if(before<state.proTarget&&(before+m.p)>=state.proTarget){toast('💪 タンパク質 目標クリア！');confettiRain();playFX();}
+  else if(snack){toast('🍫 '+n+' +'+m.k+'kcal ＝ 自転車'+Math.round(m.k/30)+'km分。戒め！');beep(196,.22,'sawtooth');}
+  else{toast('もぐもぐ記録：'+n);beep(660,.08);}
+  render();}
+
+function recentFoods(){const map={};const ds=sd(state).slice(-30);
+  ds.forEach((d,di)=>{(state.days[d].meals||[]).forEach(m=>{
+    const r=map[m.n]||(map[m.n]={n:m.n,c:0,last:0});r.c++;r.last=di;r.k=m.k;r.p=m.p;r.s=m.s;});});
+  return Object.values(map).sort((a,b)=>(b.c+b.last*0.5)-(a.c+a.last*0.5)).slice(0,12);}
+
+function renderSearch(){const raw=document.getElementById('foodSearch').value.trim();const q=toKata(raw);
+  const box=document.getElementById('searchRes');box.innerHTML='';
+  if(!q){box.hidden=true;return;}box.hidden=false;
+  const hit=x=>toKata(x.n).includes(q);const res=[];const seen=new Set();
+  const push=(x,kind)=>{if(!seen.has(x.n)){seen.add(x.n);res.push({...x,kind});}};
+  recentFoods().filter(hit).forEach(x=>push(x,'one'));
+  menuAll().filter(hit).forEach(x=>push(x,'one'));
+  state.customFoods100.concat(FOODS_DB).filter(hit).forEach(x=>push(x,'g'));
+  res.slice(0,10).forEach(x=>{const row=document.createElement('div');row.className='sres';
+    if(x.kind==='one'){
+      row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">'+Math.round(x.k)+'kcal</span><button class="sadd">＋</button>';
+      row.onclick=()=>{addMeal(x.n,x.k,x.p,x.s);clearSearch();};}
+    else{
+      row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">100gで'+x.k+'kcal・量をえらぶ↓</span>';
+      const g=document.createElement('div');g.className='grams';
+      GRAMS.forEach(gr=>{const b=chipEl(gr+'g','≒'+Math.round(x.k*gr/100),'',e=>{e.stopPropagation();addMeal(x.n+' '+gr+'g',x.k*gr/100,x.p*gr/100,null);clearSearch();});g.appendChild(b);});
+      row.appendChild(g);}
+    box.appendChild(row);});
+  const tail=document.createElement('div');tail.className='sres-tail';
+  if(!res.length)tail.innerHTML='<span class="muted">見つからないときは → </span>';
+  tail.appendChild(chipEl('✏️ カロリーを入れて登録','','',()=>openMore('freeBox','freeName',raw,'freeKcal')));
+  tail.appendChild(chipEl('🍳 ざっくり概算','','',()=>openMore('estBox','estName',raw,null)));
+  box.appendChild(tail);}
+function clearSearch(){document.getElementById('foodSearch').value='';renderSearch();}
+function openMore(boxId,nameId,name,focusId){clearSearch();const d=document.getElementById(boxId);d.open=true;
+  document.getElementById(nameId).value=name||'';d.scrollIntoView({behavior:'smooth',block:'center'});
+  if(focusId)setTimeout(()=>document.getElementById(focusId).focus(),300);}
+
+function renderSlots(){const b=document.getElementById('slotBar');b.innerHTML='';const now=slotNow();
+  SLOTS.forEach(s=>{const el=document.createElement('button');el.className='slot'+(s.id===now?' on':'')+(s.id==='夜食'?' night':'');
+    el.innerHTML='<span>'+s.e+'</span>'+s.l;el.onclick=()=>{curSlot=s.id;state.lastSlot=s.id;save();renderSlots();};b.appendChild(el);});}
+function renderRecent(){const rc=document.getElementById('recentChips');rc.innerHTML='';const list=recentFoods();
+  if(!list.length){rc.innerHTML='<div class="muted">記録すると、ここに よく食べるものが ならぶよ</div>';return;}
+  list.forEach(f=>rc.appendChild(chipEl(f.n,Math.round(f.k)+'kcal',f.s?'snack':'',()=>addMeal(f.n,f.k,f.p,f.s))));}
+function renderMenu(){if(foodTab>=MENU.length)foodTab=0;const tabsEl=document.getElementById('foodTabs');tabsEl.innerHTML='';
+  MENU.forEach((g,gi)=>tabsEl.appendChild(chipEl(g.c,'',gi===foodTab?'ctab on':'ctab',()=>{foodTab=gi;renderMenu();})));
+  const fc=document.getElementById('foodChips');fc.innerHTML='';const g=MENU[foodTab];
+  g.items.forEach(f=>{const s=f.s!=null?f.s:(g.snack?1:0);fc.appendChild(chipEl(f.n,f.k+'kcal',s?'snack':'',()=>addMeal(f.n,f.k,f.p,s)));});}
 
 function renderFood(){
-  const dd=day(cur); dd.meals=dd.meals||[];
-  let kcal=0,pro=0; dd.meals.forEach(m=>{kcal+=+m.k||0; pro+=+m.p||0;});
-  document.getElementById('foodDayLabel').textContent=cur===today()?'(今日)':cur;
+  const dd=day(cur);dd.meals=dd.meals||[];
+  let kcal=0,pro=0;dd.meals.forEach(m=>{kcal+=+m.k||0;pro+=+m.p||0;});
+  const out=burnKcal(dd);
+  document.getElementById('foodDayLabel').textContent=cur===today()?'(きょう)':cur;
+  document.getElementById('balIn').textContent=Math.round(kcal);
+  document.getElementById('balOut').textContent=Math.round(out);
+  document.getElementById('balNet').textContent=Math.round(kcal-out);
   document.getElementById('calTxt').textContent=Math.round(kcal)+' / '+state.calTarget;
   document.getElementById('proTxt').textContent=Math.round(pro)+' / '+state.proTarget+'g';
   document.getElementById('calFill').style.width=Math.min(100,kcal/state.calTarget*100)+'%';
   document.getElementById('proFill').style.width=Math.min(100,pro/state.proTarget*100)+'%';
-  const over=kcal>state.calTarget;
-  document.getElementById('calFill').style.filter=over?'saturate(1.4) brightness(1.1)':'';
-  document.getElementById('calTxt').style.color=over?'var(--fire)':'';
+  document.getElementById('calTxt').style.color=kcal>state.calTarget?'var(--fire)':'';
   document.getElementById('proTxt').style.color=pro>=state.proTarget?'var(--accent)':'';
-  // 戒め: お菓子・間食・お酒 合計 → 自転車換算
+  const left=state.calTarget-kcal;
+  document.getElementById('calLeft').innerHTML=left>=0?'あと <b>'+Math.round(left)+'</b> kcal たべてOK':'目安より <b>'+Math.round(-left)+'</b> kcal オーバー。あしたの配達で とりかえそ';
   const snackK=dd.meals.reduce((a,m)=>a+(m.s?(+m.k||0):0),0);
   const sl=document.getElementById('snackLine');
-  if(snackK>0){sl.style.background='rgba(251,113,133,.14)';sl.style.color='#fda4af';
-    sl.innerHTML='🍫 お菓子・間食・お酒 <b>'+Math.round(snackK)+' kcal</b> ＝ 🚴 自転車 <b>'+Math.round(snackK/30)+' km</b> 分。戒め。';}
-  else{sl.style.background='rgba(74,222,128,.12)';sl.style.color='var(--accent)';
-    sl.innerHTML='🍏 今日はまだお菓子ゼロ。えらい！';}
-  // meal list
-  const ml=document.getElementById('mealList'); ml.innerHTML='';
-  dd.meals.forEach((m,i)=>{const el=document.createElement('div');
-    el.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--panel2);border-radius:10px;margin-bottom:6px;font-size:.85rem;';
-    el.innerHTML=`<span style="flex:1;">${m.n}</span><span class="muted">${Math.round(m.k)}kcal・P${m.p}g</span>`;
-    const x=document.createElement('span'); x.textContent='×'; x.style.cssText='cursor:pointer;color:var(--fire);font-weight:900;padding:0 4px;';
-    x.onclick=()=>{dd.meals.splice(i,1);save();render();}; el.appendChild(x); ml.appendChild(el);});
-  if(!dd.meals.length){ml.innerHTML='<div class="muted" style="padding:4px 2px;">まだ記録なし。検索かボタンから追加。</div>';}
-  // quick chips: カテゴリタブ + そのグループのみ表示
-  if(foodTab>=FOOD_GROUPS.length)foodTab=0;
-  const tabsEl=document.getElementById('foodTabs'); tabsEl.innerHTML='';
-  FOOD_GROUPS.forEach((g,gi)=>{const t=document.createElement('button'); t.className='ghost';
-    const on=gi===foodTab;
-    t.style.cssText='padding:6px 10px;font-size:.76rem;font-weight:700;'+(on?'border-color:var(--accent2);color:var(--accent2);background:rgba(56,189,248,.12);':'');
-    t.textContent=g.c;
-    t.onclick=()=>{foodTab=gi; renderFood();};
-    tabsEl.appendChild(t);});
-  const fc=document.getElementById('foodChips'); fc.innerHTML='';
-  (FOOD_GROUPS[foodTab]||FOOD_GROUPS[0]).items.forEach(f=>{const c=document.createElement('button'); c.className='ghost';
-    c.style.cssText='padding:8px 12px;font-size:.8rem;font-weight:600;'; c.textContent='+ '+f.n;
-    c.onclick=()=>{const before=pro; const snack=isSnack(f.n); const k=+f.k||0,p=+f.p||0;
-      dd.meals.push({n:f.n,k,p,s:snack?1:0});save();
-      if(before<state.proTarget && (before+p)>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
-      else if(snack){toast('🍫 '+f.n+' +'+Math.round(k)+'kcal ＝ 自転車'+Math.round(k/30)+'km分。戒め！');beep(196,.22,'sawtooth');}
-      else{toast('追加：'+f.n);beep(660,.08);} render();};
-    fc.appendChild(c);});
-  // datalist (custom100 first, then DB)
-  const dl=document.getElementById('foodDL'); dl.innerHTML='';
-  state.customFoods100.concat(FOODS_DB).forEach(f=>{const o=document.createElement('option'); o.value=f.n; dl.appendChild(o);});
-  updateFoodPreview();
+  if(snackK>0){sl.className='infoline info-snack';sl.innerHTML='🍫 お菓子・お酒 <b>'+Math.round(snackK)+' kcal</b> ＝ 🚴 自転車 <b>'+Math.round(snackK/30)+' km</b> 分。戒め。';}
+  else{sl.className='infoline info-good';sl.innerHTML='🍏 きょうは お菓子・お酒 ゼロ。えらい！';}
+  const nightK=dd.meals.reduce((a,m)=>a+(m.night?(+m.k||0):0),0);const nl=document.getElementById('nightLine');
+  nl.hidden=!nightK;if(nightK)nl.innerHTML='🌙 21時以降 <b>'+Math.round(nightK)+' kcal</b>。書けたのが えらい。お水もいっしょにね';
+  const ml=document.getElementById('mealList');ml.innerHTML='';
+  if(!dd.meals.length)ml.innerHTML='<div class="empty">まだなにも書いてないよ。上から1タップでどうぞ🍙</div>';
+  [...SLOTS.map(s=>s.id),'その他'].forEach(gid=>{
+    const items=dd.meals.map((m,i)=>({m,i})).filter(o=>(SLOTS.some(s=>s.id===o.m.t)?o.m.t:'その他')===gid);if(!items.length)return;
+    const sl2=SLOTS.find(s=>s.id===gid);const sub=items.reduce((a,o)=>a+(+o.m.k||0),0);
+    const h=document.createElement('div');h.className='mg-h'+(gid==='夜食'?' night':'');
+    h.innerHTML='<span>'+(sl2?sl2.e+' '+sl2.l:'📝 時間なし')+'</span><span>'+Math.round(sub)+' kcal</span>';ml.appendChild(h);
+    items.forEach(({m,i})=>{const el=document.createElement('div');el.className='mrow'+(m.s?' snack':'');
+      el.innerHTML='<span class="mn">'+esc(m.n)+(m.at?'<small>'+m.at+'</small>':'')+'</span><span class="mk">'+Math.round(m.k)+'kcal</span>';
+      const plus=document.createElement('button');plus.className='mini-btn';plus.textContent='＋1';
+      plus.onclick=()=>addMeal(m.n,m.k,m.p,m.s,SLOTS.some(s=>s.id===m.t)?m.t:null);
+      const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
+      x.onclick=()=>{dd.meals.splice(i,1);save();render();};
+      el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
+  renderSlots();renderRecent();renderMenu();
 }
+
+/* ざっくり概算：料理タイプ別（100gあたり kcal / タンパク質g） */
+const CAT=[
+  {n:'あっさり（野菜・スープ）',k:45,p:2},
+  {n:'ふつうの和食',k:130,p:7},
+  {n:'丼・カレー',k:170,p:5},
+  {n:'麺類',k:140,p:5},
+  {n:'炒め物・こってり',k:230,p:10},
+  {n:'肉メイン',k:230,p:16},
+  {n:'魚メイン',k:170,p:18},
+  {n:'揚げ物',k:300,p:14},
+  {n:'パン・粉もの',k:270,p:8},
+  {n:'スイーツ',k:360,p:4,snack:true},
+];
+const EST_SIZES=[{l:'少なめ(200g)',g:200},{l:'ふつう(300g)',g:300},{l:'大盛り(450g)',g:450}];
+let estSel=1,estSize=1;
+function renderEst(){const tb=document.getElementById('estTypeChips');tb.innerHTML='';
+  CAT.forEach((c,i)=>tb.appendChild(chipEl(c.n,'',i===estSel?'on':'',()=>{estSel=i;renderEst();})));
+  const sb=document.getElementById('estSizeChips');sb.innerHTML='';
+  EST_SIZES.forEach((s,i)=>sb.appendChild(chipEl(s.l,'',i===estSize?'on':'',()=>{estSize=i;renderEst();})));
+  const c=CAT[estSel],g=EST_SIZES[estSize].g;
+  document.getElementById('estPrev').textContent='≒ '+Math.round(c.k*g/100)+' kcal ／ P '+Math.round(c.p*g/10)/10+' g';}
+document.getElementById('estAdd').onclick=()=>{const c=CAT[estSel],g=EST_SIZES[estSize].g;
+  const nm=document.getElementById('estName').value.trim()||c.n;
+  addMeal(nm+'（概算'+g+'g）',c.k*g/100,c.p*g/100,c.snack?1:null);document.getElementById('estName').value='';};
+document.getElementById('freeAdd').onclick=()=>{const n=document.getElementById('freeName').value.trim();
+  const k=parseFloat(document.getElementById('freeKcal').value);const p=parseFloat(document.getElementById('freeP').value)||0;
+  if(!n||isNaN(k)||k<0){toast('名前とカロリーを入れてね');return;}
+  addMeal(n,k,p,null);['freeName','freeKcal','freeP'].forEach(i=>document.getElementById(i).value='');};
+document.getElementById('foodSearch').oninput=renderSearch;
+document.getElementById('editTargets').onclick=()=>{
+  const c=prompt('1日の目標カロリー(kcal)',state.calTarget);if(c!==null){const v=parseFloat(c);if(!isNaN(v)&&v>0)state.calTarget=v;}
+  const p=prompt('1日の目標タンパク質(g)',state.proTarget);if(p!==null){const v=parseFloat(p);if(!isNaN(v)&&v>0)state.proTarget=v;}
+  save();render();};
+renderEst();
+
+/* ============ うごく：配達・筋トレ ============ */
+function bodyW(){return latestW(state)||70;}
+function sessKcal(s){const W=bodyW();return Math.round(s.min?6*W*s.min/60:(+s.km||0)*0.4*W);}
+function dels(dd){if(dd.dels)return dd.dels;return dd.km?[{km:+dd.km,legacy:1}]:[];}
+function syncKm(dd){const t=(dd.dels||[]).reduce((a,s)=>a+(s.km!=null?+s.km:(+s.min||0)/4),0);
+  if(t>0)dd.km=Math.round(t*10)/10;else delete dd.km;}
+function delKcal(dd){return dels(dd).reduce((a,s)=>a+sessKcal(s),0);}
+function progCount(dd){return (dd.sets||[]).filter(s=>s.prog).length;}
+function strKcal(dd){return (dd.sets||[]).reduce((a,s)=>a+(+s.k||0),0)+Math.max(0,(+dd.wo||0)-progCount(dd))*60;}
+function burnKcal(dd){return delKcal(dd)+strKcal(dd);}
+function addDel(min,km,cnt){if(!min&&!km){toast('時間か距離を入れてね');return false;}
+  const dd=day(cur);dd.dels=dels(dd).slice();const s={};
+  if(min)s.min=min;if(km)s.km=km;if(cnt)s.cnt=cnt;if(cur===today())s.at=hhmm();
+  dd.dels.push(s);syncKm(dd);save();checkBadges();render();
+  toast('🚴 配達 '+(s.min?s.min+'分 ':'')+(s.km?s.km+'km ':'')+'≒ '+sessKcal(s)+'kcal！');confettiRain();playFX();beep(880,.12);return true;}
+document.getElementById('delPresetBtn').onclick=()=>addDel(state.delPreset.min,state.delPreset.km,0);
+document.getElementById('delAdd').onclick=()=>{const mi=parseFloat(document.getElementById('delMin').value),
+  km=parseFloat(document.getElementById('delKm').value),c=parseInt(document.getElementById('delCnt').value,10);
+  if(addDel(isNaN(mi)?0:mi,isNaN(km)?0:km,isNaN(c)?0:c))['delMin','delKm','delCnt'].forEach(i=>document.getElementById(i).value='');};
+document.getElementById('delPresetEdit').onclick=()=>{const m=prompt('「いつもの」の時間（分）',state.delPreset.min);if(m===null)return;
+  const k=prompt('「いつもの」の距離（km）',state.delPreset.km);if(k===null)return;
+  const mm=parseFloat(m),kk=parseFloat(k);if(!isNaN(mm)&&mm>0)state.delPreset.min=mm;if(!isNaN(kk)&&kk>=0)state.delPreset.km=kk;save();render();};
+
+const EX=[
+  {n:'腕立て伏せ',u:'回',st:[5,10,20],k:.5},
+  {n:'スクワット',u:'回',st:[10,20,30],k:.4},
+  {n:'腹筋（クランチ）',u:'回',st:[10,20,30],k:.3},
+  {n:'プランク',u:'秒',st:[30,45,60],k:.08},
+  {n:'ランジ',u:'回',st:[10,20],k:.45},
+  {n:'テーブルロウ・懸垂',u:'回',st:[5,8,10],k:.6},
+  {n:'ヒップリフト',u:'回',st:[10,15,20],k:.3},
+  {n:'デッドバグ',u:'回',st:[10,20],k:.25},
+  {n:'パイクプッシュアップ',u:'回',st:[5,8,10],k:.5},
+  {n:'ドローイン',u:'秒',st:[30,60],k:.03},
+];
+function addSet(e,n){const dd=day(cur);dd.sets=dd.sets||[];
+  const s={ex:e.n,n,u:e.u,k:Math.round(e.k*n*10)/10};if(cur===today())s.at=hhmm();dd.sets.push(s);
+  const first=!dd.strength;dd.strength=true;save();checkBadges();render();
+  toast('💪 '+e.n+' '+n+e.u+' きろく！'+(first?' 筋トレクエスト達成':''));
+  burst(innerWidth/2,innerHeight/2,12,['#FF9DB5','#7FD8B9','#FFD36E']);playFX();beep(780,.08);}
+function renderEx(){const dd=day(cur);const sets=dd.sets||[];const box=document.getElementById('exList');box.innerHTML='';
+  EX.forEach(e=>{const tot=sets.filter(s=>s.ex===e.n).reduce((a,s)=>a+s.n,0);
+    const row=document.createElement('div');row.className='exrow';
+    row.innerHTML='<div class="exn">'+e.n+(tot?'<small>きょう '+tot+e.u+'</small>':'')+'</div>';
+    const bt=document.createElement('div');bt.className='exb';
+    e.st.forEach(n=>bt.appendChild(chipEl('+'+n,'','',()=>addSet(e,n))));
+    row.appendChild(bt);box.appendChild(row);});
+  const sl=document.getElementById('setList');sl.innerHTML='';
+  if(!sets.length)sl.innerHTML='<div class="empty">まだなし。ポチッと1セットから🍙</div>';
+  sets.forEach((s,i)=>{const el=document.createElement('div');el.className='mrow';
+    el.innerHTML='<span class="mn">'+esc(s.ex)+' '+s.n+s.u+(s.at?'<small>'+s.at+'</small>':'')+'</span><span class="mk">'+Math.round(s.k)+'kcal</span>';
+    const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
+    x.onclick=()=>{if(s.prog)dd.wo=Math.max(0,(+dd.wo||0)-1);sets.splice(i,1);
+      if(!sets.length&&!(+dd.wo))dd.strength=false;save();render();};
+    el.appendChild(x);sl.appendChild(el);});}
+function renderMove(){const dd=day(cur);const ds=dels(dd);
+  const dk=delKcal(dd),sk=strKcal(dd);
+  document.getElementById('mvDel').textContent=Math.round(dk);
+  document.getElementById('mvStr').textContent=Math.round(sk);
+  document.getElementById('mvTot').textContent=Math.round(dk+sk);
+  document.getElementById('minToday').textContent=ds.reduce((a,s)=>a+(+s.min||0),0);
+  document.getElementById('kmToday').textContent=+dd.km||0;
+  document.getElementById('cntToday').textContent=ds.reduce((a,s)=>a+(+s.cnt||0),0);
+  document.getElementById('kmTotal').textContent=totalKm(state).toFixed(1);
+  document.getElementById('delPresetTxt').textContent=state.delPreset.min+'分・'+state.delPreset.km+'km';
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i));
+  const wb=d7.reduce((a,d)=>a+(state.days[d]?burnKcal(state.days[d]):0),0);
+  const wm=d7.reduce((a,d)=>a+(state.days[d]?dels(state.days[d]).reduce((s,x)=>s+(+x.min||0),0):0),0);
+  document.getElementById('moveWeek').textContent='この7日間：配達 '+wm+'分 ・ 合計 約'+Math.round(wb).toLocaleString()+'kcal うごいた';
+  const dl=document.getElementById('delList');dl.innerHTML='';
+  if(!ds.length)dl.innerHTML='<div class="empty">まだなし。上のボタンで1タップ🚴</div>';
+  ds.forEach((s,i)=>{const el=document.createElement('div');el.className='mrow';
+    const parts=[s.min?s.min+'分':'',s.km!=null?s.km+'km':'',s.cnt?s.cnt+'件':''].filter(Boolean).join('・');
+    el.innerHTML='<span class="mn">🚴 '+parts+(s.legacy?'<small>以前の記録</small>':'')+(s.at?'<small>'+s.at+'</small>':'')+'</span><span class="mk">'+sessKcal(s)+'kcal</span>';
+    const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
+    x.onclick=()=>{dd.dels=dels(dd).slice();dd.dels.splice(i,1);syncKm(dd);save();render();};
+    el.appendChild(x);dl.appendChild(el);});
+  renderEx();}
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
   document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
@@ -838,7 +1138,7 @@ function checkBadges(){BADGES.forEach(b=>{if(b.chk(state)&&!state.earned.include
 /* ============ CHART ============ */
 function drawChart(){const c=document.getElementById('chart'),ctx=c.getContext('2d');const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
   const isW=metricMode==='w';const days=isW?wDays(state):waistDays(state);
-  if(days.length<1){ctx.fillStyle='#94a1b5';ctx.font='14px sans-serif';ctx.fillText((isW?'体重':'腹囲')+'を記録するとグラフが出ます',20,H/2);return;}
+  if(days.length<1){ctx.fillStyle='#A38F7D';ctx.font='14px sans-serif';ctx.fillText((isW?'体重':'腹囲')+'を記録するとグラフが出ます',20,H/2);return;}
   const vals=days.map(d=>+state.days[d][isW?'w':'waist']);
   const goal=isW?state.goalWeight:null;
   let min=Math.min(...vals,goal!=null?goal:Infinity),max=Math.max(...vals,goal!=null?goal:-Infinity);
@@ -847,15 +1147,15 @@ function drawChart(){const c=document.getElementById('chart'),ctx=c.getContext('
   const x=i=>days.length===1?(L+R)/2:L+(R-L)*i/(days.length-1);
   const y=v=>B-(B-T)*(v-min)/(max-min);
   /* area gradient */
-  const grad=ctx.createLinearGradient(0,T,0,B);grad.addColorStop(0,'rgba(74,222,128,.35)');grad.addColorStop(1,'rgba(74,222,128,0)');
-  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(L,B);ctx.lineTo(R,B);ctx.stroke();
-  if(goal!=null){ctx.setLineDash([5,4]);ctx.strokeStyle='#fbbf24';ctx.beginPath();ctx.moveTo(L,y(goal));ctx.lineTo(R,y(goal));ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#fbbf24';ctx.font='11px sans-serif';ctx.fillText('目標 '+goal,R-48,y(goal)-5);}
+  const grad=ctx.createLinearGradient(0,T,0,B);grad.addColorStop(0,'rgba(247,128,159,.28)');grad.addColorStop(1,'rgba(247,128,159,0)');
+  ctx.strokeStyle='#F0E2D2';ctx.beginPath();ctx.moveTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+  if(goal!=null){ctx.setLineDash([5,4]);ctx.strokeStyle='#E8A62E';ctx.beginPath();ctx.moveTo(L,y(goal));ctx.lineTo(R,y(goal));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#E8A62E';ctx.font='11px sans-serif';ctx.fillText('目標 '+goal,R-48,y(goal)-5);}
   ctx.beginPath();vals.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});
   ctx.lineTo(x(vals.length-1),B);ctx.lineTo(x(0),B);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-  ctx.strokeStyle='#4ade80';ctx.lineWidth=2.5;ctx.beginPath();vals.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});ctx.stroke();
-  ctx.fillStyle='#4ade80';vals.forEach((v,i)=>{ctx.beginPath();ctx.arc(x(i),y(v),3.5,0,7);ctx.fill();});
-  ctx.fillStyle='#94a1b5';ctx.font='10px sans-serif';ctx.fillText(max.toFixed(1),4,T+4);ctx.fillText(min.toFixed(1),4,B);}
+  ctx.strokeStyle='#F7809F';ctx.lineWidth=2.5;ctx.beginPath();vals.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});ctx.stroke();
+  ctx.fillStyle='#F7809F';vals.forEach((v,i)=>{ctx.beginPath();ctx.arc(x(i),y(v),3.5,0,7);ctx.fill();});
+  ctx.fillStyle='#A38F7D';ctx.font='10px sans-serif';ctx.fillText(max.toFixed(1),4,T+4);ctx.fillText(min.toFixed(1),4,B);}
 
 /* ============ WORKOUT ENGINE ============ */
 let curProgram=WORKOUT;
@@ -897,7 +1197,7 @@ function renderWO(){const step=curProgram[wo.i];const rest=step.n==='休憩';
   document.getElementById('woCue').textContent=step.c;
   const nx=curProgram[wo.i+1];document.getElementById('woNext').textContent=nx?('次：'+nx.n+(nx.n!=='休憩'?' '+nx.s+'秒':'')):'これでラスト！';
   const off=553-553*(wo.left/step.s);document.getElementById('woRing').style.strokeDashoffset=off;
-  document.getElementById('woRing').setAttribute('stroke',rest?'#38bdf8':'#4ade80');
+  document.getElementById('woRing').setAttribute('stroke',rest?'#5FB8E6':'#3FC59B');
   /* progress dots */
   document.querySelectorAll('#woProg i').forEach(el=>{const idx=+el.dataset.idx;el.classList.toggle('done',idx<wo.i);el.classList.toggle('cur',idx===wo.i);});}
 function tickWO(){if(wo.paused||!wo.active)return;wo.left--;
@@ -907,7 +1207,7 @@ function nextWO(){beep(1046,.15);
   wo.i++;wo.left=curProgram[wo.i].s;renderWO();
   if(curProgram[wo.i].n!=='休憩'){beep(1046,.12);setTimeout(()=>beep(1318,.14),130);}}
 function finishWO(){clearInterval(wo.timer);wo.active=false;musicStop();
-  const dd=day(cur);dd.wo=(+dd.wo||0)+1;dd.strength=true;save();
+  const dd=day(cur);dd.wo=(+dd.wo||0)+1;dd.strength=true;const isCore=curProgram===WORKOUT;(dd.sets=dd.sets||[]).push({ex:isCore?'体幹プログラム':'全身HIIT',n:1,u:'回',k:isCore?45:120,prog:1,at:hhmm()});save();
   document.getElementById('woOverlay').classList.remove('show');
   checkBadges();render();
   toast('💪 プログラム完了！ +45XP よく動いた！');confettiRain();playFX();
@@ -1082,7 +1382,13 @@ function genWeeklyReport(){
   t+='【お菓子・お酒】週合計'+Math.round(snackK)+'kcal (自転車'+Math.round(snackK/30)+'km分)\n';
   t+='【むしゃくしゃ】乗り切り累計'+(state.calmHeld||0)+'・ベスト'+(state.calmBest||0)+'連\n';
   t+='【休肝日】今週'+days.filter(o=>o.x.dry===true).length+'/'+(state.dryTarget||3)+'日・連続'+dryStreakBack(state)+'・ベスト'+dryBest(state)+'・累計'+dryTotal(state)+'\n';
-  t+='\n※30代後半の女性トレーナー視点でアドバイスください。';
+  {const nd=days.filter(o=>(o.x.meals||[]).some(m=>m.night)).length,nk=days.reduce((a,o)=>a+(o.x.meals||[]).reduce((s,m)=>s+(m.night?(+m.k||0):0),0),0);
+    t+='【21時以降の食事】'+nd+'日・計'+Math.round(nk)+'kcal\n';}
+  {const mn=days.reduce((a,o)=>a+dels(o.x).reduce((s,x)=>s+(+x.min||0),0),0),bk=days.reduce((a,o)=>a+burnKcal(o.x),0);
+    t+='【うごいた】配達'+mn+'分・消費合計 約'+Math.round(bk)+'kcal\n';}
+  {const ex={};days.forEach(o=>(o.x.sets||[]).forEach(s=>{const e=ex[s.ex]||(ex[s.ex]={n:0,u:s.u});e.n+=+s.n||0;}));
+    const ks=Object.keys(ex);t+='【筋トレ】'+(ks.length?ks.map(k=>k+ex[k].n+ex[k].u).join('・'):'記録なし')+'\n';}
+  t+='\n※トレーナーのチカ（おにぎりのゆるキャラ）として、やさしくアドバイスください。';
   return t;
 }
 document.getElementById('reportBtn').onclick=()=>{document.getElementById('reportText').value=genWeeklyReport();document.getElementById('reportOverlay').classList.add('show');};
@@ -1091,7 +1397,7 @@ document.getElementById('reportCopy').onclick=()=>{const ta=document.getElementB
   try{navigator.clipboard.writeText(ta.value);}catch(e){try{document.execCommand('copy');}catch(_){}}
   toast('📋 コピーしました。チャットに貼り付けてください');};
 
-/* ============ 千夏コーチ（ルールベース・無料オフライン） ============ */
+/* ============ チカコーチ（ルールベース・無料オフライン） ============ */
 function coachComment(){
   const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)).reverse();
   const days=d7.map(d=>({d,x:state.days[d]||{}}));
@@ -1126,8 +1432,11 @@ function coachComment(){
     if(dryWk>=dryTg)praise.push('休肝日が今週'+dryWk+'日、目標クリア。お酒を抜いた日はお腹（内臓脂肪）に一番効くの。ここが続くと必ず変わるよ。');
     else if(dryWk>=1)praise.push('休肝日'+dryWk+'日、ちゃんと作れてる。あと'+(dryTg-dryWk)+'日で今週の目標だよ、いける。');
     else nudge.push('今週まだ休肝日がゼロ。毎日を週'+dryTg+'日休むだけで、腹囲の落ちが変わるよ。まず1日、飲まない日を作ろ。');}
+  {const nd=days.filter(o=>(o.x.meals||[]).some(m=>m.night)).length;
+    if(nd>=4)nudge.push('21時以降に食べた日が'+nd+'日あったよ。ゼロにしなくていいから、まず週2日だけ「21時でごちそうさま」の日をつくってみよ。');
+    else if(nd>=1&&nd<=2)praise.push('21時以降の食事は'+nd+'日だけ。ちゃんと減らせてる、えらい〜。');}
   if(perfect>=4)praise.push('完璧な日が'+perfect+'日。習慣として体に入ってきてる。');
-  let msg=R(['今週もお疲れさま。','はい、千夏だよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
+  let msg=R(['今週もお疲れさま。','はい、チカだよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
   if(!praise.length&&!nudge.length){
     msg+='まだ記録が少なくて、コメントするには早いかな。まずは体重と、クエストを何日か付けてみて。数字が溜まったら、ちゃんと具体的に話すね。';
   } else {
@@ -1142,39 +1451,64 @@ function coachComment(){
 document.getElementById('coachBtn').onclick=()=>{document.getElementById('coachText').textContent=coachComment();document.getElementById('coachOverlay').classList.add('show');};
 document.getElementById('coachClose').onclick=()=>document.getElementById('coachOverlay').classList.remove('show');
 
-/* 千夏の立ち絵（SVG）— idをプレフィックスで一意化して複数箇所に使える */
-function chiSVG(p){return `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;border-radius:14px;">
-<defs><linearGradient id="${p}Bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38314f"/><stop offset="1" stop-color="#5a2f57"/></linearGradient>
-<clipPath id="${p}Rc"><rect x="0" y="0" width="200" height="220" rx="18"/></clipPath></defs>
-<g clip-path="url(#${p}Rc)">
-<rect width="200" height="220" fill="url(#${p}Bg)"/>
-<circle cx="100" cy="128" r="92" fill="#ffffff" opacity="0.06"/>
-<path d="M42 122 Q30 58 100 44 Q170 58 158 122 L164 220 L36 220 Z" fill="#3f2a20"/>
-<path d="M54 220 Q60 174 100 169 Q140 174 146 220 Z" fill="#fb7185"/>
-<path d="M83 171 L88 200 M117 171 L112 200" stroke="#f43f5e" stroke-width="6" fill="none" stroke-linecap="round"/>
-<rect x="90" y="150" width="20" height="24" rx="8" fill="#f4c2a0"/>
-<path d="M67 108 Q67 150 100 159 Q133 150 133 108 Q133 76 100 72 Q67 76 67 108 Z" fill="#ffdcc0"/>
-<circle cx="67" cy="116" r="7" fill="#ffdcc0"/><circle cx="133" cy="116" r="7" fill="#ffdcc0"/>
-<ellipse cx="80" cy="128" rx="8" ry="5" fill="#ff9db0" opacity="0.5"/><ellipse cx="120" cy="128" rx="8" ry="5" fill="#ff9db0" opacity="0.5"/>
-<ellipse cx="84" cy="116" rx="10" ry="12.5" fill="#fff"/><ellipse cx="116" cy="116" rx="10" ry="12.5" fill="#fff"/>
-<ellipse cx="85" cy="117" rx="7" ry="10.5" fill="#6f4a30"/><ellipse cx="115" cy="117" rx="7" ry="10.5" fill="#6f4a30"/>
-<ellipse cx="85" cy="118" rx="3.6" ry="6.5" fill="#33231a"/><ellipse cx="115" cy="118" rx="3.6" ry="6.5" fill="#33231a"/>
-<circle cx="82" cy="112" r="2.7" fill="#fff"/><circle cx="112" cy="112" r="2.7" fill="#fff"/>
-<circle cx="88" cy="122" r="1.3" fill="#fff" opacity="0.85"/><circle cx="118" cy="122" r="1.3" fill="#fff" opacity="0.85"/>
-<path d="M73 107 Q84 101 95 107" stroke="#2f2018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-<path d="M105 107 Q116 101 127 107" stroke="#2f2018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-<path d="M74 99 Q84 95 93 98" stroke="#5b3a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-<path d="M107 98 Q116 95 126 99" stroke="#5b3a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-<path d="M100 121 l -3 8 l 5 0" stroke="#deA684" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M91 140 Q100 148 109 140" stroke="#c85a5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<path d="M61 112 Q57 62 100 50 Q143 62 139 112 Q127 90 118 95 Q121 72 100 68 Q79 72 82 95 Q73 90 61 112 Z" fill="#4a2f22"/>
-<path d="M63 110 Q58 152 70 178 L82 174 Q70 142 75 110 Z" fill="#4a2f22"/>
-<path d="M137 110 Q142 152 130 178 L118 174 Q130 142 125 110 Z" fill="#4a2f22"/>
-<path d="M84 58 Q100 53 116 59" stroke="#6b442f" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
-</g></svg>`;}
-(function(){const h=document.getElementById('chiFaceHome');if(h)h.innerHTML=chiSVG('h');
-  const tips=['今日もお疲れさま。まず1つ、できることから。','下の「千夏コーチの一言」で今週の講評が見れるよ。','水分と体幹、忘れてない？無理はしないでね。','ケンカした日は"無心でデリ一択"、覚えてる？','記録をつけてるあなた、ちゃんと前に進んでるよ。','完璧じゃなくていい。続けてる時点で勝ってる。'];
-  const t=document.getElementById('chiTip');if(t)t.textContent=tips[Math.floor(Math.random()*tips.length)];})();
+/* ============ チカ（おにぎりのゆるキャラ） ============ */
+function chikaSVG(mood,p){mood=mood||'normal';p=p||'c';
+  const body='M60 10 C67 10 71 15 75 21 L104 74 C112 89 104 102 89 102 L31 102 C16 102 8 89 16 74 L45 21 C49 15 53 10 60 10 Z';
+  const ink='#3A2E28',line='#E5D5C0';
+  const up=mood==='cheer';
+  const arms=up
+    ?'<ellipse cx="25" cy="44" rx="6" ry="9" transform="rotate(-35 25 44)" fill="#fff" stroke="'+line+'" stroke-width="2.5"/><ellipse cx="95" cy="44" rx="6" ry="9" transform="rotate(35 95 44)" fill="#fff" stroke="'+line+'" stroke-width="2.5"/>'
+    :'<ellipse cx="11" cy="80" rx="6" ry="8.5" transform="rotate(25 11 80)" fill="#fff" stroke="'+line+'" stroke-width="2.5"/><ellipse cx="109" cy="80" rx="6" ry="8.5" transform="rotate(-25 109 80)" fill="#fff" stroke="'+line+'" stroke-width="2.5"/>';
+  let eyes,mouth,brows='',extra='';
+  if(mood==='happy'||mood==='cheer'){
+    eyes='<path d="M43 53 Q48 46 53 53" stroke="'+ink+'" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M67 53 Q72 46 77 53" stroke="'+ink+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    mouth='<path d="M54.5 59 Q60 68 65.5 59 Z" fill="#E86A7E"/>';
+  }else if(mood==='night'){
+    eyes='<path d="M43 52 Q48 56 53 52" stroke="'+ink+'" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M67 52 Q72 56 77 52" stroke="'+ink+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    mouth='<ellipse cx="60" cy="61.5" rx="2.4" ry="1.8" fill="#E86A7E"/>';
+    extra='<path d="M100 6 a10 10 0 1 0 9 14 a8 8 0 1 1 -9 -14 z" fill="#FFD36E"/><text x="86" y="34" font-size="11" font-weight="800" fill="#A98BF0">z</text><text x="93" y="27" font-size="8" font-weight="800" fill="#A98BF0">z</text>';
+  }else{
+    eyes='<ellipse cx="48" cy="51" rx="3.4" ry="4.4" fill="'+ink+'"/><ellipse cx="72" cy="51" rx="3.4" ry="4.4" fill="'+ink+'"/><circle cx="49.3" cy="49.3" r="1.3" fill="#fff"/><circle cx="73.3" cy="49.3" r="1.3" fill="#fff"/>';
+    if(mood==='worry'){
+      mouth='<path d="M55 62 Q57.5 59.5 60 62 Q62.5 64.5 65 62" stroke="'+ink+'" stroke-width="2" fill="none" stroke-linecap="round"/>';
+      brows='<path d="M43 45 L52 42" stroke="'+ink+'" stroke-width="2" stroke-linecap="round"/><path d="M77 45 L68 42" stroke="'+ink+'" stroke-width="2" stroke-linecap="round"/>';
+      extra='<path d="M86 34 q4 6 0 9 q-4 -3 0 -9z" fill="#9ED9F5"/>';
+    }else mouth='<path d="M56 59 Q60 63.5 64 59" stroke="'+ink+'" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+  }
+  if(up)extra+='<path d="M12 18 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z" fill="#FFD36E"/><path d="M106 22 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5z" fill="#FF9DB5"/>';
+  return '<svg viewBox="0 0 120 116" xmlns="http://www.w3.org/2000/svg">'
+    +'<defs><clipPath id="'+p+'Cb"><path d="'+body+'"/></clipPath></defs>'
+    +'<ellipse cx="60" cy="110" rx="34" ry="4.5" fill="#000" opacity=".07"/>'
+    +arms
+    +'<ellipse cx="46" cy="104" rx="7.5" ry="4.5" fill="#fff" stroke="'+line+'" stroke-width="2.5"/><ellipse cx="74" cy="104" rx="7.5" ry="4.5" fill="#fff" stroke="'+line+'" stroke-width="2.5"/>'
+    +'<path d="'+body+'" fill="#fff"/>'
+    +'<g clip-path="url(#'+p+'Cb)">'
+      +'<ellipse cx="57" cy="24" rx="2" ry="1.2" fill="#F1E8DC"/><ellipse cx="70" cy="28" rx="1.6" ry="1" fill="#F1E8DC"/>'
+      +'<ellipse cx="33" cy="70" rx="2" ry="1.2" fill="#F1E8DC"/><ellipse cx="88" cy="66" rx="2" ry="1.2" fill="#F1E8DC"/>'
+      +'<rect x="0" y="30" width="120" height="8" fill="#7FD8B9"/><rect x="0" y="33" width="120" height="1.6" fill="#fff" opacity=".8"/>'
+      +'<rect x="37" y="72" width="46" height="36" rx="5" fill="#2E3A33"/><rect x="41" y="75" width="5" height="26" rx="2" fill="#4A5C51" opacity=".8"/>'
+    +'</g>'
+    +'<path d="'+body+'" fill="none" stroke="'+line+'" stroke-width="2.5"/>'
+    +'<path d="M80 31 l10 -5 l-1.5 7 z M80 35 l9 4 l-6 3 z" fill="#7FD8B9"/>'
+    +'<ellipse cx="40" cy="60" rx="5" ry="3" fill="#FFB3C4" opacity=".85"/><ellipse cx="80" cy="60" rx="5" ry="3" fill="#FFB3C4" opacity=".85"/>'
+    +eyes+brows+mouth+extra+'</svg>';}
+
+function chikaLine(){const dd=day(cur);const ms=dd.meals||[];
+  const kcal=ms.reduce((a,m)=>a+(+m.k||0),0),pro=ms.reduce((a,m)=>a+(+m.p||0),0);
+  const out=burnKcal(dd),nightK=ms.reduce((a,m)=>a+(m.night?(+m.k||0):0),0);
+  const n=new Date(),h=n.getHours(),pick=a=>a[(ms.length+n.getDate())%a.length];
+  if(cur!==today())return{mood:'normal',t:cur.slice(5).replace('-','/')+' の記録をひらいてるよ。書きわすれ、ここで足せるよ〜'};
+  if(h>=21||h<4){
+    if(nightK>0)return{mood:'night',t:pick(['よるのぶんも ちゃんと書けたね。えらい〜。お水も いっしょに のんでね','書けたのが いちばん えらい。あしたの朝、体重はかってみよ'])};
+    return{mood:'night',t:pick(['21時すぎたよ〜。きょうは ここで ごちそうさま できたら はなまる🌸','おなかすいた？ まずお水1杯。それでも食べたら、ちゃんと書いてね'])};}
+  if(!ms.length)return{mood:'normal',t:h<11?'おはよ〜。あさごはん なにたべた？':'まだ なにも書いてないよ〜。さくっと1こ書いてみよ'};
+  if(kcal>state.calTarget)return{mood:'worry',t:'ちょっと たべすぎかも…。でも書けたのが えらい！ あしたの配達で とりかえそ'};
+  if(out>=300)return{mood:'cheer',t:'きょうは '+Math.round(out)+'kcal も うごいたね！ すごい〜'};
+  if(pro>=state.proTarget)return{mood:'cheer',t:'タンパク質 クリア！ つよい〜💪'};
+  return{mood:'happy',t:pick(['いいかんじ！ あと '+Math.round(state.calTarget-kcal)+'kcal たべてOKだよ','もぐもぐ記録、えらい〜。このちょうし！'])};}
+function renderChika(){const L=chikaLine();
+  document.getElementById('chiFaceHome').innerHTML=chikaSVG(L.mood,'h');
+  document.getElementById('chiTip').textContent=L.t;}
 
 /* ============ 経過写真（IndexedDBに縮小保存） ============ */
 let _pdb;
@@ -1250,8 +1584,8 @@ function chikaReply(raw){
       'えらい！！それ本当にすごいこと。我慢できた自分を、ちゃんと褒めてあげてね。こういう1回の積み重ねが、1か月後の腹囲を変えるんだよ。',
       'よく乗り切ったね。あなたはもう"動ける人"だから、あとはこれを続けるだけ。私は毎日ここで見てるよ。'
     ]);}
-  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','千夏','元気','ただいま'].some(k=>raw.includes(k))){
-    return R(['やっほー、今日も来てくれてありがとう。調子どう？','はいはい、千夏だよ。何かあった？食べたくなったら遠慮なく相談してね。']);}
+  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','チカ','元気','ただいま'].some(k=>raw.includes(k))){
+    return R(['やっほー、今日も来てくれてありがとう。調子どう？','はいはい、チカだよ。何かあった？食べたくなったら遠慮なく相談してね。']);}
   return R([
     'うんうん、聞いてるよ。食べたくなったり飲みたくなったら、遠慮なく"○○食べたい"って言ってね。ちゃんと一緒に考えるから。',
     'なるほどね。今日の記録はもうつけた？迷ったら、まず水1杯と深呼吸。それから決めよ。',
@@ -1260,18 +1594,18 @@ function chikaReply(raw){
 }
 function renderChat(){const log=document.getElementById('chatLog');if(!log)return;log.innerHTML='';
   (state.chat||[]).forEach(m=>{const b=document.createElement('div');
-    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#38bdf8;color:#052028;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
+    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#FFD3DE;color:#5A2A35;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
     else b.style.cssText='align-self:flex-start;max-width:82%;background:var(--panel2);padding:8px 12px;border-radius:14px 14px 14px 4px;font-size:.86rem;line-height:1.55;white-space:pre-wrap;';
     b.textContent=m.t;log.appendChild(b);});
   log.scrollTop=log.scrollHeight;}
-function openChat(){if(!state.chat||!state.chat.length){state.chat=[{r:'c',t:'やっほー、千夏だよ。今どんな感じ？…もしかして、何か食べたくなってる？ 正直に言ってみ、一緒に考えよ。'}];save();}
+function openChat(){if(!state.chat||!state.chat.length){state.chat=[{r:'c',t:'やっほー、チカだよ。今どんな感じ？…もしかして、何か食べたくなってる？ 正直に言ってみ、一緒に考えよ。'}];save();}
   document.getElementById('chatOverlay').classList.add('show');renderChat();setTimeout(()=>{const i=document.getElementById('chatInput');if(i)i.focus();},120);}
 function chatSend(){const inp=document.getElementById('chatInput');const t=inp.value.trim();if(!t)return;
   state.chat=state.chat||[];state.chat.push({r:'u',t});state.chat.push({r:'c',t:chikaReply(t)});
   if(state.chat.length>60)state.chat=state.chat.slice(-60);
   save();inp.value='';renderChat();beep(660,.05);}
 document.getElementById('chiCard').onclick=openChat;
-document.getElementById('chatFace').innerHTML=chiSVG('c');
+document.getElementById('chatFace').innerHTML=chikaSVG('happy','c');
 document.getElementById('chatClose').onclick=()=>document.getElementById('chatOverlay').classList.remove('show');
 document.getElementById('chatSend').onclick=chatSend;
 document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chatSend();}});
@@ -1325,8 +1659,8 @@ function bodyReply(raw){
     return '体づくりって、実は"休む力"も込みなの。筋肉は寝てる間に回復するから、21時就寝を狙ってるあなたは方向性ばっちり。お通じやガスが気になる時は、水分・食物繊維・そして今やってる配達（軽い運動）が効くよ。腰など痛みが絡む場合は、そっちを先にケアしてね。';
   }
   /* ⑨ あいさつ・その他 */
-  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','千夏','元気'].some(k=>t.includes(k))){
-    return 'やっほー、千夏だよ。からだのこと、どこか痛い・気になる所ある？ 部位や「いつ・何をして」痛めたか教えてくれると、ちゃんと一緒に考えられるよ。';
+  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','チカ','元気'].some(k=>t.includes(k))){
+    return 'やっほー、チカだよ。からだのこと、どこか痛い・気になる所ある？ 部位や「いつ・何をして」痛めたか教えてくれると、ちゃんと一緒に考えられるよ。';
   }
   return 'うんうん、聞かせて。「どこが」「いつ・何をしていて」「どんな痛み（ズキッ／じわじわ／しびれ）」を教えてくれると、より具体的に答えられるよ。※私は医療の代わりにはならないから、強い痛みやしびれ、長引く時は無理せず病院にかかってね。';
 }
@@ -1336,7 +1670,7 @@ function renderBodyChips(){const box=document.getElementById('bodyChips');if(!bo
     b.style.cssText='font-size:.72rem;padding:5px 9px;';b.onclick=()=>{document.getElementById('bodyInput').value=c;bodyChatSend();};box.appendChild(b);});}
 function renderBodyChat(){const log=document.getElementById('bodyLog');if(!log)return;log.innerHTML='';
   (state.bodyChat||[]).forEach(m=>{const b=document.createElement('div');
-    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#38bdf8;color:#052028;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
+    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#FFD3DE;color:#5A2A35;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
     else b.style.cssText='align-self:flex-start;max-width:82%;background:var(--panel2);padding:8px 12px;border-radius:14px 14px 14px 4px;font-size:.86rem;line-height:1.6;white-space:pre-wrap;';
     b.textContent=m.t;log.appendChild(b);});
   log.scrollTop=log.scrollHeight;}
@@ -1347,7 +1681,7 @@ function bodyChatSend(){const inp=document.getElementById('bodyInput');const t=i
   if(state.bodyChat.length>60)state.bodyChat=state.bodyChat.slice(-60);
   save();inp.value='';renderBodyChat();beep(620,.05);}
 document.getElementById('bodyChatBtn').onclick=openBodyChat;
-document.getElementById('bodyFace').innerHTML=chiSVG('b');
+document.getElementById('bodyFace').innerHTML=chikaSVG('normal','b');
 document.getElementById('bodyClose').onclick=()=>document.getElementById('bodyOverlay').classList.remove('show');
 document.getElementById('bodySend').onclick=bodyChatSend;
 document.getElementById('bodyInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();bodyChatSend();}});
@@ -1358,8 +1692,6 @@ document.getElementById('saveW').onclick=()=>{const dd=day(cur);
   const wa=parseFloat(document.getElementById('waistInput').value);if(!isNaN(wa))dd.waist=wa;else delete dd.waist;
   save();checkBadges();render();toast('記録しました 📈');beep(660,.1);};
 document.getElementById('goalInput').onchange=e=>{const v=parseFloat(e.target.value);if(!isNaN(v)){state.goalWeight=v;save();render();}};
-document.getElementById('saveKm').onclick=()=>{const dd=day(cur);const v=parseFloat(document.getElementById('kmInput').value);
-  if(!isNaN(v))dd.km=v;else delete dd.km;save();checkBadges();render();toast('+'+Math.round((v||0)*5)+'XP 🚴');beep(660,.1);};
 document.getElementById('toggleMetric').onclick=()=>{metricMode=metricMode==='w'?'waist':'w';drawChart();};
 document.getElementById('prevDay').onclick=()=>{cur=addDays(cur,-1);render();};
 document.getElementById('nextDay').onclick=()=>{cur=addDays(cur,1);render();};
@@ -1369,54 +1701,12 @@ document.getElementById('exportBtn').onclick=()=>{const b=new Blob([JSON.stringi
 document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
 document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const s=JSON.parse(r.result);if(s.days){state=s;state.earned=state.earned||[];save();prevLevel=null;render();prevLevel=levelFor(totalXP(state)).lvl;toast('データを読み込みました');}}catch(x){toast('読み込み失敗');}};r.readAsText(f);};
-/* food log handlers */
-/* 料理タイプ別の概算（100gあたり kcal / タンパク質g） */
-const CAT=[
-  {n:'あっさり（野菜・スープ中心）',k:45,p:2},
-  {n:'ふつうの和食・定食',k:130,p:7},
-  {n:'ごはんもの・丼・カレー',k:170,p:5},
-  {n:'麺類（ラーメン・パスタ等）',k:140,p:5},
-  {n:'炒め物・こってり系',k:230,p:10},
-  {n:'肉がメインの料理',k:230,p:16},
-  {n:'魚がメインの料理',k:170,p:18},
-  {n:'揚げ物ガッツリ（唐揚げ・カツ）',k:300,p:14},
-  {n:'パン・粉物・ピザ',k:270,p:8},
-  {n:'スイーツ・菓子',k:360,p:4,snack:true},
-];
-(function(){const sel=document.getElementById('estType');CAT.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.n;sel.appendChild(o);});})();
-function updateEstPreview(){const cat=CAT[+document.getElementById('estType').value||0];const g=parseFloat(document.getElementById('estGram').value);const pv=document.getElementById('estPrev');
-  if(cat&&!isNaN(g)&&g>0){const k=Math.round(cat.k*g/100),p=Math.round(cat.p*g/10)/10;pv.textContent='≒ '+k+' kcal ／ P '+p+' g';pv.style.color='var(--accent2)';}
-  else{pv.textContent='≒ — kcal ／ P — g';pv.style.color='var(--sub)';}}
-document.getElementById('estType').onchange=updateEstPreview;
-document.getElementById('estGram').oninput=updateEstPreview;
-document.getElementById('estAdd').onclick=()=>{const cat=CAT[+document.getElementById('estType').value||0];const g=parseFloat(document.getElementById('estGram').value);
-  const nm=(document.getElementById('estName').value.trim()||cat.n);
-  if(!cat||isNaN(g)||g<=0){toast('料理タイプとグラムを入れてください');return;}
-  const dd=day(cur);dd.meals=dd.meals||[];const before=dd.meals.reduce((a,m)=>a+(+m.p||0),0);
-  const k=Math.round(cat.k*g/100),p=Math.round(cat.p*g/10)/10;const snack=cat.snack||isSnack(nm);
-  dd.meals.push({n:nm+' '+g+'g(概算)',k,p,s:snack?1:0});save();
-  document.getElementById('estName').value='';document.getElementById('estGram').value=200;
-  if(before<state.proTarget&&(before+p)>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
-  else if(snack){toast('🍫 '+nm+' +'+k+'kcal ＝ 自転車'+Math.round(k/30)+'km分。戒め！');beep(196,.22,'sawtooth');}
-  else{toast('概算で追加：'+nm);beep(660,.08);} render();updateEstPreview();};
-updateEstPreview();
-document.getElementById('foodSearch').oninput=updateFoodPreview;
-document.getElementById('foodGram').oninput=updateFoodPreview;
-document.getElementById('foodAddG').onclick=()=>{const f=foodByName(document.getElementById('foodSearch').value);
-  const g=parseFloat(document.getElementById('foodGram').value);
-  if(!f||isNaN(g)||g<=0){toast('リストから食材を選び、グラムを入れてください');return;}
-  const dd=day(cur); dd.meals=dd.meals||[];
-  const before=dd.meals.reduce((a,m)=>a+(+m.p||0),0);
-  const k=Math.round(f.k*g/100), p=Math.round(f.p*g/10)/10; const snack=isSnack(f.n);
-  dd.meals.push({n:f.n+' '+g+'g',k,p,s:snack?1:0}); save();
-  document.getElementById('foodSearch').value=''; document.getElementById('foodGram').value=100;
-  if(before<state.proTarget && (before+p)>=state.proTarget){toast('💪 タンパク質 目標達成！');confettiRain();playFX();}
-  else if(snack){toast('🍫 '+f.n+' +'+k+'kcal ＝ 自転車'+Math.round(k/30)+'km分。戒め！');beep(196,.22,'sawtooth');}
-  else{toast('追加：'+f.n+' '+g+'g');beep(660,.08);} render();};
-document.getElementById('editTargets').onclick=()=>{
-  const c=prompt('1日の目標カロリー(kcal)',state.calTarget);if(c!==null){const v=parseFloat(c);if(!isNaN(v))state.calTarget=v;}
-  const p=prompt('1日の目標タンパク質(g)',state.proTarget);if(p!==null){const v=parseFloat(p);if(!isNaN(v))state.proTarget=v;}
-  save();render();};
+/* ============ タブ ============ */
+function showTab(id){document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));
+  document.querySelectorAll('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));
+  window.scrollTo(0,0);if(id==='body')drawChart();}
+document.querySelectorAll('#bnav button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+document.getElementById('coachFace').innerHTML=chikaSVG('cheer','co');
 
 prevLevel=levelFor(totalXP(state)).lvl;
 render();
