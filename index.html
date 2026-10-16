@@ -252,6 +252,15 @@
   .rc-tot b{font-size:1.35rem;color:var(--accent2);}
   .stepper{display:flex;align-items:center;gap:10px;}
   .stepper button{padding:6px 14px;}
+  .week7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .w7{text-align:center;border-radius:12px;padding:6px 0;background:var(--panel2);border:1.5px solid transparent;}
+  .w7 span{display:block;font-size:.66rem;color:var(--sub);font-weight:800;}
+  .w7 b{font-size:.7rem;font-weight:800;}
+  .w7.under{background:#E9F8F1;} .w7.under b{color:var(--accent);}
+  .w7.over{background:#FFF1F4;} .w7.over b{color:var(--fire);}
+  .w7.none b{color:var(--sub);}
+  .w7.cur{border-color:#FFB3C6;}
+  .dots{letter-spacing:2px;color:#3FC59B;}
 </style>
 </head>
 <body>
@@ -262,7 +271,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.1.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.2.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -285,19 +294,23 @@
     </div>
 
     <div class="card">
-      <h3>🍙 きょうのバランス <span class="muted" id="foodDayLabel"></span></h3>
+      <h3>🍙 きょうの収支 <span class="muted" id="foodDayLabel"></span></h3>
       <div class="bal">
         <div class="bal-i in"><span>たべた</span><b id="balIn">0</b><small>kcal</small></div>
         <div class="bal-op">−</div>
-        <div class="bal-i out"><span>うごいた</span><b id="balOut">0</b><small>kcal</small></div>
+        <div class="bal-i out"><span>しょうひ</span><b id="balOut">0</b><small>kcal</small></div>
         <div class="bal-op">=</div>
-        <div class="bal-i net"><span>さしひき</span><b id="balNet">0</b><small>kcal</small></div>
+        <div class="bal-i net"><span>しゅうし</span><b id="balNet">0</b><small>kcal</small></div>
       </div>
-      <div class="barrow"><span class="muted">カロリー</span><span id="calTxt">0 / 2100</span></div>
+      <div id="burnBreak" class="muted" style="text-align:center;font-size:.7rem;margin:-4px 0 6px;"></div>
+      <div class="barrow"><span class="muted" id="calLabel">食べていい量</span><span id="calTxt">0 / 0</span></div>
       <div class="xpbar"><div class="xpfill" id="calFill" style="background:linear-gradient(90deg,#FFC48C,#F7809F);animation:none;"></div></div>
       <div class="barrow"><span class="muted">タンパク質</span><span id="proTxt">0 / 100g</span></div>
       <div class="xpbar"><div class="xpfill" id="proFill" style="background:linear-gradient(90deg,#7FD8B9,#5FB8E6);animation:none;"></div></div>
       <div id="calLeft" class="muted" style="text-align:center;margin-top:10px;font-weight:700;"></div>
+      <div class="sec-label">📅 この7日の収支（記録した日）</div>
+      <div class="week7" id="week7"></div>
+      <div id="weekDef" class="muted" style="text-align:center;margin-top:8px;font-weight:700;"></div>
       <div id="snackLine" class="infoline"></div>
       <div id="nightLine" class="infoline info-night" hidden></div>
     </div>
@@ -328,6 +341,9 @@
       <div class="sec-label">🍳 マイ料理（材料から自動計算）</div>
       <div class="chips" id="recipeChips"></div>
 
+      <div class="sec-label">🏷 マイ商品（よく買う市販品）</div>
+      <div class="chips" id="productChips"></div>
+
       <details class="more" id="freeBox">
         <summary>✏️ 名前とカロリーだけで登録（パッケージの表示を見て）</summary>
         <div style="margin-top:10px;">
@@ -357,7 +373,7 @@
         </div>
       </details>
 
-      <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">目標カロリー / タンパク質を変更</span></div>
+      <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">アンダー目標 / タンパク質を変更</span></div>
     </div>
 
     <div class="card">
@@ -408,6 +424,7 @@
         <div class="bal-i in"><span>ごうけい</span><b id="mvTot">0</b><small>kcal</small></div>
       </div>
       <div id="moveWeek" class="muted" style="text-align:center;font-weight:700;"></div>
+      <div id="strWeek" style="text-align:center;font-weight:800;margin-top:8px;cursor:pointer;"></div>
     </div>
 
     <div class="card">
@@ -456,6 +473,18 @@
 
   <!-- ================= からだ ================= -->
   <section class="tab" id="tab-body">
+    <div class="card">
+      <h3>🔥 基礎代謝とアンダー目標</h3>
+      <div class="row">
+        <div><label class="mini">年齢</label><input type="number" id="pfAge" style="width:70px;"></div>
+        <div><label class="mini">身長(cm)</label><input type="number" step="0.1" id="pfH" style="width:84px;"></div>
+        <div><label class="mini">性別</label><select id="pfSex" class="rc-u"><option value="m">男性</option><option value="f">女性</option></select></div>
+      </div>
+      <label class="mini" style="margin-top:12px;">1日のアンダー目標（食べた量を、使った量よりどれだけ少なくするか）</label>
+      <div class="chips" id="defChips"></div>
+      <div id="pfInfo" class="infoline info-good"></div>
+      <div class="muted" style="font-size:.7rem;margin-top:6px;">体重は下の記録の最新値を使います。消費は「基礎代謝×1.2（座り仕事）＋記録した配達・筋トレ」で計算。つけ忘れると少なめに出るので、アンダー判定はきびしめ（安全側）になります。</div>
+    </div>
     <div class="card">
       <h3>⚖️ 体重 & お腹の記録</h3>
       <div class="row">
@@ -668,6 +697,33 @@
   </div>
 </div></div>
 
+<!-- マイ商品 -->
+<div class="overlay" id="productOverlay"><div class="modal recipe-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <h2 style="font-size:1.15rem;margin:0;">🏷 マイ商品</h2><span class="link" id="pdClose">閉じる</span>
+  </div>
+  <label class="mini">商品名</label>
+  <input id="pdName" type="text" style="width:100%;" placeholder="例：チョコモナカアイス">
+  <div class="row" style="margin-top:8px;flex-wrap:nowrap;">
+    <div style="flex:1;min-width:0;"><label class="mini">メーカー</label><input id="pdMaker" type="text" style="width:100%;" placeholder="田口食品"></div>
+    <div style="flex:1;min-width:0;"><label class="mini">お店</label><input id="pdStore" type="text" style="width:100%;" placeholder="サンディ"></div>
+  </div>
+  <div class="row" style="margin-top:8px;">
+    <div><label class="mini">値段(円)</label><input id="pdPrice" type="number" placeholder="70" style="width:80px;"></div>
+    <div><label class="mini">1個のカロリー</label><input id="pdKcal" type="number" placeholder="250" style="width:96px;"></div>
+    <div><label class="mini">タンパク質(g)</label><input id="pdP" type="number" step="0.1" placeholder="3" style="width:80px;"></div>
+  </div>
+  <div class="muted" style="font-size:.72rem;margin-top:6px;">袋のうらの「栄養成分表示」の数字がいちばん正確。「1個あたり」の欄を見てね。値段は検索用のメモです。</div>
+  <button class="ghost" id="pdAi" style="width:100%;margin-top:8px;" hidden>🤖 AIでカロリーを推定（目安）</button>
+  <div id="pdAiNote" class="muted" style="font-size:.72rem;margin-top:4px;"></div>
+  <label style="display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:700;margin-top:10px;"><input type="checkbox" id="pdSnack" style="width:auto;transform:scale(1.2);"> おやつ・お酒として数える（戒めカウント）</label>
+  <div style="display:flex;gap:8px;margin-top:14px;">
+    <button id="pdEat" style="flex:2;">🍙 保存して1個記録</button>
+    <button class="ghost" id="pdSave" style="flex:1;">保存だけ</button>
+  </div>
+  <div style="text-align:center;margin-top:12px;"><span class="link" id="pdDelete" style="color:var(--fire);">この商品を削除</span></div>
+</div></div>
+
 <!-- マイ料理 -->
 <div class="overlay" id="recipeOverlay"><div class="modal recipe-modal">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -859,7 +915,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.earned=s.earned||[]; s.calTarget=s.calTarget||2100; s.proTarget=s.proTarget||100; s.customFoods=s.customFoods||[]; s.customFoods100=s.customFoods100||[];
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
-  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[]; s.delPreset=s.delPreset||{min:60,km:15};
+  s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[]; s.delPreset=s.delPreset||{min:60,km:15}; s.prof=s.prof||{age:39,h:173,sex:'m'}; s.defTarget=s.defTarget||300; s.strGoal=s.strGoal||3;
   if(!s.recipes)s.recipes=[{id:1,n:'うちのグラタン',serv:2,items:[{n:'ペンネ(乾)',k:347,p:12.9,q:120,u:'g',ug:1},{n:'グラタン・ホワイトソース(缶)',k:99,p:1.8,q:1,u:'缶',ug:290},{n:'鶏もも(皮付)',k:190,p:16.6,q:200,u:'g',ug:1},{n:'しいたけ',k:25,p:3.1,q:4,u:'個',ug:15},{n:'いんげん',k:23,p:1.8,q:8,u:'本',ug:7},{n:'カリフラワー',k:28,p:3.0,q:6,u:'房',ug:15}]}];
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
@@ -981,6 +1037,7 @@ function render(){
   renderMove();
   renderChika();
   renderAiSettings();
+  renderProfile();
   document.getElementById('tbLv').textContent='Lv'+L.lvl;
 }
 function afterChange(){render();}
@@ -995,7 +1052,7 @@ function autoSlot(){if(cur!==today())return state.lastSlot||'夜';
   const n=new Date(),h=n.getHours()+n.getMinutes()/60;
   if(h<4)return '夜食';if(h<10.5)return '朝';if(h<15)return '昼';if(h<21)return '夜';return '夜食';}
 function slotNow(){return curSlot||autoSlot();}
-function toKata(s){return String(s||'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)).toLowerCase().replace(/\s+/g,'');}
+function toKata(s){return String(s||'').replace(/[\u3041-\u3096]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)).replace(/[\uFF21-\uFF3A\uFF41-\uFF5A\uFF10-\uFF19]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).toLowerCase().replace(/\s+/g,'');}
 function foodByName(n){n=(n||'').trim();if(!n)return null;
   return state.customFoods100.find(x=>x.n===n)||FOODS_DB.find(x=>x.n===n)||null;}
 function menuAll(){return MENU.flatMap(g=>g.items.map(it=>({...it,s:it.s!=null?it.s:(g.snack?1:0)})));}
@@ -1022,15 +1079,17 @@ function recentFoods(){const map={};const ds=sd(state).slice(-30);
 function renderSearch(){const raw=document.getElementById('foodSearch').value.trim();const q=toKata(raw);
   const box=document.getElementById('searchRes');box.innerHTML='';
   if(!q){box.hidden=true;return;}box.hidden=false;
-  const hit=x=>toKata(x.n).includes(q);const res=[];const seen=new Set();
+  const toks=raw.split(/[\s\u3000]+/).filter(Boolean).map(toKata);
+  const hit=x=>{const h=toKata(x.n+' '+(x.tags||''));return toks.every(t=>h.includes(t));};const res=[];const seen=new Set();
   const push=(x,kind)=>{if(!seen.has(x.n)){seen.add(x.n);res.push({...x,kind});}};
+  (state.products||[]).forEach(p=>{const x={n:prodLabel(p),k:p.k,p:p.p,s:p.s,tags:prodTags(p),sub:prodSub(p)};if(hit(x))push(x,'one');});
   recentFoods().filter(hit).forEach(x=>push(x,'one'));
-  (state.recipes||[]).forEach(r=>{const per=recipePer(r);const x={n:r.n+'（1人前）',k:per.k,p:per.p,s:null};if(hit(x)||toKata(r.n).includes(q))push(x,'one');});
+  (state.recipes||[]).forEach(r=>{const per=recipePer(r);const x={n:r.n+'（1人前）',k:per.k,p:per.p,s:null,tags:r.n};if(hit(x))push(x,'one');});
   menuAll().filter(hit).forEach(x=>push(x,'one'));
   ingAll().filter(hit).forEach(x=>push(x,'g'));
   res.slice(0,10).forEach(x=>{const row=document.createElement('div');row.className='sres';
     if(x.kind==='one'){
-      row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">'+Math.round(x.k)+'kcal</span><button class="sadd">＋</button>';
+      row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">'+(x.sub?esc(x.sub)+'・':'')+Math.round(x.k)+'kcal</span><button class="sadd">＋</button>';
       row.onclick=()=>{addMeal(x.n,x.k,x.p,x.s);clearSearch();};}
     else{
       row.innerHTML='<span class="sn">'+esc(x.n)+'</span><span class="sk">100gで'+x.k+'kcal・量をえらぶ↓</span>';
@@ -1041,6 +1100,7 @@ function renderSearch(){const raw=document.getElementById('foodSearch').value.tr
     box.appendChild(row);});
   const tail=document.createElement('div');tail.className='sres-tail';
   if(!res.length)tail.innerHTML='<span class="muted">見つからないときは → </span>';
+  tail.appendChild(chipEl('🏷 マイ商品として登録','','',()=>openProduct(null,raw)));
   tail.appendChild(chipEl('✏️ カロリーを入れて登録','','',()=>openMore('freeBox','freeName',raw,'freeKcal')));
   tail.appendChild(chipEl('🍳 ざっくり概算','','',()=>openMore('estBox','estName',raw,null)));
   box.appendChild(tail);}
@@ -1063,19 +1123,24 @@ function renderMenu(){if(foodTab>=MENU.length)foodTab=0;const tabsEl=document.ge
 function renderFood(){
   const dd=day(cur);dd.meals=dd.meals||[];
   let kcal=0,pro=0;dd.meals.forEach(m=>{kcal+=+m.k||0;pro+=+m.p||0;});
-  const out=burnKcal(dd);
-  document.getElementById('foodDayLabel').textContent=cur===today()?'(きょう)':cur;
-  document.getElementById('balIn').textContent=Math.round(kcal);
-  document.getElementById('balOut').textContent=Math.round(out);
-  document.getElementById('balNet').textContent=Math.round(kcal-out);
-  document.getElementById('calTxt').textContent=Math.round(kcal)+' / '+state.calTarget;
-  document.getElementById('proTxt').textContent=Math.round(pro)+' / '+state.proTarget+'g';
-  document.getElementById('calFill').style.width=Math.min(100,kcal/state.calTarget*100)+'%';
-  document.getElementById('proFill').style.width=Math.min(100,pro/state.proTarget*100)+'%';
-  document.getElementById('calTxt').style.color=kcal>state.calTarget?'var(--fire)':'';
-  document.getElementById('proTxt').style.color=pro>=state.proTarget?'var(--accent)':'';
-  const left=state.calTarget-kcal;
-  document.getElementById('calLeft').innerHTML=left>=0?'あと <b>'+Math.round(left)+'</b> kcal たべてOK':'目安より <b>'+Math.round(-left)+'</b> kcal オーバー。あしたの配達で とりかえそ';
+  const G=id=>document.getElementById(id);
+  const out=burnKcal(dd),base=baseBurn(),burn=base+out,bud=budgetOf(dd),net=kcal-burn,tg=state.defTarget;
+  G('foodDayLabel').textContent=cur===today()?'(きょう)':cur;
+  G('balIn').textContent=Math.round(kcal);
+  G('balOut').textContent=Math.round(burn);
+  const nb=G('balNet');nb.textContent=(net>0?'+':'')+Math.round(net);nb.style.color=net<0?'var(--accent)':'var(--fire)';
+  G('burnBreak').textContent='しょうひ＝基礎代謝など '+Math.round(base)+' ＋ うごいた '+Math.round(out)+'（記録した分）';
+  G('calLabel').textContent='食べていい量（−'+tg+'キープ）';
+  G('calTxt').textContent=Math.round(kcal)+' / '+Math.round(bud);
+  G('proTxt').textContent=Math.round(pro)+' / '+state.proTarget+'g';
+  G('calFill').style.width=Math.min(100,bud>0?kcal/bud*100:100)+'%';
+  G('proFill').style.width=Math.min(100,pro/state.proTarget*100)+'%';
+  G('calTxt').style.color=kcal>bud?'var(--fire)':'';
+  G('proTxt').style.color=pro>=state.proTarget?'var(--accent)':'';
+  G('calLeft').innerHTML=kcal<=bud?'あと <b>'+Math.round(bud-kcal)+'</b> kcal 食べても アンダー −'+tg+' をキープ👍'
+    :net<0?'目標より '+Math.round(kcal-bud)+' kcal 多め。でも まだ <b>'+Math.round(-net)+'</b> kcal アンダー'
+    :'<b>'+Math.round(net)+'</b> kcal オーバー。配達や筋トレで とりかえそ';
+  renderWeek7();
   const snackK=dd.meals.reduce((a,m)=>a+(m.s?(+m.k||0):0),0);
   const sl=document.getElementById('snackLine');
   if(snackK>0){sl.className='infoline info-snack';sl.innerHTML='🍫 お菓子・お酒 <b>'+Math.round(snackK)+' kcal</b> ＝ 🚴 自転車 <b>'+Math.round(snackK/30)+' km</b> 分。戒め。';}
@@ -1096,7 +1161,7 @@ function renderFood(){
       const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
       x.onclick=()=>{dd.meals.splice(i,1);save();render();};
       el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
-  renderSlots();renderRecent();renderMenu();renderRecipes();
+  renderSlots();renderRecent();renderMenu();renderRecipes();renderProducts();
 }
 
 /* ざっくり概算：料理タイプ別（100gあたり kcal / タンパク質g） */
@@ -1129,7 +1194,8 @@ document.getElementById('freeAdd').onclick=()=>{const n=document.getElementById(
   addMeal(n,k,p,null);['freeName','freeKcal','freeP'].forEach(i=>document.getElementById(i).value='');};
 document.getElementById('foodSearch').oninput=renderSearch;
 document.getElementById('editTargets').onclick=()=>{
-  const c=prompt('1日の目標カロリー(kcal)',state.calTarget);if(c!==null){const v=parseFloat(c);if(!isNaN(v)&&v>0)state.calTarget=v;}
+  const c=prompt('1日のアンダー目標（kcal）\n食べた量を、使った量よりどれだけ少なくするか（例：300）',state.defTarget);
+  if(c!==null){const v=parseFloat(c);if(!isNaN(v)&&v>=0)state.defTarget=Math.round(v);}
   const p=prompt('1日の目標タンパク質(g)',state.proTarget);if(p!==null){const v=parseFloat(p);if(!isNaN(v)&&v>0)state.proTarget=v;}
   save();render();};
 renderEst();
@@ -1278,24 +1344,24 @@ function trackAi(model,u){if(!u)return;const p=AI_MODELS[model];
   const usd=((u.input_tokens||0)*p.in+(u.output_tokens||0)*p.out)/1e6;const mo=today().slice(0,7);
   if(!state.aiUsage||state.aiUsage.m!==mo)state.aiUsage={m:mo,n:0,usd:0};
   state.aiUsage.n++;state.aiUsage.usd+=usd;save();renderAiSettings();}
+async function aiCall(sys,schema,text){const key=aiKey();if(!key)throw new Error('APIキーが未設定だよ（その他タブで設定してね）');
+  const model=aiModel();
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+    headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model,max_tokens:4000,system:sys,output_config:{effort:'low',format:{type:'json_schema',schema}},messages:[{role:'user',content:text}]})});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(aiErrMsg(res.status,data));
+  trackAi(model,data.usage);
+  if(data.stop_reason==='refusal')throw new Error('この内容は計算できなかったみたい。書き方を変えてみてね');
+  if(data.stop_reason==='max_tokens')throw new Error('答えが長くなりすぎたみたい。もう少し短く書いてみてね');
+  const tb=(data.content||[]).find(b=>b.type==='text');if(!tb)throw new Error('うまく読み取れなかったよ');
+  return JSON.parse(tb.text);}
 async function aiEstimate(){const text=document.getElementById('aiText').value.trim();
   if(!text){toast('食べたものを書いてね');return;}
   const key=aiKey();if(!key){toast('AIを使うには、その他タブでAPIキーの設定が必要だよ');return;}
   const btn=document.getElementById('aiGo'),out=document.getElementById('aiResult');
   btn.disabled=true;btn.textContent='🍙 チカが計算中…';out.innerHTML='';aiLast=null;
-  try{const model=aiModel();
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model,max_tokens:4000,system:AI_SYS,
-        output_config:{effort:'low',format:{type:'json_schema',schema:AI_SCHEMA}},
-        messages:[{role:'user',content:text}]})});
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(aiErrMsg(res.status,data));
-    trackAi(model,data.usage);
-    if(data.stop_reason==='refusal')throw new Error('この内容は計算できなかったみたい。書き方を変えてみてね');
-    if(data.stop_reason==='max_tokens')throw new Error('答えが長くなりすぎたみたい。もう少し短く書いてみてね');
-    const tb=(data.content||[]).find(b=>b.type==='text');
-    const r=tb?JSON.parse(tb.text):null;
+  try{const r=await aiCall(AI_SYS,AI_SCHEMA,text);
     if(!r||!Array.isArray(r.items)||!r.items.length)throw new Error('うまく読み取れなかったよ。材料をもう少しくわしく書いてみてね');
     aiLast=r;renderAiResult();
   }catch(e){out.innerHTML='<div class="infoline info-snack">'+esc(e instanceof TypeError?'通信できなかったよ（電波を確認してね）':(e.message||'エラー'))+'</div>';}
@@ -1344,6 +1410,103 @@ document.getElementById('aiKeyDel').onclick=()=>{if(!confirm('APIキーをこの
 document.getElementById('aiModelSel').onchange=e=>{state.aiModel=e.target.value;save();};
 document.getElementById('aiGo').onclick=aiEstimate;
 document.getElementById('aiToSettings').onclick=()=>showTab('more');
+
+/* ============ アンダーカロリー（収支） ============ */
+function bmr(){const P=state.prof;return 10*bodyW()+6.25*(+P.h||170)-5*(+P.age||40)+(P.sex==='f'?-161:5);}
+function baseBurn(){return bmr()*1.2;}
+function budgetOf(dd){return baseBurn()+burnKcal(dd)-state.defTarget;}
+function dayNet(d){const x=state.days[d];if(!x||!(x.meals||[]).length)return null;
+  return x.meals.reduce((a,m)=>a+(+m.k||0),0)-(baseBurn()+burnKcal(x));}
+function renderWeek7(){const box=document.getElementById('week7');box.innerHTML='';let sum=0,n=0,under=0;const W='日月火水木金土';
+  for(let i=6;i>=0;i--){const d=addDays(today(),-i),v=dayNet(d);const c=document.createElement('div');
+    c.className='w7'+(v==null?' none':v<0?' under':' over')+(d===cur?' cur':'');
+    c.innerHTML='<span>'+(d===today()?'今日':W[new Date(d+'T00:00').getDay()])+'</span><b>'+(v==null?'ー':(v>0?'+':'')+Math.round(v))+'</b>';
+    c.onclick=()=>{cur=d;render();};box.appendChild(c);
+    if(v!=null){sum+=v;n++;if(v<0)under++;}}
+  document.getElementById('weekDef').innerHTML=n
+    ?'記録した'+n+'日のうち <b>'+under+'日</b> アンダー ・ 合計 <b>'+(sum>0?'+':'')+Math.round(sum).toLocaleString()+'</b> kcal'
+      +(sum<0?'<br>＝ 体脂肪 約'+(-sum/7200).toFixed(2)+'kg 分 🔥':'')
+    :'ごはんを記録すると、ここに毎日の収支がならぶよ';}
+const DEF_OPTS=[{v:200,l:'ゆるめ −200'},{v:300,l:'ふつう −300'},{v:500,l:'しっかり −500'}];
+function renderProfile(){const P=state.prof,G=id=>document.getElementById(id);
+  [['pfAge',P.age],['pfH',P.h]].forEach(([id,v])=>{if(document.activeElement!==G(id))G(id).value=v;});
+  G('pfSex').value=P.sex;
+  const dc=G('defChips');dc.innerHTML='';
+  DEF_OPTS.forEach(o=>dc.appendChild(chipEl(o.l,'',o.v===state.defTarget?'on':'',()=>{state.defTarget=o.v;save();render();})));
+  const b=bmr(),base=b*1.2;
+  G('pfInfo').innerHTML='基礎代謝 約'+Math.round(b).toLocaleString()+'kcal（体重'+bodyW()+'kg）<br>動かない日の消費めやす 約'+Math.round(base).toLocaleString()+'kcal'
+    +'<br>→ 配達なしの日は 約<b>'+Math.round(base-state.defTarget).toLocaleString()+'</b>kcal、いつもの配達がある日は 約<b>'
+    +Math.round(base+sessKcal(state.delPreset)-state.defTarget).toLocaleString()+'</b>kcal まで食べてもアンダー';}
+['pfAge','pfH'].forEach(id=>document.getElementById(id).onchange=e=>{const v=parseFloat(e.target.value);
+  if(!isNaN(v)&&v>0){state.prof[id==='pfAge'?'age':'h']=v;save();render();}});
+document.getElementById('pfSex').onchange=e=>{state.prof.sex=e.target.value;save();render();};
+function strDay(x){return !!(x&&(x.strength||(x.sets||[]).length||+x.wo));}
+function renderStrWeek(){const d7=[...Array(7)].map((_,i)=>addDays(today(),-i));const n=d7.filter(d=>strDay(state.days[d])).length,g=state.strGoal;
+  document.getElementById('strWeek').innerHTML='💪 この7日の筋トレ <b>'+n+' / '+g+'日</b> <span class="dots">'+'●'.repeat(Math.min(n,g))+'○'.repeat(Math.max(0,g-n))+'</span>'
+    +(n>=g?' クリア🎉':'')+'<div class="muted" style="font-size:.68rem;font-weight:700;">タップで目標を変更</div>';}
+document.getElementById('strWeek').onclick=()=>{const v=parseInt(prompt('1週間に何日、筋トレする？',state.strGoal),10);
+  if(!isNaN(v)&&v>=1&&v<=7){state.strGoal=v;save();render();}};
+
+/* ============ マイ商品（よく買う市販品。メーカー・お店・値段でも検索できる） ============ */
+const STORES=['サンディ','万代','関西スーパー','ライフ','イオン','コープ','業務スーパー','ダイエー','阪急オアシス','いかりスーパー','マルハチ',
+  'トライアル','ドン・キホーテ','ドンキ','西友','イズミヤ','コノミヤ','オークワ','平和堂','セブンイレブン','セブン-イレブン','セブン',
+  'ローソン','ファミリーマート','ファミマ','ミニストップ','デイリーヤマザキ','スギ薬局','ウエルシア','ココカラファイン','コスモス','ダイソー'];
+const MAKERS=['田口食品','森永','明治','ロッテ','グリコ','江崎グリコ','赤城乳業','井村屋','丸永製菓','センタン','カルビー','湖池屋','ヤマザキ',
+  '山崎製パン','敷島製パン','パスコ','ハーゲンダッツ','雪印','不二家','ブルボン','亀田製菓','日清','マルちゃん','東洋水産','ハウス','エスビー',
+  'キユーピー','ニチレイ','味の素','ハインツ','セブンプレミアム','トップバリュ','サッポロ','キリン','アサヒ','サントリー','ネスレ','UHA味覚糖',
+  'カバヤ','有楽製菓','フルタ','やおきん','チロル'];
+function parseProduct(raw){const o={n:'',mk:'',st:'',pr:''},rest=[];
+  String(raw||'').split(/[\s　]+/).filter(Boolean).forEach(w=>{
+    const m=w.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).match(/^(\d+)円$/);
+    if(m&&!o.pr){o.pr=+m[1];return;}
+    if(!o.st&&STORES.some(s=>toKata(w)===toKata(s))){o.st=w;return;}
+    if(!o.mk&&(MAKERS.some(s=>toKata(w)===toKata(s))||/(食品|製菓|乳業|製パン|フーズ)$/.test(w))){o.mk=w;return;}
+    rest.push(w);});
+  o.n=rest.join(' ');return o;}
+function prodLabel(p){return p.n+(p.mk?'（'+p.mk+'）':'');}
+function prodSub(p){return [p.st,p.pr!==''&&p.pr!=null?p.pr+'円':''].filter(Boolean).join('・');}
+function prodTags(p){return [p.n,p.mk,p.st,p.pr!==''&&p.pr!=null?p.pr+'円':''].join(' ');}
+function renderProducts(){const box=document.getElementById('productChips');box.innerHTML='';
+  (state.products||[]).forEach(p=>{const g=document.createElement('span');g.className='rgrp';
+    g.appendChild(chipEl(p.n,Math.round(p.k)+'kcal',p.s?'snack':'',()=>addMeal(prodLabel(p),p.k,p.p,p.s)));
+    const e=document.createElement('button');e.className='mini-btn';e.textContent='✏️';e.onclick=()=>openProduct(p.id);
+    g.appendChild(e);box.appendChild(g);});
+  box.appendChild(chipEl('＋ 商品を登録','','on',()=>openProduct(null,'')));}
+let pdEdit=null;
+const $v=id=>document.getElementById(id);
+function openProduct(id,raw){const ex=(state.products||[]).find(x=>x.id===id);
+  pdEdit=ex?{...ex}:{id:Date.now(),...parseProduct(raw),k:'',p:'',s:null};
+  if(!ex)clearSearch();
+  $v('pdName').value=pdEdit.n||'';$v('pdMaker').value=pdEdit.mk||'';$v('pdStore').value=pdEdit.st||'';$v('pdPrice').value=pdEdit.pr||'';
+  $v('pdKcal').value=pdEdit.k!==''&&pdEdit.k!=null?pdEdit.k:'';$v('pdP').value=pdEdit.p!==''&&pdEdit.p!=null?pdEdit.p:'';
+  $v('pdSnack').checked=pdEdit.s!=null?!!pdEdit.s:isSnack(pdEdit.n);
+  $v('pdDelete').hidden=!ex;$v('pdAi').hidden=!aiKey();$v('pdAiNote').textContent='';
+  $v('productOverlay').classList.add('show');
+  const focusId=pdEdit.n?'pdKcal':'pdName';setTimeout(()=>$v(focusId).focus(),200);}
+function closeProduct(){$v('productOverlay').classList.remove('show');pdEdit=null;}
+function saveProduct(){const n=$v('pdName').value.trim(),k=parseFloat($v('pdKcal').value),pr=parseFloat($v('pdPrice').value);
+  if(!n){toast('商品名を入れてね');return null;}
+  if(isNaN(k)||k<0){toast('カロリーを入れてね（袋のうらに書いてあるよ）');return null;}
+  const rec={id:pdEdit.id,n,mk:$v('pdMaker').value.trim(),st:$v('pdStore').value.trim(),pr:isNaN(pr)?'':pr,
+    k:Math.round(k),p:Math.round((parseFloat($v('pdP').value)||0)*10)/10,s:$v('pdSnack').checked?1:0};
+  state.products=state.products||[];const i=state.products.findIndex(x=>x.id===rec.id);
+  if(i>=0)state.products[i]=rec;else state.products.push(rec);save();return rec;}
+$v('pdName').oninput=e=>{if($v('pdDelete').hidden)$v('pdSnack').checked=isSnack(e.target.value);};
+$v('pdSave').onclick=()=>{const r=saveProduct();if(!r)return;closeProduct();toast('🏷 '+r.n+' を登録したよ');render();};
+$v('pdEat').onclick=()=>{const r=saveProduct();if(!r)return;closeProduct();addMeal(prodLabel(r),r.k,r.p,r.s);};
+$v('pdDelete').onclick=()=>{if(!confirm('この商品を削除しますか？（食事の記録は消えません）'))return;
+  state.products=(state.products||[]).filter(x=>x.id!==pdEdit.id);save();closeProduct();render();toast('削除しました');};
+$v('pdClose').onclick=closeProduct;
+const PD_SCHEMA={type:'object',additionalProperties:false,required:['kcal','protein','note'],
+  properties:{kcal:{type:'number'},protein:{type:'number'},note:{type:'string'}}};
+$v('pdAi').onclick=async()=>{const n=$v('pdName').value.trim();if(!n){toast('商品名を入れてね');return;}
+  const b=$v('pdAi'),note=$v('pdAiNote');b.disabled=true;b.textContent='🍙 推定中…';note.textContent='';
+  try{const r=await aiCall('日本で売られている市販品の、1個（1パック）あたりのエネルギー(kcal)とタンパク質(g)の目安を答えてください。正確な栄養成分表示を知らない場合は、同じ種類の一般的な商品から推定し、noteにそう書いてください。noteは日本語で1文。',
+      PD_SCHEMA,[$v('pdMaker').value.trim(),n].filter(Boolean).join(' '));
+    $v('pdKcal').value=Math.round(r.kcal);$v('pdP').value=Math.round(r.protein*10)/10;
+    note.textContent='🤖 '+r.note+'（袋の表示があれば、そちらを優先してね）';}
+  catch(e){note.textContent=e instanceof TypeError?'通信できなかったよ（電波を確認してね）':(e.message||'エラー');}
+  finally{b.disabled=false;b.textContent='🤖 AIでカロリーを推定（目安）';}};
 
 /* ============ うごく：配達・筋トレ ============ */
 function bodyW(){return latestW(state)||70;}
@@ -1422,7 +1585,7 @@ function renderMove(){const dd=day(cur);const ds=dels(dd);
     const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
     x.onclick=()=>{dd.dels=dels(dd).slice();dd.dels.splice(i,1);syncKm(dd);save();render();};
     el.appendChild(x);dl.appendChild(el);});
-  renderEx();}
+  renderEx();renderStrWeek();}
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
   document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
@@ -1684,6 +1847,9 @@ function genWeeklyReport(){
     t+='【うごいた】配達'+mn+'分・消費合計 約'+Math.round(bk)+'kcal\n';}
   {const ex={};days.forEach(o=>(o.x.sets||[]).forEach(s=>{const e=ex[s.ex]||(ex[s.ex]={n:0,u:s.u});e.n+=+s.n||0;}));
     const ks=Object.keys(ex);t+='【筋トレ】'+(ks.length?ks.map(k=>k+ex[k].n+ex[k].u).join('・'):'記録なし')+'\n';}
+  {const ns=days.map(o=>dayNet(o.d)).filter(v=>v!=null),sum=ns.reduce((a,v)=>a+v,0);
+    t+='【収支】記録'+ns.length+'日・アンダー'+ns.filter(v=>v<0).length+'日・合計'+(sum>0?'+':'')+Math.round(sum)+'kcal（目標 1日−'+state.defTarget+'、消費は基礎代謝×1.2＋運動で推定）\n';}
+  {const sd=days.filter(o=>strDay(o.x)).length;t+='【筋トレした日】'+sd+'/'+state.strGoal+'日\n';}
   t+='\n※トレーナーのチカ（おにぎりのゆるキャラ）として、やさしくアドバイスください。';
   return t;
 }
@@ -1731,6 +1897,12 @@ function coachComment(){
   {const nd=days.filter(o=>(o.x.meals||[]).some(m=>m.night)).length;
     if(nd>=4)nudge.push('21時以降に食べた日が'+nd+'日あったよ。ゼロにしなくていいから、まず週2日だけ「21時でごちそうさま」の日をつくってみよ。');
     else if(nd>=1&&nd<=2)praise.push('21時以降の食事は'+nd+'日だけ。ちゃんと減らせてる、えらい〜。');}
+  {const ns=days.map(o=>dayNet(o.d)).filter(v=>v!=null),u=ns.filter(v=>v<0).length,sum=ns.reduce((a,v)=>a+v,0);
+    if(ns.length>=3&&u>=Math.ceil(ns.length*0.6))praise.push('記録した'+ns.length+'日のうち'+u+'日アンダー。合計'+Math.round(-sum)+'kcal分、ちゃんと体脂肪が減る方向に進んでるよ。');
+    else if(ns.length>=3&&u<=1)nudge.push('今週はアンダーの日が'+u+'日。まずは配達の日だけでも「食べていい量」の中におさめてみよ。');
+    const sd=days.filter(o=>strDay(o.x)).length;
+    if(sd>=state.strGoal)praise.push('筋トレ'+sd+'日、目標クリア！ 食べる量をへらしても筋肉が守れる、いちばん大事なところだよ。');
+    else if(sd===0)nudge.push('この7日は筋トレがゼロ。アンダーの時ほど筋肉が落ちやすいから、腕立て10回だけでもポチッとしよ。');}
   if(perfect>=4)praise.push('完璧な日が'+perfect+'日。習慣として体に入ってきてる。');
   let msg=R(['今週もお疲れさま。','はい、チカだよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
   if(!praise.length&&!nudge.length){
@@ -1798,10 +1970,12 @@ function chikaLine(){const dd=day(cur);const ms=dd.meals||[];
     if(nightK>0)return{mood:'night',t:pick(['よるのぶんも ちゃんと書けたね。えらい〜。お水も いっしょに のんでね','書けたのが いちばん えらい。あしたの朝、体重はかってみよ'])};
     return{mood:'night',t:pick(['21時すぎたよ〜。きょうは ここで ごちそうさま できたら はなまる🌸','おなかすいた？ まずお水1杯。それでも食べたら、ちゃんと書いてね'])};}
   if(!ms.length)return{mood:'normal',t:h<11?'おはよ〜。あさごはん なにたべた？':'まだ なにも書いてないよ〜。さくっと1こ書いてみよ'};
-  if(kcal>state.calTarget)return{mood:'worry',t:'ちょっと たべすぎかも…。でも書けたのが えらい！ あしたの配達で とりかえそ'};
+  const bud=budgetOf(dd),net=kcal-(baseBurn()+out);
+  if(net>0)return{mood:'worry',t:'いまの記録だと '+Math.round(net)+'kcal オーバー…。でも書けたのが えらい！ 配達か筋トレで とりかえそ'};
+  if(kcal>bud)return{mood:'normal',t:'まだアンダーだけど、目標までは あと少しだよ。ここで ごちそうさま できたら はなまる🌸'};
   if(out>=300)return{mood:'cheer',t:'きょうは '+Math.round(out)+'kcal も うごいたね！ すごい〜'};
   if(pro>=state.proTarget)return{mood:'cheer',t:'タンパク質 クリア！ つよい〜💪'};
-  return{mood:'happy',t:pick(['いいかんじ！ あと '+Math.round(state.calTarget-kcal)+'kcal たべてOKだよ','もぐもぐ記録、えらい〜。このちょうし！'])};}
+  return{mood:'happy',t:pick(['いいかんじ！ あと '+Math.round(bud-kcal)+'kcal 食べても アンダーだよ','もぐもぐ記録、えらい〜。このちょうし！'])};}
 function renderChika(){const L=chikaLine();
   document.getElementById('chiFaceHome').innerHTML=chikaSVG(L.mood,'h');
   document.getElementById('chiTip').textContent=L.t;}
