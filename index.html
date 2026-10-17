@@ -292,7 +292,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.5.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.6.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -514,6 +514,14 @@
       <div id="exList"></div>
       <div class="sec-label">📒 きょうのセット</div>
       <div id="setList"></div>
+    </div>
+
+    <div class="card">
+      <h3>🪑 デスクでできる運動</h3>
+      <div class="muted" style="margin-bottom:10px;">仕事の合間に、静かに・汗をかかずに。終わると自動で記録されます。腰が痛いときは無理しないでね。</div>
+      <button class="big mint" id="startDesk">▶ デスク筋トレ 4分<span class="sub">ドローイン・椅子スクワット・机で腕立てなど6種目（筋トレ1日にカウント）</span></button>
+      <button class="big" id="startDeskStretch" style="margin-top:10px;background:linear-gradient(135deg,#B79CF2,#5FB8E6);">▶ デスクほぐし 3分<span class="sub">首・肩・肩甲骨・腰をほぐすストレッチ7種目</span></button>
+      <div class="muted" style="font-size:.72rem;margin-top:8px;">1時間に1回、どちらかをやるのがおすすめ。座りっぱなしを区切るだけでも、1日の消費は少しずつ増えます。</div>
     </div>
 
     <div class="card" style="text-align:center;">
@@ -1614,7 +1622,7 @@ function renderAdvice(){const dd=day(cur),ms=dd.meals||[],isT=cur===today(),h=is
   if(ms.length&&pro<state.proTarget&&(h>=12||pro<state.proTarget*0.3))
     add('💪','タンパク質があと '+Math.round(state.proTarget-pro)+'g。サラダチキン（24g）・プロテイン（24g）・納豆（7g）・卵（6g）がかんたん。');
   else if(pro>=state.proTarget)add('💪','タンパク質クリア！ アンダーでも筋肉が守られてるよ。','good');
-  if(out===0&&h>=12)add('🚶','きょうはまだ動いた記録がないよ。早歩き20分で約'+Math.round(4.3*W*20/60)+'kcal。','warn');
+  if(out===0&&h>=12)add('🚶','きょうはまだ動いた記録がないよ。早歩き20分で約'+Math.round(4.3*W*20/60)+'kcal。デスクなら「うごく」タブのデスク筋トレ4分でもOK。','warn');
   else if(out>=300)add('🚴','きょうは '+Math.round(out)+' kcal うごけた。えらい！','good');
   const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)),sn=d7.filter(d=>strDay(state.days[d])).length;
   if(!strDay(dd)&&sn<state.strGoal)add('🏋️','この7日の筋トレは '+sn+'/'+state.strGoal+'日。腕立て10回だけでも1日にカウントされるよ。');
@@ -1728,6 +1736,10 @@ const EX=[
   {n:'デッドバグ',u:'回',st:[10,20],k:.25},
   {n:'パイクプッシュアップ',u:'回',st:[5,8,10],k:.5},
   {n:'ドローイン',u:'秒',st:[30,60],k:.03},
+  {n:'椅子スクワット',u:'回',st:[10,20],k:.35},
+  {n:'デスク腕立て',u:'回',st:[10,20],k:.3},
+  {n:'かかと上げ',u:'回',st:[20,30],k:.1},
+  {n:'座って膝上げ',u:'回',st:[20,30],k:.15},
 ];
 function addSet(e,n){const dd=day(cur);dd.sets=dd.sets||[];
   const s={ex:e.n,n,u:e.u,k:Math.round(e.k*n*10)/10};if(cur===today())s.at=hhmm();dd.sets.push(s);
@@ -1851,14 +1863,47 @@ function nextWO(){beep(1046,.15);
   if(wo.i>=curProgram.length-1){finishWO();return;}
   wo.i++;wo.left=curProgram[wo.i].s;renderWO();
   if(curProgram[wo.i].n!=='休憩'){beep(1046,.12);setTimeout(()=>beep(1318,.14),130);}}
+/* デスクでできる運動（静か・汗をかかない）。desk=筋トレ扱い、stretch=軽い運動扱い */
+const DESK_STR=[
+  {n:'ドローイン（座ったまま）',s:30,c:'背すじを伸ばし、お腹をへこませたまま呼吸。おへそを背中に近づけるイメージ。'},
+  {n:'休憩',s:10,c:'次は座ったまま膝上げ。'},
+  {n:'座ったまま膝上げ',s:30,c:'椅子に浅く座り、左右交互に膝を胸へ。背もたれに寄りかからない。'},
+  {n:'休憩',s:10,c:'次は椅子スクワット。'},
+  {n:'椅子スクワット',s:40,c:'お尻が座面にふれる直前まで下ろして立つ。膝はつま先と同じ向き。'},
+  {n:'休憩',s:10,c:'次は机で腕立て。机が動かないか確認してね。'},
+  {n:'デスク腕立て',s:30,c:'机のふちに手をつき、体を一直線にして腕を曲げ伸ばし。'},
+  {n:'休憩',s:10,c:'次はかかと上げ。'},
+  {n:'かかと上げ',s:40,c:'立って、かかとをゆっくり上げ下げ。ふくらはぎは第二の心臓。'},
+  {n:'休憩',s:10,c:'ラスト、座ってひねり。'},
+  {n:'座ってひねり腹筋',s:30,c:'背すじを伸ばしたまま上半身を左右にゆっくりひねる。腰が痛いときは小さく。'},
+];
+DESK_STR.desk=true;
+const DESK_STRETCH=[
+  {n:'首まわし',s:30,c:'ゆっくり右回り→左回り。痛いところは無理しない。'},
+  {n:'肩回し',s:30,c:'両肩を後ろへ大きくまわす。肩甲骨が動くのを感じて。'},
+  {n:'肩甲骨寄せ',s:30,c:'胸を張って肩甲骨を寄せ、5秒キープ→ゆるめる、をくり返す。'},
+  {n:'胸ひらき',s:20,c:'手を後ろで組み、胸を開いて天井を見る。猫背リセット。'},
+  {n:'体の横を伸ばす',s:30,c:'片手を上げて反対側へ倒す。左右15秒ずつ。'},
+  {n:'太もも裏を伸ばす',s:30,c:'浅く座って片脚を前へ。つま先を上げて、背すじを伸ばしたまま前へ。左右15秒ずつ。'},
+  {n:'腰ひねりストレッチ',s:20,c:'背もたれを持って、上半身をゆっくり後ろへひねる。左右10秒ずつ。'},
+];
+DESK_STRETCH.stretch=true;
 function finishWO(){clearInterval(wo.timer);wo.active=false;musicStop();
-  const dd=day(cur);dd.wo=(+dd.wo||0)+1;dd.strength=true;const isCore=curProgram===WORKOUT;(dd.sets=dd.sets||[]).push({ex:isCore?'体幹プログラム':'全身HIIT',n:1,u:'回',k:isCore?45:120,prog:1,at:hhmm()});save();
+  const dd=day(cur),P=curProgram,mins=Math.max(1,Math.round(P.reduce((a,s)=>a+s.s,0)/60));let msg;
+  if(P.stretch){const k=Math.round(2.3*bodyW()*mins/60);(dd.acts=dd.acts||[]).push({a:'🧘 デスクほぐし',min:mins,k,at:hhmm()});
+    msg='🧘 デスクほぐし完了！ 肩まわり、軽くなった？';}
+  else{dd.wo=(+dd.wo||0)+1;dd.strength=true;const isCore=P===WORKOUT;
+    const ex=P.desk?'デスク筋トレ':isCore?'体幹プログラム':'全身HIIT',k=P.desk?Math.round(3.5*bodyW()*mins/60):isCore?45:120;
+    (dd.sets=dd.sets||[]).push({ex,n:1,u:'回',k,prog:1,at:hhmm()});msg='💪 '+ex+' 完了！ よく動いた！';}
+  save();
   document.getElementById('woOverlay').classList.remove('show');
   checkBadges();render();
-  toast('💪 プログラム完了！ +45XP よく動いた！');confettiRain();playFX();
+  toast(msg);confettiRain();playFX();
   beep(660,.12);setTimeout(()=>beep(880,.12),120);setTimeout(()=>beep(1170,.28),240);}
 function quitWO(){clearInterval(wo.timer);wo.active=false;musicStop();document.getElementById('woOverlay').classList.remove('show');}
 document.getElementById('startWO').onclick=()=>openWO(WORKOUT);
+document.getElementById('startDesk').onclick=()=>openWO(DESK_STR);
+document.getElementById('startDeskStretch').onclick=()=>openWO(DESK_STRETCH);
 document.getElementById('startFull').onclick=()=>openWO(buildFullBody(state.silentMode));
 document.getElementById('silentChk').checked=state.silentMode;
 document.getElementById('silentChk').onchange=e=>{state.silentMode=e.target.checked;save();};
