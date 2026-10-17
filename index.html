@@ -279,7 +279,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.3.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.4.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -425,6 +425,7 @@
       </div>
       <div style="text-align:center;margin-top:10px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
     </div>
+  </section>
 
   <!-- ================= うごく ================= -->
   <section class="tab" id="tab-move">
@@ -432,7 +433,7 @@
     <div class="card">
       <h3>🔥 きょう うごいた分</h3>
       <div class="bal">
-        <div class="bal-i out"><span>🚴 配達</span><b id="mvDel">0</b><small>kcal</small></div>
+        <div class="bal-i out"><span>🚴 配達・有酸素</span><b id="mvDel">0</b><small>kcal</small></div>
         <div class="bal-op">+</div>
         <div class="bal-i out"><span>💪 筋トレ</span><b id="mvStr">0</b><small>kcal</small></div>
         <div class="bal-op">=</div>
@@ -452,7 +453,7 @@
         <div><label class="mini">件数</label><input type="number" id="delCnt" placeholder="6" style="width:70px;"></div>
         <button id="delAdd">追加</button>
       </div>
-      <div class="muted" style="font-size:.72rem;margin-top:6px;">昼の部・夜の部など、何回でも足せます。消費カロリーは体重から自動計算。</div>
+      <div class="muted" style="font-size:.72rem;margin-top:6px;">時間だけ入れればOK（距離・件数は任意）。昼の部・夜の部など何回でも足せます。消費カロリーは体重から自動計算。</div>
       <div id="delList" style="margin-top:12px;"></div>
       <div style="display:flex;margin-top:10px;">
         <div class="stat"><b id="minToday">0</b><span>きょう(分)</span></div>
@@ -461,6 +462,18 @@
         <div class="stat"><b id="kmTotal">0</b><span>累計km</span></div>
       </div>
       <div style="text-align:center;margin-top:10px;"><span class="link" id="delPresetEdit">「いつもの」を変更</span></div>
+    </div>
+
+    <div class="card">
+      <h3>🏃 ランニング・自転車など（分だけでOK）</h3>
+      <select id="actSel" class="sel big"></select>
+      <div class="row nowrap" style="margin-top:8px;">
+        <select id="actMin" class="sel"></select>
+        <span id="actPrev" class="qprev"></span>
+        <button id="actAdd">追加</button>
+      </div>
+      <div class="muted" style="font-size:.72rem;margin-top:6px;">消費カロリーは「運動の強さ（METs）× 体重 × 時間」で自動計算します。</div>
+      <div id="actList" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -1547,6 +1560,46 @@ $v('pdAi').onclick=async()=>{const n=$v('pdName').value.trim();if(!n){toast('商
   catch(e){note.textContent=e instanceof TypeError?'通信できなかったよ（電波を確認してね）':(e.message||'エラー');}
   finally{b.disabled=false;b.textContent='🤖 AIでカロリーを推定（目安）';}};
 
+/* ============ うごく：ランニング・自転車など（分だけで自動計算） ============ */
+const ACTS=[
+  {n:'🏃 ランニング（ふつう・時速8km）',m:8.3,run:1},
+  {n:'🏃 ジョギング（ゆっくり）',m:7.0,run:1},
+  {n:'🚶 ウォーキング（ふつう）',m:3.5},
+  {n:'🚶 早歩き',m:4.3},
+  {n:'🚴 自転車（ふつう）',m:6.8},
+  {n:'🚴 自転車（ゆっくり・街乗り）',m:4.0},
+  {n:'🪢 なわとび',m:11.8},
+  {n:'🪜 階段のぼり',m:8.8},
+  {n:'🏊 水泳（ゆっくり）',m:5.8},
+  {n:'🧘 ストレッチ・ヨガ',m:2.5},
+  {n:'🧹 家事・子どもと遊ぶ',m:3.5},
+];
+const ACT_MINS=[10,15,20,30,45,60,90,120];
+function actKcal(dd){return (dd.acts||[]).reduce((a,x)=>a+(+x.k||0),0);}
+function actMinutes(){const v=document.getElementById('actMin').value;return v==='other'?null:+v;}
+function updateActPrev(){const a=ACTS[+document.getElementById('actSel').value||0],m=actMinutes();
+  document.getElementById('actPrev').textContent=m?'≒ '+Math.round(a.m*bodyW()*m/60)+' kcal':'';}
+function renderActs(){const s=document.getElementById('actSel'),ms=document.getElementById('actMin');
+  if(!s.options.length){
+    ACTS.forEach((a,i)=>{const o=document.createElement('option');o.value=i;o.textContent=a.n;s.appendChild(o);});
+    ACT_MINS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+'分';ms.appendChild(o);});
+    const o=document.createElement('option');o.value='other';o.textContent='そのほか（入力）';ms.appendChild(o);ms.value='30';}
+  updateActPrev();
+  const dd=day(cur),list=document.getElementById('actList');list.innerHTML='';
+  (dd.acts||[]).forEach((x,i)=>{const el=document.createElement('div');el.className='mrow';
+    el.innerHTML='<span class="mn">'+esc(x.a)+' '+x.min+'分'+(x.at?'<small>'+x.at+'</small>':'')+'</span><span class="mk">'+Math.round(x.k)+'kcal</span>';
+    const del=document.createElement('button');del.className='mini-btn del';del.textContent='×';
+    del.onclick=()=>{dd.acts.splice(i,1);save();render();};el.appendChild(del);list.appendChild(el);});}
+document.getElementById('actSel').onchange=updateActPrev;
+document.getElementById('actMin').onchange=updateActPrev;
+document.getElementById('actAdd').onclick=()=>{const a=ACTS[+document.getElementById('actSel').value||0];let m=actMinutes();
+  if(m==null){m=parseFloat(prompt('何分うごいた？',''));if(isNaN(m)||m<=0)return;}
+  const dd=day(cur);dd.acts=dd.acts||[];const k=Math.round(a.m*bodyW()*m/60);
+  const x={a:a.n,min:m,k};if(cur===today())x.at=hhmm();dd.acts.push(x);
+  let msg=a.n+' '+m+'分 ≒ '+k+'kcal！';
+  if(a.run&&cur===today()&&new Date().getHours()<12&&!dd.run){dd.run=true;msg+=' 朝ランクエスト達成';}
+  save();checkBadges();render();toast(msg);confettiRain();playFX();beep(880,.12);};
+
 /* ============ うごく：配達・筋トレ ============ */
 function bodyW(){return latestW(state)||70;}
 function sessKcal(s){const W=bodyW();return Math.round(s.min?6*W*s.min/60:(+s.km||0)*0.4*W);}
@@ -1556,7 +1609,7 @@ function syncKm(dd){const t=(dd.dels||[]).reduce((a,s)=>a+(s.km!=null?+s.km:(+s.
 function delKcal(dd){return dels(dd).reduce((a,s)=>a+sessKcal(s),0);}
 function progCount(dd){return (dd.sets||[]).filter(s=>s.prog).length;}
 function strKcal(dd){return (dd.sets||[]).reduce((a,s)=>a+(+s.k||0),0)+Math.max(0,(+dd.wo||0)-progCount(dd))*60;}
-function burnKcal(dd){return delKcal(dd)+strKcal(dd);}
+function burnKcal(dd){return delKcal(dd)+actKcal(dd)+strKcal(dd);}
 function addDel(min,km,cnt){if(!min&&!km){toast('時間か距離を入れてね');return false;}
   const dd=day(cur);dd.dels=dels(dd).slice();const s={};
   if(min)s.min=min;if(km)s.km=km;if(cnt)s.cnt=cnt;if(cur===today())s.at=hhmm();
@@ -1603,7 +1656,7 @@ function renderEx(){const dd=day(cur);const sets=dd.sets||[];const box=document.
       if(!sets.length&&!(+dd.wo))dd.strength=false;save();render();};
     el.appendChild(x);sl.appendChild(el);});}
 function renderMove(){const dd=day(cur);const ds=dels(dd);
-  const dk=delKcal(dd),sk=strKcal(dd);
+  const dk=delKcal(dd)+actKcal(dd),sk=strKcal(dd);
   document.getElementById('mvDel').textContent=Math.round(dk);
   document.getElementById('mvStr').textContent=Math.round(sk);
   document.getElementById('mvTot').textContent=Math.round(dk+sk);
@@ -1624,7 +1677,7 @@ function renderMove(){const dd=day(cur);const ds=dels(dd);
     const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
     x.onclick=()=>{dd.dels=dels(dd).slice();dd.dels.splice(i,1);syncKm(dd);save();render();};
     el.appendChild(x);dl.appendChild(el);});
-  renderEx();renderStrWeek();}
+  renderEx();renderStrWeek();renderActs();}
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
   document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
@@ -1883,7 +1936,7 @@ function genWeeklyReport(){
   {const nd=days.filter(o=>(o.x.meals||[]).some(m=>m.night)).length,nk=days.reduce((a,o)=>a+(o.x.meals||[]).reduce((s,m)=>s+(m.night?(+m.k||0):0),0),0);
     t+='【21時以降の食事】'+nd+'日・計'+Math.round(nk)+'kcal\n';}
   {const mn=days.reduce((a,o)=>a+dels(o.x).reduce((s,x)=>s+(+x.min||0),0),0),bk=days.reduce((a,o)=>a+burnKcal(o.x),0);
-    t+='【うごいた】配達'+mn+'分・消費合計 約'+Math.round(bk)+'kcal\n';}
+    t+='【うごいた】配達'+mn+'分・ほかの運動'+days.reduce((a,o)=>a+(o.x.acts||[]).reduce((s,x)=>s+(+x.min||0),0),0)+'分・消費合計 約'+Math.round(bk)+'kcal\n';}
   {const ex={};days.forEach(o=>(o.x.sets||[]).forEach(s=>{const e=ex[s.ex]||(ex[s.ex]={n:0,u:s.u});e.n+=+s.n||0;}));
     const ks=Object.keys(ex);t+='【筋トレ】'+(ks.length?ks.map(k=>k+ex[k].n+ex[k].u).join('・'):'記録なし')+'\n';}
   {const ns=days.map(o=>dayNet(o.d)).filter(v=>v!=null),sum=ns.reduce((a,v)=>a+v,0);
