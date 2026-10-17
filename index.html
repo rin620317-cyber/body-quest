@@ -269,6 +269,19 @@
   .qprev{flex:1;font-weight:800;color:var(--sub);font-size:.9rem;text-align:right;white-space:nowrap;}
   .msum{background:var(--panel2);border-radius:14px;padding:10px 12px;font-size:.86rem;font-weight:700;margin-bottom:8px;text-align:center;}
   .links-row{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin-top:16px;}
+  #bnav button{font-size:.66rem;}
+  .adv-wrap{display:flex;gap:10px;align-items:flex-start;}
+  .adv-face{width:64px;flex:0 0 auto;}
+  .adv-face svg{display:block;width:100%;}
+  .adv-list{flex:1;min-width:0;}
+  .adv{background:var(--panel2);border-radius:14px;padding:9px 11px;margin-bottom:6px;font-size:.84rem;font-weight:700;line-height:1.55;}
+  .adv.warn{background:#FFF1F4;} .adv.good{background:#E9F8F1;}
+  .wgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;}
+  .wg{background:var(--panel2);border-radius:14px;padding:8px 10px;min-width:0;}
+  .wg span{display:block;font-size:.68rem;color:var(--sub);font-weight:800;}
+  .wg b{font-size:1.02rem;}
+  .wg small{font-size:.64rem;color:var(--sub);margin-left:3px;font-weight:700;}
+  .wcom{white-space:pre-wrap;background:#FFF8E6;border-radius:14px;padding:12px;font-size:.84rem;line-height:1.7;font-weight:600;}
 </style>
 </head>
 <body>
@@ -279,7 +292,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.4.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.5.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -297,6 +310,7 @@
       <div id="mealSum" class="msum"></div>
       <div id="mealList"></div>
       <div class="muted" style="text-align:center;margin-top:8px;font-size:.7rem;">※カロリーは一般的な目安です</div>
+      <div style="text-align:center;margin-top:8px;"><span class="link" id="toSum">📊 収支とアドバイスを見る</span></div>
     </div>
 
     <div class="card inputcard" id="inputCard">
@@ -367,34 +381,12 @@
       </div>
     </div>
 
-    <div class="card">
-      <h3>🍙 きょうの収支 <span class="muted" id="foodDayLabel"></span></h3>
-      <div class="bal">
-        <div class="bal-i in"><span>たべた</span><b id="balIn">0</b><small>kcal</small></div>
-        <div class="bal-op">−</div>
-        <div class="bal-i out"><span>しょうひ</span><b id="balOut">0</b><small>kcal</small></div>
-        <div class="bal-op">=</div>
-        <div class="bal-i net"><span>しゅうし</span><b id="balNet">0</b><small>kcal</small></div>
-      </div>
-      <div id="burnBreak" class="muted" style="text-align:center;font-size:.7rem;margin:-4px 0 6px;"></div>
-      <div class="barrow"><span class="muted" id="calLabel">食べていい量</span><span id="calTxt">0 / 0</span></div>
-      <div class="xpbar"><div class="xpfill" id="calFill" style="background:linear-gradient(90deg,#FFC48C,#F7809F);animation:none;"></div></div>
-      <div class="barrow"><span class="muted">タンパク質</span><span id="proTxt">0 / 100g</span></div>
-      <div class="xpbar"><div class="xpfill" id="proFill" style="background:linear-gradient(90deg,#7FD8B9,#5FB8E6);animation:none;"></div></div>
-      <div id="calLeft" class="muted" style="text-align:center;margin-top:10px;font-weight:700;"></div>
-      <div class="sec-label">📅 この7日の収支（記録した日）</div>
-      <div class="week7" id="week7"></div>
-      <div id="weekDef" class="muted" style="text-align:center;margin-top:8px;font-weight:700;"></div>
-      <div id="snackLine" class="infoline"></div>
-      <div id="nightLine" class="infoline info-night" hidden></div>
-    </div>
-
     <div class="card mascot" id="chiCard">
       <div class="chika-wrap" id="chiFaceHome"></div>
       <div class="bubble">
-        <div class="chika-name">チカ</div>
+        <div class="chika-name">おにぎりマン</div>
         <div id="chiTip"></div>
-        <div class="bubble-sub">💬 タップでチカとおしゃべり</div>
+        <div class="bubble-sub">💬 タップでおにぎりマンとおしゃべり</div>
       </div>
     </div>
 
@@ -424,6 +416,46 @@
         <button id="waterUndo" class="ghost">−200</button>
       </div>
       <div style="text-align:center;margin-top:10px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
+    </div>
+  </section>
+
+  <!-- ================= しゅうし ================= -->
+  <section class="tab" id="tab-sum">
+    <div class="card">
+      <h3>🍙 きょうの収支 <span class="muted" id="foodDayLabel"></span></h3>
+      <div class="bal">
+        <div class="bal-i in"><span>たべた</span><b id="balIn">0</b><small>kcal</small></div>
+        <div class="bal-op">−</div>
+        <div class="bal-i out"><span>しょうひ</span><b id="balOut">0</b><small>kcal</small></div>
+        <div class="bal-op">=</div>
+        <div class="bal-i net"><span>しゅうし</span><b id="balNet">0</b><small>kcal</small></div>
+      </div>
+      <div id="burnBreak" class="muted" style="text-align:center;font-size:.7rem;margin:-4px 0 6px;"></div>
+      <div class="barrow"><span class="muted" id="calLabel">食べていい量</span><span id="calTxt">0 / 0</span></div>
+      <div class="xpbar"><div class="xpfill" id="calFill" style="background:linear-gradient(90deg,#FFC48C,#F7809F);animation:none;"></div></div>
+      <div class="barrow"><span class="muted">タンパク質</span><span id="proTxt">0 / 100g</span></div>
+      <div class="xpbar"><div class="xpfill" id="proFill" style="background:linear-gradient(90deg,#7FD8B9,#5FB8E6);animation:none;"></div></div>
+      <div id="calLeft" class="muted" style="text-align:center;margin-top:10px;font-weight:700;"></div>
+      <div id="snackLine" class="infoline"></div>
+      <div id="nightLine" class="infoline info-night" hidden></div>
+    </div>
+
+    <div class="card">
+      <h3>💡 おにぎりマンのアドバイス</h3>
+      <div class="adv-wrap"><div class="adv-face" id="advFace"></div><div class="adv-list" id="advList"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>📅 週間サマリー（この7日）</h3>
+      <div class="week7" id="week7"></div>
+      <div id="weekDef" class="muted" style="text-align:center;margin-top:8px;font-weight:700;"></div>
+      <div class="wgrid" id="weekGrid"></div>
+      <div class="sec-label">🍙 おにぎりマンの今週のひとこと</div>
+      <div id="weekComment" class="wcom"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="ghost" id="weekCommentNew" style="flex:1;">🔄 ほかのひとこと</button>
+        <button class="ghost" id="sumReport" style="flex:1;">📋 レポートを作る</button>
+      </div>
     </div>
   </section>
 
@@ -569,8 +601,8 @@
     </div>
 
     <button class="big" id="calmBtn" style="background:linear-gradient(135deg,#F7809F,#EE5B76);margin-bottom:12px;">🔥 むしゃくしゃボタン<span class="sub">ケンカしたときは無心でデリ一択</span></button>
-    <button class="big mint" id="bodyChatBtn" style="margin-bottom:12px;">🩺 からだ相談室<span class="sub">腰・膝・肩の痛み、フォーム、故障の相談にチカが答える</span></button>
-    <button class="big" id="coachBtn" style="margin-bottom:12px;">🍙 チカの今週のひとこと<span class="sub">無料・オフライン・ボタン1つ</span></button>
+    <button class="big mint" id="bodyChatBtn" style="margin-bottom:12px;">🩺 からだ相談室<span class="sub">腰・膝・肩の痛み、フォーム、故障の相談におにぎりマンが答える</span></button>
+    <button class="big" id="coachBtn" style="margin-bottom:12px;">🍙 おにぎりマンの今週のひとこと<span class="sub">無料・オフライン・ボタン1つ</span></button>
     <button class="big" id="reportBtn" style="background:linear-gradient(135deg,#B79CF2,#5FB8E6);margin-bottom:12px;">📋 今週のレポートを作成<span class="sub">深く相談したい週は、コピーしてチャットに貼る</span></button>
 
     <div class="card">
@@ -621,6 +653,7 @@
 
 <nav id="bnav">
   <button class="on" data-t="food"><span>🍙</span>ごはん</button>
+  <button data-t="sum"><span>📊</span>しゅうし</button>
   <button data-t="move"><span>🚴</span>うごく</button>
   <button data-t="body"><span>⚖️</span>からだ</button>
   <button data-t="more"><span>☰</span>その他</button>
@@ -678,20 +711,20 @@
   </div>
 </div></div>
 
-<!-- チカコーチ -->
+<!-- おにぎりマンコーチ -->
 <div class="overlay" id="coachOverlay"><div class="modal">
   <div id="coachFace" style="width:120px;margin:0 auto 4px;"></div>
-  <h2 style="font-size:1.2rem;margin:2px 0 2px;">チカ</h2>
-  <div class="muted" style="font-size:.72rem;margin-bottom:10px;">おにぎりの子／あなたのゆる専属トレーナー</div>
+  <h2 style="font-size:1.2rem;margin:2px 0 2px;">おにぎりマン</h2>
+  <div class="muted" style="font-size:.72rem;margin-bottom:10px;">おにぎりのヒーロー／あなたのゆる専属トレーナー</div>
   <div id="coachText" style="text-align:left;white-space:pre-wrap;font-size:.9rem;line-height:1.75;background:var(--panel2);border-radius:12px;padding:14px;max-height:60vh;overflow-y:auto;"></div>
   <button class="big" id="coachClose" style="margin-top:14px;background:linear-gradient(135deg,#F7809F,#B79CF2);">ありがとう 💪</button>
 </div></div>
 
-<!-- チカとチャット -->
+<!-- おにぎりマンとチャット -->
 <div class="overlay" id="chatOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh;">
   <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
     <div id="chatFace" style="width:40px;flex:0 0 auto;"></div>
-    <div style="flex:1;text-align:left;"><div style="font-weight:700;">チカ</div><div class="muted" style="font-size:.66rem;">いつでも相談してね（無料・ルール式の相棒）</div></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">おにぎりマン</div><div class="muted" style="font-size:.66rem;">いつでも相談してね（無料・ルール式の相棒）</div></div>
     <span class="link" id="chatClose">閉じる</span>
   </div>
   <div id="chatLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
@@ -704,7 +737,7 @@
 <div class="overlay" id="bodyOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:88vh;">
   <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
     <div id="bodyFace" style="width:40px;flex:0 0 auto;"></div>
-    <div style="flex:1;text-align:left;"><div style="font-weight:700;">🩺 からだ相談室</div><div class="muted" style="font-size:.66rem;">チカが答えるよ（無料・ルール式）。※医療の代わりにはならないから、ひどい時は病院へ</div></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">🩺 からだ相談室</div><div class="muted" style="font-size:.66rem;">おにぎりマンが答えるよ（無料・ルール式）。※医療の代わりにはならないから、ひどい時は病院へ</div></div>
     <span class="link" id="bodyClose">閉じる</span>
   </div>
   <div id="bodyLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
@@ -1066,6 +1099,8 @@ function render(){
   renderChika();
   renderAiSettings();
   renderProfile();
+  renderAdvice();
+  renderWeekSum();
   document.getElementById('tbLv').textContent='Lv'+L.lvl;
 }
 function afterChange(){render();}
@@ -1418,7 +1453,7 @@ async function aiEstimate(){const text=document.getElementById('aiText').value.t
   if(!text){toast('食べたものを書いてね');return;}
   const key=aiKey();if(!key){toast('AIを使うには、その他タブでAPIキーの設定が必要だよ');return;}
   const btn=document.getElementById('aiGo'),out=document.getElementById('aiResult');
-  btn.disabled=true;btn.textContent='🍙 チカが計算中…';out.innerHTML='';aiLast=null;
+  btn.disabled=true;btn.textContent='🍙 おにぎりマンが計算中…';out.innerHTML='';aiLast=null;
   try{const r=await aiCall(AI_SYS,AI_SCHEMA,text);
     if(!r||!Array.isArray(r.items)||!r.items.length)throw new Error('うまく読み取れなかったよ。材料をもう少しくわしく書いてみてね');
     aiLast=r;renderAiResult();
@@ -1559,6 +1594,65 @@ $v('pdAi').onclick=async()=>{const n=$v('pdName').value.trim();if(!n){toast('商
     note.textContent='🤖 '+r.note+'（袋の表示があれば、そちらを優先してね）';}
   catch(e){note.textContent=e instanceof TypeError?'通信できなかったよ（電波を確認してね）':(e.message||'エラー');}
   finally{b.disabled=false;b.textContent='🤖 AIでカロリーを推定（目安）';}};
+
+/* ============ しゅうしタブ：随時アドバイス＋週間サマリー ============ */
+function renderAdvice(){const dd=day(cur),ms=dd.meals||[],isT=cur===today(),h=isT?new Date().getHours():24;
+  const kcal=ms.reduce((a,m)=>a+(+m.k||0),0),pro=ms.reduce((a,m)=>a+(+m.p||0),0),out=burnKcal(dd);
+  const burn=baseBurn()+out,bud=budgetOf(dd),net=kcal-burn,tg=state.defTarget,W=bodyW();
+  const walkMin=k=>Math.ceil(k/(4.3*W/60)),delMin=k=>Math.ceil(k/(6*W/60));
+  const L=[];const add=(e,t,c)=>L.push({e,t,c:c||''});
+  if(!ms.length){
+    if(isT&&h<11)add('☀️','朝ごはんはタンパク質から。卵＋納豆で約13g、ギリシャヨーグルトなら1つで10g。');
+    else add('📝','まだ記録がゼロ。食べたら1タップで書いておこう。書くだけでも食べすぎに気づきやすくなるよ。');
+  }else if(net>0){add('🔥','いま '+Math.round(net)+' kcal オーバー。早歩き '+walkMin(net)+'分 か、配達 '+delMin(net)+'分 でとりかえせるよ。','warn');}
+  else if(kcal>bud){add('⚖️','アンダーだけど、目標の −'+tg+' まではあと '+Math.round(kcal-bud)+' kcal。'+(isT?'ここでごちそうさまが◎':'あしたは少しだけ控えめに。'));}
+  else{const r=Math.round(bud-kcal);
+    if(isT&&h>=21)add('🌙','21時すぎ。ここでおしまいにすれば、きょうは '+Math.round(-net)+' kcal アンダーで着地！','good');
+    else if(isT&&h>=16)add('🍽','夕ごはんは '+r+' kcal までならアンダーキープ。ごはんを少なめ（100g）にすると約80kcal へらせるよ。','good');
+    else if(isT)add('👍','いいペース。あと '+r+' kcal 食べてもアンダーだよ。','good');
+    else add('👍','この日は '+Math.round(-net)+' kcal アンダーで着地。いいね！','good');}
+  if(ms.length&&pro<state.proTarget&&(h>=12||pro<state.proTarget*0.3))
+    add('💪','タンパク質があと '+Math.round(state.proTarget-pro)+'g。サラダチキン（24g）・プロテイン（24g）・納豆（7g）・卵（6g）がかんたん。');
+  else if(pro>=state.proTarget)add('💪','タンパク質クリア！ アンダーでも筋肉が守られてるよ。','good');
+  if(out===0&&h>=12)add('🚶','きょうはまだ動いた記録がないよ。早歩き20分で約'+Math.round(4.3*W*20/60)+'kcal。','warn');
+  else if(out>=300)add('🚴','きょうは '+Math.round(out)+' kcal うごけた。えらい！','good');
+  const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)),sn=d7.filter(d=>strDay(state.days[d])).length;
+  if(!strDay(dd)&&sn<state.strGoal)add('🏋️','この7日の筋トレは '+sn+'/'+state.strGoal+'日。腕立て10回だけでも1日にカウントされるよ。');
+  const snackK=ms.reduce((a,m)=>a+(m.s?(+m.k||0):0),0);
+  if(snackK>0)add('🍫','お菓子・お酒 '+Math.round(snackK)+' kcal ＝ 自転車 '+Math.round(snackK/30)+'km分。あしたは半分にしてみよ。','warn');
+  if(isT&&h>=15&&(+dd.water||0)<(state.waterTarget||2500)*0.5)add('💧','水分が '+(+dd.water||0)+'ml。おなかがすいたと思ったら、まず水を1杯。');
+  if(!d7.some(d=>state.days[d]&&state.days[d].dry===true)&&ms.some(m=>m.s&&/ビール|ワイン|ハイボール|チューハイ|日本酒|焼酎|生ビール/.test(m.n)))
+    add('🍶','この7日、休肝日がまだゼロ。まず1日つくると、お腹まわりに効くよ。');
+  const top=L.slice(0,4);
+  document.getElementById('advList').innerHTML=top.map(x=>'<div class="adv '+x.c+'"><span>'+x.e+'</span>'+esc(x.t)+'</div>').join('');
+  document.getElementById('advFace').innerHTML=chikaSVG(net>0?'worry':(isT&&h>=21?'night':(top.some(x=>x.c==='good')?'cheer':'normal')),'ad');}
+function renderWeekSum(){const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)),xs=d7.map(d=>state.days[d]).filter(Boolean);
+  const logged=d7.filter(d=>dayNet(d)!=null),nets=logged.map(dayNet),sum=nets.reduce((a,v)=>a+v,0);
+  const tot=(f)=>logged.reduce((a,d)=>a+state.days[d].meals.reduce((s,m)=>s+(+m[f]||0),0),0);
+  const avgK=logged.length?tot('k')/logged.length:0,avgP=logged.length?tot('p')/logged.length:0;
+  const burn=xs.reduce((a,x)=>a+burnKcal(x),0);
+  const dmin=xs.reduce((a,x)=>a+dels(x).reduce((s,y)=>s+(+y.min||0),0),0),amin=xs.reduce((a,x)=>a+(x.acts||[]).reduce((s,y)=>s+(+y.min||0),0),0);
+  const str=d7.filter(d=>strDay(state.days[d])).length,dry=xs.filter(x=>x.dry===true).length;
+  const night=xs.filter(x=>(x.meals||[]).some(m=>m.night)).length,snack=xs.reduce((a,x)=>a+(x.meals||[]).reduce((s,m)=>s+(m.s?(+m.k||0):0),0),0);
+  const wd=d7.slice().reverse().filter(d=>state.days[d]&&state.days[d].w!=null);
+  const w0=wd.length?+state.days[wd[0]].w:null,w1=wd.length?+state.days[wd[wd.length-1]].w:null;
+  const cell=(e,l,v,u)=>'<div class="wg"><span>'+e+' '+l+'</span><b>'+v+'</b><small>'+(u||'')+'</small></div>';
+  document.getElementById('weekGrid').innerHTML=
+    cell('🔥','アンダーの日',nets.filter(v=>v<0).length+' / '+logged.length,'日')
+    +cell('📉','収支の合計',(sum>0?'+':'')+Math.round(sum).toLocaleString(),'kcal')
+    +cell('🍙','平均たべた',Math.round(avgK).toLocaleString(),'kcal/日')
+    +cell('💪','平均タンパク質',Math.round(avgP),'g/日')
+    +cell('🚴','うごいた',Math.round(burn).toLocaleString(),'kcal')
+    +cell('⏱','配達・運動',dmin+' / '+amin,'分')
+    +cell('🏋️','筋トレ',str+' / '+state.strGoal,'日')
+    +cell('🍶','休肝日',dry,'日')
+    +cell('🌙','21時以降に食べた',night,'日')
+    +cell('🍫','お菓子・お酒',Math.round(snack).toLocaleString(),'kcal')
+    +cell('⚖️','体重',w0==null?'ー':(wd.length>1?w0+'→'+w1:w1),w0!=null&&wd.length>1?'kg（'+((w1-w0)>0?'+':'')+(w1-w0).toFixed(1)+'）':(w0!=null?'kg':''));}
+function renderWeekComment(){document.getElementById('weekComment').textContent=coachComment();}
+document.getElementById('weekCommentNew').onclick=renderWeekComment;
+document.getElementById('sumReport').onclick=()=>document.getElementById('reportBtn').click();
+document.getElementById('toSum').onclick=()=>showTab('sum');
 
 /* ============ うごく：ランニング・自転車など（分だけで自動計算） ============ */
 const ACTS=[
@@ -1942,7 +2036,7 @@ function genWeeklyReport(){
   {const ns=days.map(o=>dayNet(o.d)).filter(v=>v!=null),sum=ns.reduce((a,v)=>a+v,0);
     t+='【収支】記録'+ns.length+'日・アンダー'+ns.filter(v=>v<0).length+'日・合計'+(sum>0?'+':'')+Math.round(sum)+'kcal（目標 1日−'+state.defTarget+'、消費は基礎代謝×1.2＋運動で推定）\n';}
   {const sd=days.filter(o=>strDay(o.x)).length;t+='【筋トレした日】'+sd+'/'+state.strGoal+'日\n';}
-  t+='\n※トレーナーのチカ（おにぎりのゆるキャラ）として、やさしくアドバイスください。';
+  t+='\n※トレーナーのおにぎりマン（おにぎりのゆるキャラ）として、やさしくアドバイスください。';
   return t;
 }
 document.getElementById('reportBtn').onclick=()=>{document.getElementById('reportText').value=genWeeklyReport();document.getElementById('reportOverlay').classList.add('show');};
@@ -1951,7 +2045,7 @@ document.getElementById('reportCopy').onclick=()=>{const ta=document.getElementB
   try{navigator.clipboard.writeText(ta.value);}catch(e){try{document.execCommand('copy');}catch(_){}}
   toast('📋 コピーしました。チャットに貼り付けてください');};
 
-/* ============ チカコーチ（ルールベース・無料オフライン） ============ */
+/* ============ おにぎりマンコーチ（ルールベース・無料オフライン） ============ */
 function coachComment(){
   const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)).reverse();
   const days=d7.map(d=>({d,x:state.days[d]||{}}));
@@ -1996,7 +2090,7 @@ function coachComment(){
     if(sd>=state.strGoal)praise.push('筋トレ'+sd+'日、目標クリア！ 食べる量をへらしても筋肉が守れる、いちばん大事なところだよ。');
     else if(sd===0)nudge.push('この7日は筋トレがゼロ。アンダーの時ほど筋肉が落ちやすいから、腕立て10回だけでもポチッとしよ。');}
   if(perfect>=4)praise.push('完璧な日が'+perfect+'日。習慣として体に入ってきてる。');
-  let msg=R(['今週もお疲れさま。','はい、チカだよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
+  let msg=R(['今週もお疲れさま。','はい、おにぎりマンだよ。今週の、見せてもらった。','ちょっと今週のこと、見てみたよ。'])+'\n\n';
   if(!praise.length&&!nudge.length){
     msg+='まだ記録が少なくて、コメントするには早いかな。まずは体重と、クエストを何日か付けてみて。数字が溜まったら、ちゃんと具体的に話すね。';
   } else {
@@ -2011,7 +2105,7 @@ function coachComment(){
 document.getElementById('coachBtn').onclick=()=>{document.getElementById('coachText').textContent=coachComment();document.getElementById('coachOverlay').classList.add('show');};
 document.getElementById('coachClose').onclick=()=>document.getElementById('coachOverlay').classList.remove('show');
 
-/* ============ チカ（おにぎりのゆるキャラ） ============ */
+/* ============ おにぎりマン（おにぎりのゆるキャラ） ============ */
 function chikaSVG(mood,p){mood=mood||'normal';p=p||'c';
   const body='M60 10 C67 10 71 15 75 21 L104 74 C112 89 104 102 89 102 L31 102 C16 102 8 89 16 74 L45 21 C49 15 53 10 60 10 Z';
   const ink='#3A2E28',line='#E5D5C0';
@@ -2103,7 +2197,7 @@ document.getElementById('photoDelBtn').onclick=()=>{if(curPhotoId==null)return;p
 document.getElementById('photoCloseBtn').onclick=()=>document.getElementById('photoOverlay').classList.remove('show');
 renderPhotos();
 
-/* ============ チカとチャット（ルール式・無料オフライン） ============ */
+/* ============ おにぎりマンとチャット（ルール式・無料オフライン） ============ */
 function chikaReply(raw){
   const R=a=>a[Math.floor(Math.random()*a.length)];
   const km=k=>Math.round(k/30);
@@ -2146,8 +2240,8 @@ function chikaReply(raw){
       'えらい！！それ本当にすごいこと。我慢できた自分を、ちゃんと褒めてあげてね。こういう1回の積み重ねが、1か月後の腹囲を変えるんだよ。',
       'よく乗り切ったね。あなたはもう"動ける人"だから、あとはこれを続けるだけ。私は毎日ここで見てるよ。'
     ]);}
-  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','チカ','元気','ただいま'].some(k=>raw.includes(k))){
-    return R(['やっほー、今日も来てくれてありがとう。調子どう？','はいはい、チカだよ。何かあった？食べたくなったら遠慮なく相談してね。']);}
+  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','おにぎりマン','元気','ただいま'].some(k=>raw.includes(k))){
+    return R(['やっほー、今日も来てくれてありがとう。調子どう？','はいはい、おにぎりマンだよ。何かあった？食べたくなったら遠慮なく相談してね。']);}
   return R([
     'うんうん、聞いてるよ。食べたくなったり飲みたくなったら、遠慮なく"○○食べたい"って言ってね。ちゃんと一緒に考えるから。',
     'なるほどね。今日の記録はもうつけた？迷ったら、まず水1杯と深呼吸。それから決めよ。',
@@ -2160,7 +2254,7 @@ function renderChat(){const log=document.getElementById('chatLog');if(!log)retur
     else b.style.cssText='align-self:flex-start;max-width:82%;background:var(--panel2);padding:8px 12px;border-radius:14px 14px 14px 4px;font-size:.86rem;line-height:1.55;white-space:pre-wrap;';
     b.textContent=m.t;log.appendChild(b);});
   log.scrollTop=log.scrollHeight;}
-function openChat(){if(!state.chat||!state.chat.length){state.chat=[{r:'c',t:'やっほー、チカだよ。今どんな感じ？…もしかして、何か食べたくなってる？ 正直に言ってみ、一緒に考えよ。'}];save();}
+function openChat(){if(!state.chat||!state.chat.length){state.chat=[{r:'c',t:'やっほー、おにぎりマンだよ。今どんな感じ？…もしかして、何か食べたくなってる？ 正直に言ってみ、一緒に考えよ。'}];save();}
   document.getElementById('chatOverlay').classList.add('show');renderChat();setTimeout(()=>{const i=document.getElementById('chatInput');if(i)i.focus();},120);}
 function chatSend(){const inp=document.getElementById('chatInput');const t=inp.value.trim();if(!t)return;
   state.chat=state.chat||[];state.chat.push({r:'u',t});state.chat.push({r:'c',t:chikaReply(t)});
@@ -2221,8 +2315,8 @@ function bodyReply(raw){
     return '体づくりって、実は"休む力"も込みなの。筋肉は寝てる間に回復するから、21時就寝を狙ってるあなたは方向性ばっちり。お通じやガスが気になる時は、水分・食物繊維・そして今やってる配達（軽い運動）が効くよ。腰など痛みが絡む場合は、そっちを先にケアしてね。';
   }
   /* ⑨ あいさつ・その他 */
-  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','チカ','元気'].some(k=>t.includes(k))){
-    return 'やっほー、チカだよ。からだのこと、どこか痛い・気になる所ある？ 部位や「いつ・何をして」痛めたか教えてくれると、ちゃんと一緒に考えられるよ。';
+  if(['こんにち','おはよ','こんばん','やあ','はろ','ちか','おにぎりマン','元気'].some(k=>t.includes(k))){
+    return 'やっほー、おにぎりマンだよ。からだのこと、どこか痛い・気になる所ある？ 部位や「いつ・何をして」痛めたか教えてくれると、ちゃんと一緒に考えられるよ。';
   }
   return 'うんうん、聞かせて。「どこが」「いつ・何をしていて」「どんな痛み（ズキッ／じわじわ／しびれ）」を教えてくれると、より具体的に答えられるよ。※私は医療の代わりにはならないから、強い痛みやしびれ、長引く時は無理せず病院にかかってね。';
 }
@@ -2266,7 +2360,7 @@ document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!
 /* ============ タブ ============ */
 function showTab(id){document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));
   document.querySelectorAll('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));
-  window.scrollTo(0,0);if(id==='body')drawChart();}
+  window.scrollTo(0,0);if(id==='body')drawChart();if(id==='sum')renderWeekComment();}
 document.querySelectorAll('#bnav button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
 document.getElementById('coachFace').innerHTML=chikaSVG('cheer','co');
 
