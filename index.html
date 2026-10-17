@@ -261,6 +261,14 @@
   .w7.none b{color:var(--sub);}
   .w7.cur{border-color:#FFB3C6;}
   .dots{letter-spacing:2px;color:#3FC59B;}
+  .inputcard{border:2.5px solid #FFB3C6;box-shadow:0 8px 22px rgba(232,100,138,.15);}
+  .sel{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;font-size:1rem;color:var(--txt);min-width:0;}
+  .sel.big{width:100%;border:2px solid #FFC9D6;}
+  .in-label{font-size:.82rem;font-weight:800;color:var(--accent2);margin:16px 0 6px;}
+  .row.nowrap{flex-wrap:nowrap;align-items:center;}
+  .qprev{flex:1;font-weight:800;color:var(--sub);font-size:.9rem;text-align:right;white-space:nowrap;}
+  .msum{background:var(--panel2);border-radius:14px;padding:10px 12px;font-size:.86rem;font-weight:700;margin-bottom:8px;text-align:center;}
+  .links-row{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin-top:16px;}
 </style>
 </head>
 <body>
@@ -271,7 +279,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.2.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.3.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -284,12 +292,78 @@
   <!-- ================= ごはん ================= -->
   <section class="tab on" id="tab-food">
 
-    <div class="card mascot" id="chiCard">
-      <div class="chika-wrap" id="chiFaceHome"></div>
-      <div class="bubble">
-        <div class="chika-name">チカ</div>
-        <div id="chiTip"></div>
-        <div class="bubble-sub">💬 タップでチカとおしゃべり</div>
+    <div class="card">
+      <h3>📒 きょう食べたもの <span class="muted" id="mealDay"></span></h3>
+      <div id="mealSum" class="msum"></div>
+      <div id="mealList"></div>
+      <div class="muted" style="text-align:center;margin-top:8px;font-size:.7rem;">※カロリーは一般的な目安です</div>
+    </div>
+
+    <div class="card inputcard" id="inputCard">
+      <h3>✍️ 食べたものを追加</h3>
+      <div class="row nowrap">
+        <span class="mini" style="margin:0;white-space:nowrap;font-size:.82rem;">いつ？</span>
+        <select id="slotSel" class="sel" style="flex:1;"></select>
+      </div>
+
+      <div class="in-label">① リストからえらぶ</div>
+      <select id="quickSel" class="sel big"></select>
+      <div class="row nowrap" style="margin-top:8px;">
+        <select id="quickQty" class="sel">
+          <option value="0.5">半分</option><option value="1" selected>1つ（1人前）</option>
+          <option value="1.5">1.5</option><option value="2">2つ</option><option value="3">3つ</option>
+        </select>
+        <span id="quickPrev" class="qprev"></span>
+        <button id="quickAdd">追加</button>
+      </div>
+      <div style="margin-top:6px;"><span class="link" id="quickEdit" hidden></span></div>
+
+      <div class="in-label">② なまえでさがす</div>
+      <input id="foodSearch" type="text" autocomplete="off" placeholder="🔍 牛丼・ビール・鶏むね・サンディ アイス…">
+      <div id="searchRes" hidden></div>
+
+      <div class="in-label">③ そのほかの入れ方</div>
+      <details class="more ai" id="aiBox">
+        <summary>🤖 AIにまかせる（文章で書くだけ）</summary>
+        <div style="margin-top:10px;">
+          <textarea id="aiText" rows="3" placeholder="例：グラタン。ペンネ、ハインツのグラタンソース、鶏もも肉、しいたけ、いんげん、カリフラワー。2人前つくって1人前たべた"></textarea>
+          <button id="aiGo" style="width:100%;margin-top:8px;">🤖 AIで計算</button>
+          <div id="aiNoKey" class="muted" style="font-size:.74rem;margin-top:6px;">※ 使うにはAPIキーの設定が必要です（1回 約0.03円）。<span class="link" id="aiToSettings">設定へ</span></div>
+          <div id="aiResult" style="margin-top:10px;"></div>
+        </div>
+      </details>
+      <details class="more" id="freeBox">
+        <summary>✏️ 名前とカロリーだけで登録（パッケージの表示を見て）</summary>
+        <div style="margin-top:10px;">
+          <label class="mini">なにを食べた？</label>
+          <input id="freeName" type="text" style="width:100%;" placeholder="例：セブンのパスタサラダ">
+          <div class="row" style="margin-top:8px;">
+            <div><label class="mini">カロリー(kcal)</label><input type="number" id="freeKcal" placeholder="350"></div>
+            <div><label class="mini">タンパク質(g) 任意</label><input type="number" step="0.1" id="freeP" placeholder="12"></div>
+            <button id="freeAdd">追加</button>
+          </div>
+        </div>
+      </details>
+      <details class="more" id="estBox">
+        <summary>🍳 ざっくり概算（カロリーがわからない料理）</summary>
+        <div style="margin-top:10px;">
+          <label class="mini">料理名（任意）</label>
+          <input id="estName" type="text" style="width:100%;" placeholder="例：妻の肉じゃが">
+          <label class="mini" style="margin-top:10px;">どんな料理？</label>
+          <select id="estType" class="sel" style="width:100%;"></select>
+          <label class="mini" style="margin-top:10px;">量は？</label>
+          <select id="estSize" class="sel" style="width:100%;"></select>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;">
+            <span id="estPrev" style="font-size:.92rem;font-weight:800;color:var(--accent2);">≒ — kcal</span>
+            <button id="estAdd">追加</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="links-row">
+        <span class="link" id="newRecipe">🍳 マイ料理をつくる</span>
+        <span class="link" id="newProduct">🏷 マイ商品を登録</span>
+        <span class="link" id="editTargets">アンダー目標 / タンパク質を変更</span>
       </div>
     </div>
 
@@ -315,71 +389,13 @@
       <div id="nightLine" class="infoline info-night" hidden></div>
     </div>
 
-    <div class="card">
-      <h3>✍️ さくっと記録</h3>
-      <div class="slotbar" id="slotBar"></div>
-      <input id="foodSearch" type="text" autocomplete="off" placeholder="🔍 たべたものを入力（牛丼・ビール・鶏むね…）">
-      <div id="searchRes" hidden></div>
-
-      <details class="more ai" id="aiBox">
-        <summary>🤖 AIにまかせる（文章で書くだけ）</summary>
-        <div style="margin-top:10px;">
-          <textarea id="aiText" rows="3" placeholder="例：グラタン。ペンネ、ハインツのグラタンソース、鶏もも肉、しいたけ、いんげん、カリフラワー。2人前つくって1人前たべた"></textarea>
-          <button id="aiGo" style="width:100%;margin-top:8px;">🤖 AIで計算</button>
-          <div id="aiNoKey" class="muted" style="font-size:.74rem;margin-top:6px;">※ 使うにはAPIキーの設定が必要です（1回 約0.03円）。<span class="link" id="aiToSettings">設定へ</span></div>
-          <div id="aiResult" style="margin-top:10px;"></div>
-        </div>
-      </details>
-
-      <div class="sec-label">🕘 よく食べる・さっき食べた（1タップ）</div>
-      <div class="chips" id="recentChips"></div>
-
-      <div class="sec-label">📚 メニューからえらぶ</div>
-      <div class="chips" id="foodTabs" style="margin-bottom:10px;"></div>
-      <div class="chips" id="foodChips"></div>
-
-      <div class="sec-label">🍳 マイ料理（材料から自動計算）</div>
-      <div class="chips" id="recipeChips"></div>
-
-      <div class="sec-label">🏷 マイ商品（よく買う市販品）</div>
-      <div class="chips" id="productChips"></div>
-
-      <details class="more" id="freeBox">
-        <summary>✏️ 名前とカロリーだけで登録（パッケージの表示を見て）</summary>
-        <div style="margin-top:10px;">
-          <label class="mini">なにを食べた？</label>
-          <input id="freeName" type="text" style="width:100%;" placeholder="例：セブンのパスタサラダ">
-          <div class="row" style="margin-top:8px;">
-            <div><label class="mini">カロリー(kcal)</label><input type="number" id="freeKcal" placeholder="350"></div>
-            <div><label class="mini">タンパク質(g) 任意</label><input type="number" step="0.1" id="freeP" placeholder="12"></div>
-            <button id="freeAdd">追加</button>
-          </div>
-        </div>
-      </details>
-
-      <details class="more" id="estBox">
-        <summary>🍳 ざっくり概算（カロリーがわからない料理）</summary>
-        <div style="margin-top:10px;">
-          <label class="mini">料理名（任意）</label>
-          <input id="estName" type="text" style="width:100%;" placeholder="例：妻の肉じゃが">
-          <label class="mini" style="margin-top:10px;">どんな料理？</label>
-          <div class="chips" id="estTypeChips"></div>
-          <label class="mini" style="margin-top:10px;">量は？</label>
-          <div class="chips" id="estSizeChips"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;">
-            <span id="estPrev" style="font-size:.92rem;font-weight:800;color:var(--accent2);">≒ — kcal</span>
-            <button id="estAdd">追加</button>
-          </div>
-        </div>
-      </details>
-
-      <div style="text-align:center;margin-top:14px;"><span class="link" id="editTargets">アンダー目標 / タンパク質を変更</span></div>
-    </div>
-
-    <div class="card">
-      <h3>📒 きょう食べたもの</h3>
-      <div id="mealList"></div>
-      <div class="muted" style="text-align:center;margin-top:8px;font-size:.7rem;">※カロリーは一般的な目安です</div>
+    <div class="card mascot" id="chiCard">
+      <div class="chika-wrap" id="chiFaceHome"></div>
+      <div class="bubble">
+        <div class="chika-name">チカ</div>
+        <div id="chiTip"></div>
+        <div class="bubble-sub">💬 タップでチカとおしゃべり</div>
+      </div>
     </div>
 
     <div class="card">
@@ -409,7 +425,6 @@
       </div>
       <div style="text-align:center;margin-top:10px;"><span class="link" id="waterTargetEdit">目標を変更（現在 2.5L）</span></div>
     </div>
-  </section>
 
   <!-- ================= うごく ================= -->
   <section class="tab" id="tab-move">
@@ -1109,16 +1124,47 @@ function openMore(boxId,nameId,name,focusId){clearSearch();const d=document.getE
   document.getElementById(nameId).value=name||'';d.scrollIntoView({behavior:'smooth',block:'center'});
   if(focusId)setTimeout(()=>document.getElementById(focusId).focus(),300);}
 
-function renderSlots(){const b=document.getElementById('slotBar');b.innerHTML='';const now=slotNow();
-  SLOTS.forEach(s=>{const el=document.createElement('button');el.className='slot'+(s.id===now?' on':'')+(s.id==='夜食'?' night':'');
-    el.innerHTML='<span>'+s.e+'</span>'+s.l;el.onclick=()=>{curSlot=s.id;state.lastSlot=s.id;save();renderSlots();};b.appendChild(el);});}
-function renderRecent(){const rc=document.getElementById('recentChips');rc.innerHTML='';const list=recentFoods();
-  if(!list.length){rc.innerHTML='<div class="muted">記録すると、ここに よく食べるものが ならぶよ</div>';return;}
-  list.forEach(f=>rc.appendChild(chipEl(f.n,Math.round(f.k)+'kcal',f.s?'snack':'',()=>addMeal(f.n,f.k,f.p,f.s))));}
-function renderMenu(){if(foodTab>=MENU.length)foodTab=0;const tabsEl=document.getElementById('foodTabs');tabsEl.innerHTML='';
-  MENU.forEach((g,gi)=>tabsEl.appendChild(chipEl(g.c,'',gi===foodTab?'ctab on':'ctab',()=>{foodTab=gi;renderMenu();})));
-  const fc=document.getElementById('foodChips');fc.innerHTML='';const g=MENU[foodTab];
-  g.items.forEach(f=>{const s=f.s!=null?f.s:(g.snack?1:0);fc.appendChild(chipEl(f.n,f.k+'kcal',s?'snack':'',()=>addMeal(f.n,f.k,f.p,s)));});}
+function renderSlots(){const s=document.getElementById('slotSel');
+  if(!s.options.length)SLOTS.forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.e+' '+x.l;s.appendChild(o);});
+  s.value=slotNow();}
+document.getElementById('slotSel').onchange=e=>{curSlot=e.target.value;state.lastSlot=curSlot;save();};
+let quickMap={};
+const qtyWord=q=>q===0.5?'半分':q+'人前';
+function quickItems(){const map={},groups=[];
+  const add=(g,key,label,item)=>{map[key]=item;g.opts.push([key,label]);};
+  const rec={l:'🕘 よく食べる・最近',opts:[]};
+  recentFoods().forEach((f,i)=>add(rec,'r'+i,f.n+'（'+Math.round(f.k)+'kcal）',{n:f.n,k:f.k,p:f.p,s:f.s}));
+  const rc={l:'🍳 マイ料理（1人前）',opts:[]};
+  (state.recipes||[]).forEach(r=>{const per=recipePer(r);
+    add(rc,'c'+r.id,r.n+'（'+Math.round(per.k)+'kcal）',{n:r.n+'（1人前）',k:per.k,p:per.p,s:null,recipe:r.id,
+      name:q=>r.n+'（'+(q===1?'1人前':qtyWord(q))+'）'});});
+  const pd={l:'🏷 マイ商品',opts:[]};
+  (state.products||[]).forEach(p=>add(pd,'p'+p.id,p.n+(p.st?'・'+p.st:'')+'（'+p.k+'kcal）',{n:prodLabel(p),k:p.k,p:p.p,s:p.s,product:p.id}));
+  groups.push(rec,rc,pd);
+  MENU.forEach((g,gi)=>{const og={l:g.c,opts:[]};
+    g.items.forEach((f,i)=>add(og,'m'+gi+'_'+i,f.n+'（'+f.k+'kcal）',{n:f.n,k:f.k,p:f.p,s:f.s!=null?f.s:(g.snack?1:0)}));groups.push(og);});
+  return{map,groups};}
+function renderQuick(){const sel=document.getElementById('quickSel');const keep=sel.value;const Q=quickItems();quickMap=Q.map;
+  sel.innerHTML='<option value="">▼ タップしてえらぶ（よく食べる・マイ料理・メニュー）</option>';
+  Q.groups.forEach(g=>{if(!g.opts.length)return;const og=document.createElement('optgroup');og.label=g.l;
+    g.opts.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;og.appendChild(o);});sel.appendChild(og);});
+  sel.value=quickMap[keep]?keep:'';updateQuick();}
+function updateQuick(){const it=quickMap[document.getElementById('quickSel').value];const q=+document.getElementById('quickQty').value||1;
+  document.getElementById('quickPrev').textContent=it?'≒ '+Math.round(it.k*q)+' kcal':'';
+  const ed=document.getElementById('quickEdit');ed.hidden=!(it&&(it.recipe||it.product));
+  ed.textContent=it&&it.recipe?'✏️ この料理の材料をなおす':'✏️ この商品をなおす';}
+document.getElementById('quickSel').onchange=updateQuick;
+document.getElementById('quickQty').onchange=updateQuick;
+document.getElementById('quickAdd').onclick=()=>{const it=quickMap[document.getElementById('quickSel').value];
+  if(!it){toast('食べたものを えらんでね');return;}
+  const q=+document.getElementById('quickQty').value||1;
+  const name=it.name?it.name(q):(q===1?it.n:it.n+(q===0.5?'（半分）':' ×'+q));
+  document.getElementById('quickSel').value='';document.getElementById('quickQty').value='1';
+  addMeal(name,it.k*q,it.p*q,it.s);};
+document.getElementById('quickEdit').onclick=()=>{const it=quickMap[document.getElementById('quickSel').value];if(!it)return;
+  if(it.recipe)openRecipe(it.recipe);else if(it.product)openProduct(it.product);};
+document.getElementById('newRecipe').onclick=()=>openRecipe(null);
+document.getElementById('newProduct').onclick=()=>openProduct(null,'');
 
 function renderFood(){
   const dd=day(cur);dd.meals=dd.meals||[];
@@ -1140,6 +1186,9 @@ function renderFood(){
   G('calLeft').innerHTML=kcal<=bud?'あと <b>'+Math.round(bud-kcal)+'</b> kcal 食べても アンダー −'+tg+' をキープ👍'
     :net<0?'目標より '+Math.round(kcal-bud)+' kcal 多め。でも まだ <b>'+Math.round(-net)+'</b> kcal アンダー'
     :'<b>'+Math.round(net)+'</b> kcal オーバー。配達や筋トレで とりかえそ';
+  G('mealDay').textContent=cur===today()?'(きょう)':cur;
+  G('mealSum').innerHTML='合計 <b>'+Math.round(kcal)+'</b> kcal'+(kcal<=bud?' ・ あと <b>'+Math.round(bud-kcal)+'</b> kcal でアンダーキープ👍'
+    :net<0?' ・ まだアンダー（目標より '+Math.round(kcal-bud)+' 多め）':' ・ <b style="color:var(--fire)">'+Math.round(net)+'</b> kcal オーバー');
   renderWeek7();
   const snackK=dd.meals.reduce((a,m)=>a+(m.s?(+m.k||0):0),0);
   const sl=document.getElementById('snackLine');
@@ -1161,7 +1210,7 @@ function renderFood(){
       const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
       x.onclick=()=>{dd.meals.splice(i,1);save();render();};
       el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
-  renderSlots();renderRecent();renderMenu();renderRecipes();renderProducts();
+  renderSlots();renderQuick();
 }
 
 /* ざっくり概算：料理タイプ別（100gあたり kcal / タンパク質g） */
@@ -1179,12 +1228,14 @@ const CAT=[
 ];
 const EST_SIZES=[{l:'少なめ(200g)',g:200},{l:'ふつう(300g)',g:300},{l:'大盛り(450g)',g:450}];
 let estSel=1,estSize=1;
-function renderEst(){const tb=document.getElementById('estTypeChips');tb.innerHTML='';
-  CAT.forEach((c,i)=>tb.appendChild(chipEl(c.n,'',i===estSel?'on':'',()=>{estSel=i;renderEst();})));
-  const sb=document.getElementById('estSizeChips');sb.innerHTML='';
-  EST_SIZES.forEach((s,i)=>sb.appendChild(chipEl(s.l,'',i===estSize?'on':'',()=>{estSize=i;renderEst();})));
-  const c=CAT[estSel],g=EST_SIZES[estSize].g;
+function renderEst(){const ts=document.getElementById('estType'),ss=document.getElementById('estSize');
+  if(!ts.options.length){CAT.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.n;ts.appendChild(o);});
+    EST_SIZES.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.l;ss.appendChild(o);});
+    ts.value=estSel;ss.value=estSize;}
+  estSel=+ts.value;estSize=+ss.value;const c=CAT[estSel],g=EST_SIZES[estSize].g;
   document.getElementById('estPrev').textContent='≒ '+Math.round(c.k*g/100)+' kcal ／ P '+Math.round(c.p*g/10)/10+' g';}
+document.getElementById('estType').onchange=renderEst;
+document.getElementById('estSize').onchange=renderEst;
 document.getElementById('estAdd').onclick=()=>{const c=CAT[estSel],g=EST_SIZES[estSize].g;
   const nm=document.getElementById('estName').value.trim()||c.n;
   addMeal(nm+'（概算'+g+'g）',c.k*g/100,c.p*g/100,c.snack?1:null);document.getElementById('estName').value='';};
@@ -1247,12 +1298,6 @@ function recipePer(r){const t=recipeTot(r),s=Math.max(1,+r.serv||1);return{k:t.k
 
 let rcEdit=null,rcPortion=1;
 const PORTIONS=[{l:'半分',v:.5},{l:'1人前',v:1},{l:'1.5人前',v:1.5},{l:'2人前',v:2}];
-function renderRecipes(){const box=document.getElementById('recipeChips');box.innerHTML='';
-  (state.recipes||[]).forEach(r=>{const per=recipePer(r);const g=document.createElement('span');g.className='rgrp';
-    g.appendChild(chipEl(r.n,Math.round(per.k)+'kcal/1人前','',()=>addMeal(r.n+'（1人前）',per.k,per.p,null)));
-    const e=document.createElement('button');e.className='mini-btn';e.textContent='✏️';e.onclick=()=>openRecipe(r.id);
-    g.appendChild(e);box.appendChild(g);});
-  box.appendChild(chipEl('＋ 新しい料理をつくる','','on',()=>openRecipe(null)));}
 function openRecipe(id){const r=(state.recipes||[]).find(x=>x.id===id);
   rcEdit=r?JSON.parse(JSON.stringify(r)):{id:Date.now(),n:'',serv:1,items:[]};rcPortion=1;
   document.getElementById('rcName').value=rcEdit.n;document.getElementById('rcSearch').value='';
@@ -1466,12 +1511,6 @@ function parseProduct(raw){const o={n:'',mk:'',st:'',pr:''},rest=[];
 function prodLabel(p){return p.n+(p.mk?'（'+p.mk+'）':'');}
 function prodSub(p){return [p.st,p.pr!==''&&p.pr!=null?p.pr+'円':''].filter(Boolean).join('・');}
 function prodTags(p){return [p.n,p.mk,p.st,p.pr!==''&&p.pr!=null?p.pr+'円':''].join(' ');}
-function renderProducts(){const box=document.getElementById('productChips');box.innerHTML='';
-  (state.products||[]).forEach(p=>{const g=document.createElement('span');g.className='rgrp';
-    g.appendChild(chipEl(p.n,Math.round(p.k)+'kcal',p.s?'snack':'',()=>addMeal(prodLabel(p),p.k,p.p,p.s)));
-    const e=document.createElement('button');e.className='mini-btn';e.textContent='✏️';e.onclick=()=>openProduct(p.id);
-    g.appendChild(e);box.appendChild(g);});
-  box.appendChild(chipEl('＋ 商品を登録','','on',()=>openProduct(null,'')));}
 let pdEdit=null;
 const $v=id=>document.getElementById(id);
 function openProduct(id,raw){const ex=(state.products||[]).find(x=>x.id===id);
