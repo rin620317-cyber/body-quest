@@ -282,6 +282,9 @@
   .wg b{font-size:1.02rem;}
   .wg small{font-size:.64rem;color:var(--sub);margin-left:3px;font-weight:700;}
   .wcom{white-space:pre-wrap;background:#FFF8E6;border-radius:14px;padding:12px;font-size:.84rem;line-height:1.7;font-weight:600;}
+  .mrow.tap{cursor:pointer;}
+  .mrow.tap:active{filter:brightness(.97);}
+  input[type=time]{background:var(--panel2);border:1.5px solid var(--line);color:var(--txt);border-radius:14px;padding:10px 8px;font-size:1rem;}
 </style>
 </head>
 <body>
@@ -292,7 +295,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.7.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.8.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -309,7 +312,7 @@
       <h3>📒 きょう食べたもの <span class="muted" id="mealDay"></span></h3>
       <div id="mealSum" class="msum"></div>
       <div id="mealList"></div>
-      <div class="muted" style="text-align:center;margin-top:8px;font-size:.7rem;">※カロリーは一般的な目安です</div>
+      <div class="muted" style="text-align:center;margin-top:8px;font-size:.7rem;">✏️ 記録をタップすると、量やカロリーをなおせます ・ ※カロリーは目安です</div>
       <div style="text-align:center;margin-top:8px;"><span class="link" id="toSum">📊 収支とアドバイスを見る</span></div>
     </div>
 
@@ -763,6 +766,32 @@
   <div style="display:flex;gap:10px;margin-top:14px;">
     <button class="ghost" id="photoDelBtn" style="flex:1;color:var(--fire);">この写真を削除</button>
     <button id="photoCloseBtn" style="flex:1;">閉じる</button>
+  </div>
+</div></div>
+
+<!-- 食事の記録をなおす -->
+<div class="overlay" id="mealEditOverlay"><div class="modal recipe-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <h2 style="font-size:1.15rem;margin:0;">✏️ 記録をなおす</h2><span class="link" id="meClose">閉じる</span>
+  </div>
+  <label class="mini">なにを食べた？</label>
+  <input id="meName" type="text" style="width:100%;">
+  <label class="mini" style="margin-top:10px;">量を変える（記録したときの量を1として）</label>
+  <select id="meQty" class="sel" style="width:100%;">
+    <option value="0.5">半分</option><option value="1" selected>そのまま</option><option value="1.5">1.5倍</option><option value="2">2倍</option><option value="3">3倍</option>
+  </select>
+  <div class="row" style="margin-top:10px;">
+    <div><label class="mini">カロリー(kcal)</label><input id="meKcal" type="number" style="width:100px;"></div>
+    <div><label class="mini">タンパク質(g)</label><input id="meP" type="number" step="0.1" style="width:90px;"></div>
+  </div>
+  <div class="row nowrap" style="margin-top:10px;">
+    <div style="flex:1;min-width:0;"><label class="mini">いつ？</label><select id="meSlot" class="sel" style="width:100%;"></select></div>
+    <div><label class="mini">時刻</label><input id="meTime" type="time" style="width:112px;"></div>
+  </div>
+  <label style="display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:700;margin-top:10px;"><input type="checkbox" id="meSnack" style="width:auto;transform:scale(1.2);"> おやつ・お酒として数える（戒めカウント）</label>
+  <div style="display:flex;gap:8px;margin-top:14px;">
+    <button id="meSave" style="flex:2;">保存</button>
+    <button class="ghost" id="meDel" style="flex:1;color:var(--fire);">削除</button>
   </div>
 </div></div>
 
@@ -1272,12 +1301,13 @@ function renderFood(){
     const sl2=SLOTS.find(s=>s.id===gid);const sub=items.reduce((a,o)=>a+(+o.m.k||0),0);
     const h=document.createElement('div');h.className='mg-h'+(gid==='夜食'?' night':'');
     h.innerHTML='<span>'+(sl2?sl2.e+' '+sl2.l:'📝 時間なし')+'</span><span>'+Math.round(sub)+' kcal</span>';ml.appendChild(h);
-    items.forEach(({m,i})=>{const el=document.createElement('div');el.className='mrow'+(m.s?' snack':'');
+    items.forEach(({m,i})=>{const el=document.createElement('div');el.className='mrow tap'+(m.s?' snack':'');
       el.innerHTML='<span class="mn">'+esc(m.n)+(m.at?'<small>'+m.at+'</small>':'')+'</span><span class="mk">'+Math.round(m.k)+'kcal</span>';
+      el.onclick=()=>openMealEdit(i);
       const plus=document.createElement('button');plus.className='mini-btn';plus.textContent='＋1';
-      plus.onclick=()=>addMeal(m.n,m.k,m.p,m.s,SLOTS.some(s=>s.id===m.t)?m.t:null);
+      plus.onclick=e=>{e.stopPropagation();addMeal(m.n,m.k,m.p,m.s,SLOTS.some(s=>s.id===m.t)?m.t:null);};
       const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
-      x.onclick=()=>{dd.meals.splice(i,1);save();render();};
+      x.onclick=e=>{e.stopPropagation();dd.meals.splice(i,1);save();render();};
       el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
   renderSlots();renderQuick();
 }
@@ -1617,6 +1647,33 @@ $v('pdAi').onclick=async()=>{const n=$v('pdName').value.trim();if(!n){toast('商
     note.textContent='🤖 '+r.note+'（袋の表示があれば、そちらを優先してね）';}
   catch(e){note.textContent=e instanceof TypeError?'通信できなかったよ（電波を確認してね）':(e.message||'エラー');}
   finally{b.disabled=false;b.textContent='🤖 AIでカロリーを推定（目安）';}};
+
+/* ============ 食事の記録をなおす ============ */
+let meIdx=null,meBase=null;
+function openMealEdit(i){const m=day(cur).meals[i];if(!m)return;const G=id=>document.getElementById(id);
+  meIdx=i;meBase={n:m.n,k:+m.k||0,p:+m.p||0};
+  G('meName').value=m.n;G('meKcal').value=Math.round(m.k);G('meP').value=m.p||0;G('meQty').value='1';
+  const sl=G('meSlot');
+  if(!sl.options.length)[...SLOTS.map(s=>[s.id,s.e+' '+s.l]),['その他','📝 時間なし']].forEach(([v,l])=>{
+    const o=document.createElement('option');o.value=v;o.textContent=l;sl.appendChild(o);});
+  sl.value=SLOTS.some(s=>s.id===m.t)?m.t:'その他';G('meTime').value=m.at||'';G('meSnack').checked=!!m.s;
+  G('mealEditOverlay').classList.add('show');}
+function closeMealEdit(){document.getElementById('mealEditOverlay').classList.remove('show');meIdx=null;meBase=null;}
+document.getElementById('meQty').onchange=e=>{if(!meBase)return;const q=+e.target.value,G=id=>document.getElementById(id);
+  G('meKcal').value=Math.round(meBase.k*q);G('meP').value=Math.round(meBase.p*q*10)/10;
+  G('meName').value=q===1?meBase.n:meBase.n+(q===0.5?'（半分）':' ×'+q);};
+document.getElementById('meClose').onclick=closeMealEdit;
+document.getElementById('meSave').onclick=()=>{const m=day(cur).meals[meIdx];if(!m){closeMealEdit();return;}const G=id=>document.getElementById(id);
+  const n=G('meName').value.trim(),k=parseFloat(G('meKcal').value);
+  if(!n){toast('名前を入れてね');return;}
+  if(isNaN(k)||k<0){toast('カロリーを入れてね');return;}
+  m.n=n;m.k=Math.round(k);m.p=Math.round((parseFloat(G('meP').value)||0)*10)/10;m.s=G('meSnack').checked?1:0;
+  const t=G('meSlot').value;if(t==='その他')delete m.t;else m.t=t;
+  if(m.t==='夜食')m.night=1;else delete m.night;
+  const at=G('meTime').value;if(at)m.at=at;else delete m.at;
+  save();closeMealEdit();render();toast('✏️ なおしました');};
+document.getElementById('meDel').onclick=()=>{if(meIdx==null)return;if(!confirm('この記録を削除しますか？'))return;
+  day(cur).meals.splice(meIdx,1);save();closeMealEdit();render();toast('削除しました');};
 
 /* ============ しゅうしタブ：随時アドバイス＋週間サマリー ============ */
 function renderAdvice(){const dd=day(cur),ms=dd.meals||[],isT=cur===today(),h=isT?new Date().getHours():24;
