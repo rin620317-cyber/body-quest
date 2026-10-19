@@ -297,7 +297,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.9.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.10.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -467,13 +467,6 @@
   <!-- ================= うごく ================= -->
   <section class="tab" id="tab-move">
     <div class="card">
-      <h3>⚡ いつもの運動（1タップで記録）</h3>
-      <div id="presetList"></div>
-      <div style="text-align:center;margin-top:6px;"><span class="link" id="presetNew">＋ いつもの運動を登録</span></div>
-    </div>
-
-
-    <div class="card">
       <h3>🔥 きょう うごいた分</h3>
       <div class="bal">
         <div class="bal-i out"><span>🚴 配達・有酸素</span><b id="mvDel">0</b><small>kcal</small></div>
@@ -484,6 +477,14 @@
       </div>
       <div id="moveWeek" class="muted" style="text-align:center;font-weight:700;"></div>
       <div id="strWeek" style="text-align:center;font-weight:800;margin-top:8px;cursor:pointer;"></div>
+      <div class="sec-label">📒 きょう動いた記録 <span class="muted" id="moveDay" style="font-weight:700;"></span></div>
+      <div id="moveHist"></div>
+    </div>
+
+    <div class="card">
+      <h3>⚡ いつもの運動（1タップで記録）</h3>
+      <div id="presetList"></div>
+      <div style="text-align:center;margin-top:6px;"><span class="link" id="presetNew">＋ いつもの運動を登録</span></div>
     </div>
 
     <div class="card">
@@ -1762,6 +1763,26 @@ document.getElementById('weekCommentNew').onclick=renderWeekComment;
 document.getElementById('sumReport').onclick=()=>document.getElementById('reportBtn').click();
 document.getElementById('toSum').onclick=()=>showTab('sum');
 
+/* ============ きょう動いた記録（配達・運動・筋トレを時刻順に） ============ */
+function moveEntries(dd){const L=[];
+  dels(dd).forEach((s,i)=>L.push({at:s.at||'',t:'🚴 配達 '+[s.min?s.min+'分':'',s.km!=null?s.km+'km':'',s.cnt?s.cnt+'件':''].filter(Boolean).join('・')+(s.legacy?'（以前の記録）':''),
+    k:sessKcal(s),del:()=>{dd.dels=dels(dd).slice();dd.dels.splice(i,1);syncKm(dd);}}));
+  (dd.acts||[]).forEach((x,i)=>L.push({at:x.at||'',t:x.a+' '+x.min+'分',k:+x.k||0,del:()=>{dd.acts.splice(i,1);}}));
+  (dd.sets||[]).forEach((s,i)=>L.push({at:s.at||'',t:(s.prog?'🏋️ '+s.ex:'💪 '+s.ex+' '+s.n+s.u),k:+s.k||0,del:()=>{
+    if(s.prog)dd.wo=Math.max(0,(+dd.wo||0)-1);dd.sets.splice(i,1);if(!dd.sets.length&&!(+dd.wo))dd.strength=false;}}));
+  const legacy=Math.max(0,(+dd.wo||0)-progCount(dd));
+  if(legacy)L.push({at:'',t:'🏋️ プログラム（以前の記録）×'+legacy,k:legacy*60,del:null});
+  return L.sort((a,b)=>(a.at||'99:99').localeCompare(b.at||'99:99'));}
+function renderMoveHist(){const dd=day(cur),box=document.getElementById('moveHist');box.innerHTML='';
+  document.getElementById('moveDay').textContent=cur===today()?'':cur;
+  const L=moveEntries(dd);
+  if(!L.length){box.innerHTML='<div class="empty">まだ記録なし。下の「いつもの運動」や配達ボタンから1タップでどうぞ🍙</div>';return;}
+  L.forEach(e=>{const el=document.createElement('div');el.className='mrow';
+    el.innerHTML='<span class="mn">'+esc(e.t)+(e.at?'<small>'+e.at+'</small>':'')+'</span><span class="mk">'+Math.round(e.k)+'kcal</span>';
+    if(e.del){const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
+      x.onclick=()=>{if(!confirm('この記録を消しますか？'))return;e.del();save();render();toast('消しました');};el.appendChild(x);}
+    box.appendChild(el);});}
+
 /* ============ いつもの運動（タイマーなしで1タップ記録） ============ */
 const PS_LV={easy:{l:'ゆるめ（ストレッチ・ヨガ）',m:3},mid:{l:'ふつう（自重の筋トレ）',m:5},hard:{l:'きつい（HIIT・息が上がる）',m:8}};
 const PS_MINS=[5,10,15,20,25,30,40,45,60];
@@ -1924,7 +1945,7 @@ function renderMove(){const dd=day(cur);const ds=dels(dd);
     const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
     x.onclick=()=>{dd.dels=dels(dd).slice();dd.dels.splice(i,1);syncKm(dd);save();render();};
     el.appendChild(x);dl.appendChild(el);});
-  renderEx();renderStrWeek();renderActs();renderPresets();}
+  renderEx();renderStrWeek();renderActs();renderPresets();renderMoveHist();}
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
   document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
