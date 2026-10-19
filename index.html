@@ -285,6 +285,8 @@
   .mrow.tap{cursor:pointer;}
   .mrow.tap:active{filter:brightness(.97);}
   input[type=time]{background:var(--panel2);border:1.5px solid var(--line);color:var(--txt);border-radius:14px;padding:10px 8px;font-size:1rem;}
+  .ps-row{display:flex;gap:6px;align-items:center;margin-bottom:8px;}
+  .ps-btn{flex:1;text-align:left;padding:13px 14px;font-size:.98rem;}
 </style>
 </head>
 <body>
@@ -295,7 +297,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.8.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v14.9.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -464,6 +466,12 @@
 
   <!-- ================= うごく ================= -->
   <section class="tab" id="tab-move">
+    <div class="card">
+      <h3>⚡ いつもの運動（1タップで記録）</h3>
+      <div id="presetList"></div>
+      <div style="text-align:center;margin-top:6px;"><span class="link" id="presetNew">＋ いつもの運動を登録</span></div>
+    </div>
+
 
     <div class="card">
       <h3>🔥 きょう うごいた分</h3>
@@ -769,6 +777,25 @@
   </div>
 </div></div>
 
+<!-- いつもの運動 -->
+<div class="overlay" id="presetOverlay"><div class="modal recipe-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <h2 style="font-size:1.15rem;margin:0;">⚡ いつもの運動</h2><span class="link" id="psClose">閉じる</span>
+  </div>
+  <label class="mini">名前</label>
+  <input id="psName" type="text" style="width:100%;" placeholder="例：YouTubeの全身10種">
+  <div class="row nowrap" style="margin-top:10px;">
+    <div><label class="mini">時間</label><select id="psMin" class="sel"></select></div>
+    <div style="flex:1;min-width:0;"><label class="mini">強さ</label><select id="psLv" class="sel" style="width:100%;"></select></div>
+  </div>
+  <div id="psPrev" class="muted" style="margin-top:8px;font-weight:700;"></div>
+  <label style="display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:700;margin-top:10px;"><input type="checkbox" id="psStr" style="width:auto;transform:scale(1.2);"> 筋トレした日として数える</label>
+  <div style="display:flex;gap:8px;margin-top:14px;">
+    <button id="psSave" style="flex:2;">保存</button>
+    <button class="ghost" id="psDel" style="flex:1;color:var(--fire);">削除</button>
+  </div>
+</div></div>
+
 <!-- 食事の記録をなおす -->
 <div class="overlay" id="mealEditOverlay"><div class="modal recipe-modal">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -1027,6 +1054,7 @@ function load(){let s;try{s=JSON.parse(localStorage.getItem(KEY));}catch(e){}
   s.music=s.music||'off'; s.silentMode=!!s.silentMode;
   s.calmHeld=s.calmHeld||0; s.calmGave=s.calmGave||0; s.calmStreak=s.calmStreak||0; s.calmBest=s.calmBest||0;
   s.waterTarget=s.waterTarget||2500; s.chat=s.chat||[]; s.dryTarget=s.dryTarget||3; s.bodyChat=s.bodyChat||[]; s.delPreset=s.delPreset||{min:60,km:15}; s.prof=s.prof||{age:39,h:173,sex:'m'}; s.defTarget=s.defTarget||300; s.strGoal=s.strGoal||3;
+  if(!s.presets)s.presets=[{id:1,n:'YouTubeの全身10種',min:15,lv:'hard',str:true}];
   if(!s.recipes)s.recipes=[{id:1,n:'うちのグラタン',serv:2,items:[{n:'ペンネ(乾)',k:347,p:12.9,q:120,u:'g',ug:1},{n:'グラタン・ホワイトソース(缶)',k:99,p:1.8,q:1,u:'缶',ug:290},{n:'鶏もも(皮付)',k:190,p:16.6,q:200,u:'g',ug:1},{n:'しいたけ',k:25,p:3.1,q:4,u:'個',ug:15},{n:'いんげん',k:23,p:1.8,q:8,u:'本',ug:7},{n:'カリフラワー',k:28,p:3.0,q:6,u:'房',ug:15}]}];
   return s;}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
@@ -1734,6 +1762,47 @@ document.getElementById('weekCommentNew').onclick=renderWeekComment;
 document.getElementById('sumReport').onclick=()=>document.getElementById('reportBtn').click();
 document.getElementById('toSum').onclick=()=>showTab('sum');
 
+/* ============ いつもの運動（タイマーなしで1タップ記録） ============ */
+const PS_LV={easy:{l:'ゆるめ（ストレッチ・ヨガ）',m:3},mid:{l:'ふつう（自重の筋トレ）',m:5},hard:{l:'きつい（HIIT・息が上がる）',m:8}};
+const PS_MINS=[5,10,15,20,25,30,40,45,60];
+function psKcal(p){return Math.round((PS_LV[p.lv]||PS_LV.mid).m*bodyW()*(+p.min||0)/60);}
+function renderPresets(){const box=document.getElementById('presetList');box.innerHTML='';const ps=state.presets||[];
+  if(!ps.length){box.innerHTML='<div class="empty">よくやる運動を登録すると、ここから1タップで記録できるよ</div>';return;}
+  ps.forEach(p=>{const row=document.createElement('div');row.className='ps-row';
+    const b=document.createElement('button');b.className='big mint ps-btn';
+    b.innerHTML='▶ '+esc(p.n)+'<span class="sub">'+p.min+'分・約'+psKcal(p)+'kcal'+(p.str?'・筋トレ1日にカウント':'')+'</span>';
+    b.onclick=()=>addPreset(p);
+    const e=document.createElement('button');e.className='mini-btn';e.textContent='✏️';e.onclick=()=>openPreset(p.id);
+    row.appendChild(b);row.appendChild(e);box.appendChild(row);});}
+function addPreset(p){const dd=day(cur),k=psKcal(p),at=cur===today()?{at:hhmm()}:{};
+  if(p.str){(dd.sets=dd.sets||[]).push(Object.assign({ex:p.n,n:1,u:'回',k,prog:1},at));
+    const first=!dd.strength;dd.wo=(+dd.wo||0)+1;dd.strength=true;
+    toast('💪 '+p.n+' '+p.min+'分 ≒ '+k+'kcal きろく！'+(first?' 筋トレクエスト達成':''));}
+  else{(dd.acts=dd.acts||[]).push(Object.assign({a:'⚡ '+p.n,min:p.min,k},at));toast('⚡ '+p.n+' '+p.min+'分 ≒ '+k+'kcal きろく！');}
+  save();checkBadges();render();confettiRain();playFX();beep(880,.12);}
+let psEdit=null;
+function psOpt(sel,v,l){const o=document.createElement('option');o.value=v;o.textContent=l;sel.appendChild(o);}
+function updatePsPrev(){const G=id=>document.getElementById(id);
+  G('psPrev').textContent='≒ '+psKcal({min:+G('psMin').value,lv:G('psLv').value})+' kcal（体重'+bodyW()+'kgで計算）';}
+function openPreset(id){const G=id=>document.getElementById(id),ex=(state.presets||[]).find(x=>x.id===id);
+  psEdit=ex?{...ex}:{id:Date.now(),n:'',min:15,lv:'mid',str:true};
+  if(!G('psLv').options.length){PS_MINS.forEach(v=>psOpt(G('psMin'),v,v+'分'));Object.entries(PS_LV).forEach(([k,v])=>psOpt(G('psLv'),k,v.l));}
+  if(![...G('psMin').options].some(o=>+o.value===+psEdit.min))psOpt(G('psMin'),psEdit.min,psEdit.min+'分');
+  G('psName').value=psEdit.n;G('psMin').value=String(psEdit.min);G('psLv').value=psEdit.lv;G('psStr').checked=!!psEdit.str;
+  G('psDel').hidden=!ex;updatePsPrev();G('presetOverlay').classList.add('show');}
+function closePreset(){document.getElementById('presetOverlay').classList.remove('show');psEdit=null;}
+document.getElementById('psMin').onchange=updatePsPrev;
+document.getElementById('psLv').onchange=updatePsPrev;
+document.getElementById('psClose').onclick=closePreset;
+document.getElementById('presetNew').onclick=()=>openPreset(null);
+document.getElementById('psSave').onclick=()=>{const G=id=>document.getElementById(id),n=G('psName').value.trim();
+  if(!n){toast('名前を入れてね');return;}
+  const rec={id:psEdit.id,n,min:+G('psMin').value,lv:G('psLv').value,str:G('psStr').checked};
+  state.presets=state.presets||[];const i=state.presets.findIndex(x=>x.id===rec.id);
+  if(i>=0)state.presets[i]=rec;else state.presets.push(rec);save();closePreset();render();toast('⚡ '+n+' を保存したよ');};
+document.getElementById('psDel').onclick=()=>{if(!psEdit||!confirm('「'+psEdit.n+'」を削除しますか？（記録は消えません）'))return;
+  state.presets=(state.presets||[]).filter(x=>x.id!==psEdit.id);save();closePreset();render();};
+
 /* ============ うごく：ランニング・自転車など（分だけで自動計算） ============ */
 const ACTS=[
   {n:'🏃 ランニング（ふつう・時速8km）',m:8.3,run:1},
@@ -1855,7 +1924,7 @@ function renderMove(){const dd=day(cur);const ds=dels(dd);
     const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
     x.onclick=()=>{dd.dels=dels(dd).slice();dd.dels.splice(i,1);syncKm(dd);save();render();};
     el.appendChild(x);dl.appendChild(el);});
-  renderEx();renderStrWeek();renderActs();}
+  renderEx();renderStrWeek();renderActs();renderPresets();}
 
 function levelUp(n){document.getElementById('lvlupNum').textContent=n;
   document.getElementById('lvlupMsg').textContent='積み重ねが形になってきた。この調子。';
