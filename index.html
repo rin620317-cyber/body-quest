@@ -313,6 +313,10 @@
   .mini-btn.fav.on{background:#FFF6DB;border-color:#F2D9A6;}
   .chip.fav{background:#FFFBEF;border-color:#F2D9A6;}
   .chip.favdel{background:#FFF1F4;border-color:#FFC9D6;color:var(--fire);}
+  .treat-btn{width:100%;padding:8px 10px;font-size:.8rem;}
+  .treat-btn.on{background:#FFF8E6;border-color:#F2D9A6;color:#C47F14;}
+  .w7.treat{background:#FFF8E6!important;border-color:#F2D9A6;}
+  .w7.treat b{color:#C47F14!important;}
 </style>
 </head>
 <body>
@@ -323,7 +327,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v15.1.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v15.2.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -339,6 +343,7 @@
     <div class="card stampcard">
       <div class="stamp-head"><b>🏅 きょうの4つ</b><span id="stampMeta" class="muted"></span></div>
       <div class="stamps" id="stamps"></div>
+      <div id="treatRow" style="margin-top:8px;"></div>
     </div>
     <div id="topBanners"></div>
 
@@ -1136,7 +1141,7 @@ function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return iso(x)
 function dayDiff(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
 let cur=today();
 function day(d){if(!state.days[d])state.days[d]={};return state.days[d];}
-function score(d){if(d>=NEW_FROM)return newScore(d);const x=state.days[d]||{};return QUESTS.reduce((a,q)=>a+(x[q.key]?1:0),0);}
+function score(d){if(d>=NEW_FROM){const t=state.days[d];return (t&&t.treat)?Math.max(3,newScore(d)):newScore(d);}const x=state.days[d]||{};return QUESTS.reduce((a,q)=>a+(x[q.key]?1:0),0);}
 
 /* aggregates */
 function sd(s){return Object.keys(s.days).sort();}
@@ -1245,6 +1250,7 @@ function render(){
   renderAiSettings();
   renderProfile();
   renderStamps();
+  renderTreat();
   renderTop();
   renderTrend();
   renderRoadmap();
@@ -1693,7 +1699,7 @@ function dayNet(d){const x=state.days[d];if(!x||!(x.meals||[]).length)return nul
   return x.meals.reduce((a,m)=>a+(+m.k||0),0)-(baseBurn()+burnKcal(x));}
 function renderWeek7(){const box=document.getElementById('week7');box.innerHTML='';let sum=0,n=0,under=0;const W='日月火水木金土';
   for(let i=6;i>=0;i--){const d=addDays(today(),-i),v=dayNet(d);const c=document.createElement('div');
-    c.className='w7'+(v==null?' none':v<0?' under':' over')+(d===cur?' cur':'');
+    c.className='w7'+(v==null?' none':v<0?' under':' over')+(d===cur?' cur':'')+(state.days[d]&&state.days[d].treat?' treat':'');
     c.innerHTML='<span>'+(d===today()?'今日':W[new Date(d+'T00:00').getDay()])+'</span><b>'+(v==null?'ー':(v>0?'+':'')+Math.round(v))+'</b>';
     c.onclick=()=>{cur=d;render();};box.appendChild(c);
     if(v!=null){sum+=v;n++;if(v<0)under++;}}
@@ -1780,7 +1786,7 @@ $v('pdAi').onclick=async()=>{const n=$v('pdName').value.trim();if(!n){toast('商
 const NEW_FROM='2026-10-21';
 const CHECKS=[{k:'under',e:'🔥',l:'アンダー',d:'食べた量が、使った量より少ない'},{k:'night',e:'🌙',l:'21時以降なし',d:'21時以降に何も食べない'},
   {k:'pro',e:'💪',l:'タンパク質',d:'目標のグラム数をとる'},{k:'move',e:'🏃',l:'うごいた',d:'筋トレ、または150kcal以上の運動'}];
-const BASIC_FOODS=['ごはん ふつう(150g)','おにぎり 1個','食パン 6枚切1枚','卵 1個','納豆 1パック','サラダチキン','ギリシャヨーグルト','バナナ 1本',
+const BASIC_FOODS=['ごはん ふつう(150g)','おにぎり 1個','食パン 6枚切1枚','卵 1個','納豆 1パック','サラダチキン','ヨーグルト 100g','バナナ 1本',
   '味噌汁 1杯','サラダ（ドレッシング付）','白菜キムチ 小皿','牛丼 並','ラーメン','コンビニ弁当','ビール 350缶','赤ワイン グラス1杯'];
 function mealsK(x){return ((x&&x.meals)||[]).reduce((a,m)=>a+(+m.k||0),0);}
 function mealsP(x){return ((x&&x.meals)||[]).reduce((a,m)=>a+(+m.p||0),0);}
@@ -1789,7 +1795,7 @@ function dayChecks(d){const x=state.days[d]||{},ms=x.meals||[],has=ms.length>0,n
 function newScore(d){const c=dayChecks(d);return CHECKS.filter(q=>c[q.k]===true).length;}
 function fullDay(d){return mealsK(state.days[d])>=1000&&(d!==today()||new Date().getHours()>=21);}
 function underBest(){let best=0,c=0,prev=null;
-  sd(state).forEach(d=>{const ok=fullDay(d)&&dayChecks(d).under===true;
+  sd(state).forEach(d=>{if(state.days[d].treat){if(prev&&dayDiff(prev,d)===1)prev=d;return;}const ok=fullDay(d)&&dayChecks(d).under===true;
     if(ok){c=(prev&&dayDiff(prev,d)===1)?c+1:1;best=Math.max(best,c);prev=d;}else{c=0;prev=null;}});return best;}
 function fatProgress(){let sum=0;sd(state).forEach(d=>{if(!fullDay(d))return;const x=state.days[d];sum+=mealsK(x)-(baseBurn()+burnKcal(x));});
   const def=Math.max(0,-sum);return{def,kg:Math.floor(def/7200)};}
@@ -1804,13 +1810,14 @@ function renderStamps(){const isT=cur===today(),h=new Date().getHours(),c=dayChe
     else if(q.k==='night'){if(st===false){cls='ng';mark='食べた';}else if(st&&late){cls='ok';mark='✓ +25';}else{cls=st?'keep':'';mark=isT?'これから':'未記録';}}
     else if(q.k==='pro'){if(st){cls='ok';mark='✓ +25';}else{cls=isT?'':'ng';mark='あと'+Math.max(0,Math.round(state.proTarget-mealsP(x)))+'g';}}
     else{if(st){cls='ok';mark='✓ +25';}else{cls=isT?'':'ng';mark=isT?'まだ':'なし';}}
+    if(x.treat&&cls==='ng'&&(q.k==='under'||q.k==='night')){cls='keep';mark='🎉 ごほうび';}
     const el=document.createElement('div');el.className='stp '+cls;el.innerHTML='<b>'+q.e+'</b>'+q.l+'<small>'+mark+'</small>';box.appendChild(el);});
   document.getElementById('stampMeta').textContent='🔥連続'+curStreak(state)+'日 ・ Lv'+levelFor(totalXP(state)).lvl;}
 
-const NIGHT_CANDS=[{n:'ギリシャヨーグルト',k:59,p:10},{n:'ゆで卵 1個',k:76,p:6.2},{n:'味噌汁 1杯',k:40,p:3},{n:'もずく酢 1パック',k:20,p:0.3},
+const NIGHT_CANDS=[{n:'ヨーグルト 100g',k:56,p:3.6},{n:'ギリシャヨーグルト',k:59,p:10},{n:'ゆで卵 1個',k:76,p:6.2},{n:'味噌汁 1杯',k:40,p:3},{n:'もずく酢 1パック',k:20,p:0.3},
   {n:'冷奴',k:70,p:6.5},{n:'白菜キムチ 小皿',k:18,p:1.2},{n:'素焼きナッツ 小袋',k:150,p:5},{n:'ピーナッツバター 大さじ1',k:100,p:4},
   {n:'プロテイン 1杯',k:120,p:24},{n:'ホットミルク',k:122,p:6.6},{n:'枝豆 1皿',k:120,p:10},{n:'炭酸水',k:0,p:0}];
-function nightPlan(){return state.nightPlan||['ギリシャヨーグルト','ゆで卵 1個','味噌汁 1杯','もずく酢 1パック','炭酸水'];}
+function nightPlan(){return state.nightPlan||['ヨーグルト 100g','ゆで卵 1個','味噌汁 1杯','もずく酢 1パック','炭酸水'];}
 let nightDetOpen=false;
 function needBackup(){if(sd(state).length<3||state.backupSnooze===today())return false;
   return !state.lastBackup||dayDiff(state.lastBackup,today())>=30;}
@@ -1896,6 +1903,20 @@ function renderFavs(){const box=document.getElementById('favChips'),fs=state.fav
     hint.textContent='タップではずせます。新しく入れるときは、食べたものの ☆ を押してね';box.appendChild(hint);}}
 document.getElementById('favEditBtn').onclick=()=>{favEdit=!favEdit;renderFavs();};
 
+/* ============ ごほうびの日（月2回まで。連続日数を守る） ============ */
+const TREAT_MAX=2;
+function treatCount(month){return sd(state).filter(d=>d.slice(0,7)===month&&state.days[d].treat).length;}
+function renderTreat(){const box=document.getElementById('treatRow');box.innerHTML='';if(cur>today())return;
+  const x=state.days[cur]||{},left=Math.max(0,TREAT_MAX-treatCount(cur.slice(0,7))),who=cur===today()?'きょう':'この日';
+  const b=document.createElement('button');b.className='ghost treat-btn'+(x.treat?' on':'');
+  if(x.treat){b.textContent='🎉 '+who+'はごほうびの日（とりけす）';
+    b.onclick=()=>{if(!confirm('ごほうびの日をとりけしますか？'))return;delete day(cur).treat;save();render();toast('とりけしました');};}
+  else if(left<=0){b.textContent='🎉 今月のごほうびの日は使い切り（月'+TREAT_MAX+'回まで）';b.disabled=true;}
+  else{b.textContent='🎉 '+who+'をごほうびの日にする（今月あと'+left+'回）';
+    b.onclick=()=>{if(!confirm(who+'を「ごほうびの日」にしますか？\nオーバーしても連続日数が途切れません（今月あと'+left+'回）'))return;
+      day(cur).treat=true;save();render();toast('🎉 ごほうびの日！ 家族との時間、楽しんでね');confettiRain();playFX();beep(880,.12);};}
+  box.appendChild(b);}
+
 /* ============ 食事の記録をなおす ============ */
 let meIdx=null,meBase=null;
 function openMealEdit(i){const m=day(cur).meals[i];if(!m)return;const G=id=>document.getElementById(id);
@@ -1929,10 +1950,11 @@ function renderAdvice(){const dd=day(cur),ms=dd.meals||[],isT=cur===today(),h=is
   const burn=baseBurn()+out,bud=budgetOf(dd),net=kcal-burn,tg=state.defTarget,W=bodyW();
   const walkMin=k=>Math.ceil(k/(4.3*W/60)),delMin=k=>Math.ceil(k/(6*W/60));
   const L=[];const add=(e,t,c)=>L.push({e,t,c:c||''});
+  if(dd.treat)add('🎉','きょうはごほうびの日。朝昼は軽め＋タンパク質、お店ではサラダや肉・魚から、ごはんは少なめに。帰ったら閉店して、あしたは普通に戻すだけでOK。','good');
   if(!ms.length){
     if(isT&&h<11)add('☀️','朝ごはんはタンパク質から。卵＋納豆で約13g、ギリシャヨーグルトなら1つで10g。');
     else add('📝','まだ記録がゼロ。食べたら1タップで書いておこう。書くだけでも食べすぎに気づきやすくなるよ。');
-  }else if(net>0){add('🔥','いま '+Math.round(net)+' kcal オーバー。早歩き '+walkMin(net)+'分 か、配達 '+delMin(net)+'分 でとりかえせるよ。','warn');}
+  }else if(net>0&&!dd.treat){add('🔥','いま '+Math.round(net)+' kcal オーバー。早歩き '+walkMin(net)+'分 か、配達 '+delMin(net)+'分 でとりかえせるよ。','warn');}
   else if(kcal>bud){add('⚖️','アンダーだけど、目標の −'+tg+' まではあと '+Math.round(kcal-bud)+' kcal。'+(isT?'ここでごちそうさまが◎':'あしたは少しだけ控えめに。'));}
   else{const r=Math.round(bud-kcal);
     if(isT&&h>=21)add('🌙','21時すぎ。ここでおしまいにすれば、きょうは '+Math.round(-net)+' kcal アンダーで着地！','good');
@@ -1978,6 +2000,7 @@ function renderWeekSum(){const d7=[...Array(7)].map((_,i)=>addDays(today(),-i)),
     +cell('🍶','休肝日',dry,'日')
     +cell('🌙','21時以降に食べた',night,'日')
     +cell('🍫','お菓子・お酒',Math.round(snack).toLocaleString(),'kcal')
+    +cell('🎉','ごほうびの日',xs.filter(x=>x.treat).length,'日')
     +cell('⚖️','体重',w0==null?'ー':(wd.length>1?w0+'→'+w1:w1),w0!=null&&wd.length>1?'kg（'+((w1-w0)>0?'+':'')+(w1-w0).toFixed(1)+'）':(w0!=null?'kg':''));}
 function renderWeekComment(){document.getElementById('weekComment').textContent=coachComment();}
 document.getElementById('weekCommentNew').onclick=renderWeekComment;
@@ -2474,6 +2497,7 @@ function genWeeklyReport(){
   {const ns=days.map(o=>dayNet(o.d)).filter(v=>v!=null),sum=ns.reduce((a,v)=>a+v,0);
     t+='【収支】記録'+ns.length+'日・アンダー'+ns.filter(v=>v<0).length+'日・合計'+(sum>0?'+':'')+Math.round(sum)+'kcal（目標 1日−'+state.defTarget+'、消費は基礎代謝×1.2＋運動で推定）\n';}
   {const sd=days.filter(o=>strDay(o.x)).length;t+='【筋トレした日】'+sd+'/'+state.strGoal+'日\n';}
+  t+='【ごほうびの日（家族の外食など）】'+days.filter(o=>o.x.treat).length+'日\n';
   t+='\n※トレーナーのおにぎりマン（おにぎりのゆるキャラ）として、やさしくアドバイスください。';
   return t;
 }
@@ -2589,6 +2613,7 @@ function chikaLine(){const dd=day(cur);const ms=dd.meals||[];
   const kcal=ms.reduce((a,m)=>a+(+m.k||0),0),pro=ms.reduce((a,m)=>a+(+m.p||0),0);
   const out=burnKcal(dd),nightK=ms.reduce((a,m)=>a+(m.night?(+m.k||0):0),0);
   const n=new Date(),h=n.getHours(),pick=a=>a[(ms.length+n.getDate())%a.length];
+  if(dd.treat)return{mood:'cheer',t:'きょうはごほうびの日🎉 家族との時間、楽しんでね！ 帰ってからの追加だけはナシでね'};
   if(cur!==today())return{mood:'normal',t:cur.slice(5).replace('-','/')+' の記録をひらいてるよ。書きわすれ、ここで足せるよ〜'};
   if(h>=21||h<4){
     if(nightK>0)return{mood:'night',t:pick(['よるのぶんも ちゃんと書けたね。えらい〜。お水も いっしょに のんでね','書けたのが いちばん えらい。あしたの朝、体重はかってみよ'])};
