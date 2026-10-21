@@ -22,5 +22,55 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "食べたものを記録",
+      "short_name": "食べた",
+      "url": "./?go=food",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "動いたを記録",
+      "short_name": "動いた",
+      "url": "./?go=move",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "体重を記録",
+      "short_name": "体重",
+      "url": "./?go=weight",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "しゅうしを見る",
+      "short_name": "しゅうし",
+      "url": "./?go=sum",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
