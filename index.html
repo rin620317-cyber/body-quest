@@ -309,6 +309,10 @@
   .rm-step.done{background:#E9F8F1;color:var(--accent);}
   .rm-step.next{background:#FFF0F4;color:var(--accent2);}
   .rm-step span{width:54px;font-weight:800;flex:0 0 auto;}
+  .mini-btn.fav{color:#E8A62E;padding:4px 8px;}
+  .mini-btn.fav.on{background:#FFF6DB;border-color:#F2D9A6;}
+  .chip.fav{background:#FFFBEF;border-color:#F2D9A6;}
+  .chip.favdel{background:#FFF1F4;border-color:#FFC9D6;color:var(--fire);}
 </style>
 </head>
 <body>
@@ -319,7 +323,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🍙 KARADAクエスト<span class="ver">v15.0.0</span></div>
+      <div class="brand">🍙 KARADAクエスト<span class="ver">v15.1.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -352,6 +356,11 @@
         <span class="mini" style="margin:0;white-space:nowrap;font-size:.82rem;">いつ？</span>
         <select id="slotSel" class="sel" style="flex:1;"></select>
       </div>
+
+      <div class="in-label" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>⭐ お気に入り（1タップ）</span><span class="link" id="favEditBtn" style="font-size:.74rem;">入れ替える</span>
+      </div>
+      <div class="chips" id="favChips"></div>
 
       <div class="in-label">🤖 書くだけ・撮るだけ（AIが計算して記録）</div>
       <textarea id="aiText" rows="2" placeholder="例：鮭おにぎり、サラダチキン、ゆで卵／グラタン2人前つくって半分"></textarea>
@@ -1399,8 +1408,10 @@ function renderFood(){
       plus.onclick=e=>{e.stopPropagation();addMeal(m.n,m.k,m.p,m.s,SLOTS.some(s=>s.id===m.t)?m.t:null);};
       const x=document.createElement('button');x.className='mini-btn del';x.textContent='×';
       x.onclick=e=>{e.stopPropagation();dd.meals.splice(i,1);save();render();};
-      el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
-  renderSlots();renderQuick();renderYest();
+      const star=document.createElement('button');star.className='mini-btn fav'+(isFav(m.n)?' on':'');star.textContent=isFav(m.n)?'★':'☆';
+      star.onclick=e=>{e.stopPropagation();toggleFav(m);};
+      el.appendChild(star);el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
+  renderSlots();renderQuick();renderYest();renderFavs();
 }
 
 /* ざっくり概算：料理タイプ別（100gあたり kcal / タンパク質g） */
@@ -1867,6 +1878,23 @@ function renderMonster(){const F=fatProgress(),prog=F.def%7200,hp=7200-prog,pct=
     +'<div class="muted" style="font-size:.7rem;margin-top:6px;">アンダー7,200kcalで1体撃破（体脂肪 約1kg分）。記録が1,000kcal未満の日と、21時前の今日は数えないよ。</div>';
   if(state.fatKg!=null&&F.kg>state.fatKg){toast('👾 モンスター撃破！ 体脂肪 約1kg分 🎉');confettiRain();playFX();beep(880,.15);setTimeout(()=>beep(1170,.2),140);}
   if(state.fatKg!==F.kg){state.fatKg=F.kg;save();}}
+
+/* ============ お気に入り（入れ替え自由） ============ */
+let favEdit=false;
+function isFav(n){return (state.favs||[]).some(f=>f.n===n);}
+function toggleFav(m){state.favs=state.favs||[];
+  if(isFav(m.n)){state.favs=state.favs.filter(f=>f.n!==m.n);toast('☆ お気に入りからはずしたよ');}
+  else{state.favs.push({n:m.n,k:+m.k||0,p:+m.p||0,s:m.s?1:0});toast('⭐ お気に入りに入れたよ');}
+  save();render();}
+function renderFavs(){const box=document.getElementById('favChips'),fs=state.favs||[];box.innerHTML='';
+  const btn=document.getElementById('favEditBtn');btn.hidden=!fs.length;btn.textContent=favEdit?'✓ 完了':'入れ替える';
+  if(!fs.length){favEdit=false;box.innerHTML='<span class="muted">「きょう食べたもの」の ☆ をタップすると、ここに並ぶよ</span>';return;}
+  fs.forEach(f=>box.appendChild(chipEl((favEdit?'✕ ':'⭐ ')+f.n,Math.round(f.k)+'kcal',favEdit?'favdel':'fav',()=>{
+    if(favEdit){state.favs=fs.filter(x=>x.n!==f.n);save();render();}
+    else addMeal(f.n,f.k,f.p,f.s);})));
+  if(favEdit){const hint=document.createElement('span');hint.className='muted';hint.style.fontSize='.72rem';
+    hint.textContent='タップではずせます。新しく入れるときは、食べたものの ☆ を押してね';box.appendChild(hint);}}
+document.getElementById('favEditBtn').onclick=()=>{favEdit=!favEdit;renderFavs();};
 
 /* ============ 食事の記録をなおす ============ */
 let meIdx=null,meBase=null;
