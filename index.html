@@ -317,6 +317,15 @@
   .treat-btn.on{background:#FFF8E6;border-color:#F2D9A6;color:#C47F14;}
   .w7.treat{background:#FFF8E6!important;border-color:#F2D9A6;}
   .w7.treat b{color:#C47F14!important;}
+  .rv-sum{display:flex;gap:10px;align-items:flex-start;background:#F4FBF8;border-radius:16px;padding:10px 12px;font-weight:700;font-size:.86rem;line-height:1.6;}
+  .rv-sum .rf{width:48px;flex:0 0 auto;} .rv-sum .rf svg{width:100%;display:block;}
+  .rv-bal{margin-top:10px;}
+  .rv-row{display:flex;gap:8px;padding:7px 4px;border-bottom:1px dashed var(--line);font-size:.82rem;line-height:1.5;}
+  .rv-row b{width:92px;flex:0 0 auto;color:var(--sub);font-size:.76rem;}
+  .rv-row.g span{color:var(--accent);} .rv-row.w span{color:var(--fire);}
+  .rv-list{margin:10px 0 0;padding-left:18px;font-size:.84rem;line-height:1.65;}
+  .rv-h{font-size:.8rem;font-weight:800;margin-top:12px;}
+  .rvbanner{background:#F4FBF8;border-color:#BFEBD9;}
 </style>
 </head>
 <body>
@@ -327,7 +336,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🦭 KARADAクエスト<span class="ver">v15.4.0</span></div>
+      <div class="brand">🦭 KARADAクエスト<span class="ver">v15.5.0</span></div>
       <div class="tb-lv" id="tbLv">Lv1</div>
     </div>
     <div class="datehop">
@@ -496,6 +505,13 @@
       <div id="calLeft" class="muted" style="text-align:center;margin-top:10px;font-weight:700;"></div>
       <div id="snackLine" class="infoline"></div>
       <div id="nightLine" class="infoline info-night" hidden></div>
+    </div>
+
+    <div class="card">
+      <h3>🥗 ごまちゃんの食事チェック</h3>
+      <div class="muted" style="font-size:.74rem;margin-bottom:8px;">食べたものの中身（量・タンパク質・野菜・塩分やお酒）を見て、やせながら健康も守れているかをチェックします。医療的な判断ではありません。</div>
+      <div class="chips" id="rvTabs"></div>
+      <div id="rvBody" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -1260,6 +1276,7 @@ function render(){
   renderAdvice();
   renderWeekSum();
   renderMonster();
+  renderReview();
   document.getElementById('tbLv').textContent='Lv'+L.lvl;
 }
 function afterChange(){render();}
@@ -1607,11 +1624,11 @@ function trackAi(model,u){if(!u)return;const p=AI_MODELS[model];
   const usd=((u.input_tokens||0)*p.in+(u.output_tokens||0)*p.out)/1e6;const mo=today().slice(0,7);
   if(!state.aiUsage||state.aiUsage.m!==mo)state.aiUsage={m:mo,n:0,usd:0};
   state.aiUsage.n++;state.aiUsage.usd+=usd;save();renderAiSettings();}
-async function aiCall(sys,schema,text){const key=aiKey();if(!key)throw new Error('APIキーが未設定だよ（その他タブで設定してね）');
+async function aiCall(sys,schema,text,effort){const key=aiKey();if(!key)throw new Error('APIキーが未設定だよ（その他タブで設定してね）');
   const model=aiModel();
   const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
     headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model,max_tokens:4000,system:sys,output_config:{effort:'low',format:{type:'json_schema',schema}},messages:[{role:'user',content:text}]})});
+    body:JSON.stringify({model,max_tokens:4000,system:sys,output_config:{effort:effort||'low',format:{type:'json_schema',schema}},messages:[{role:'user',content:text}]})});
   const data=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(aiErrMsg(res.status,data));
   trackAi(model,data.usage);
@@ -1830,6 +1847,11 @@ function needBackup(){if(sd(state).length<3||state.backupSnooze===today())return
 function renderTop(){const box=document.getElementById('topBanners');box.innerHTML='';
   document.getElementById('backupInfo').textContent='前回のバックアップ：'+(state.lastBackup||'まだ')+'（写真は含まれません）';
   if(cur!==today())return;const h=new Date().getHours(),dd=day(cur);
+  {const y=addDays(today(),-1),rv=(state.reviews||{})['day:'+y];
+    if(rv&&rv.data&&rv.src==='ai'&&state.rvSeen!==y){const c=document.createElement('div');c.className='card rvbanner';
+      c.innerHTML='<b>🥗 きのうの食事チェックが届いたよ</b><div class="muted" style="font-size:.8rem;margin-top:4px;font-weight:700;">'+esc(rv.data.summary||'')+'</div>';
+      const b=document.createElement('button');b.className='ghost';b.style.cssText='width:100%;margin-top:8px;';b.textContent='しゅうしタブで見る';
+      b.onclick=()=>{state.rvSeen=y;save();rvKind='day';showTab('sum');render();};c.appendChild(b);box.appendChild(c);}}
   if(h>=21||h<4){const c=document.createElement('div');c.className='card nightcard';
     c.innerHTML='<div class="night-head"><div class="nf">'+chikaSVG('night','nt')+'</div><div><b>🌙 夜食モード</b><div class="muted" style="font-size:.8rem;font-weight:700;margin-top:2px;">'
       +(dd.closed?'きょうはもう閉店。えらい！ このままおやすみ🌙':'21時すぎたよ。食べるなら、決めたものだけね')+'</div></div></div>';
@@ -1922,6 +1944,91 @@ function renderTreat(){const box=document.getElementById('treatRow');box.innerHT
     b.onclick=()=>{if(!confirm(who+'を「ごほうびの日」にしますか？\nオーバーしても連続日数が途切れません（今月あと'+left+'回）'))return;
       day(cur).treat=true;save();render();toast('🎉 ごほうびの日！ 家族との時間、楽しんでね');confettiRain();playFX();beep(880,.12);};}
   box.appendChild(b);}
+
+/* ============ ごまちゃんの食事チェック（前日・1週間・1か月） ============ */
+const RV_KINDS=[{k:'day',l:'きのう',n:1},{k:'week',l:'この1週間',n:7},{k:'month',l:'この1か月',n:30}];
+let rvKind='day',rvBusy=false;
+const RV_SCHEMA={type:'object',additionalProperties:false,required:['summary','balance','good','improve','next'],properties:{
+  summary:{type:'string'},
+  balance:{type:'object',additionalProperties:false,required:['amount','protein','veg','carb_fat','salt_alcohol'],
+    properties:{amount:{type:'string'},protein:{type:'string'},veg:{type:'string'},carb_fat:{type:'string'},salt_alcohol:{type:'string'}}},
+  good:{type:'array',items:{type:'string'}},improve:{type:'array',items:{type:'string'}},next:{type:'array',items:{type:'string'}}}};
+const RV_SYS='あなたは、体を絞っている人を応援する、やさしい食事アドバイザー「ごまちゃん」（ゴマフアザラシの赤ちゃんのゆるキャラ）です。医療行為や診断はしません。\n'
+  +'目的：アンダーカロリーで体脂肪を減らしつつ、栄養バランスをくずして不健康にならないようにすること。\n'
+  +'渡された食事記録（料理名・kcal・タンパク質・時間帯）から、料理名をもとに 野菜・海藻・きのこ・果物、主食、たんぱく源、脂質の多いもの（揚げ物など）、塩分の多いもの（麺の汁・漬物・加工食品・外食など）、お酒・お菓子、21時以降の食事を推定して評価してください。\n'
+  +'- 食べすぎだけでなく、食べなさすぎ（摂取が基礎代謝を大きく下回る日が続く、タンパク質不足）にも注意する\n'
+  +'- balance の各項目は「◎」「○」「△」のどれかで始め、1文で（amount=量、protein=タンパク質、veg=野菜・海藻・果物、carb_fat=主食と脂質のバランス、salt_alcohol=塩分とお酒）\n'
+  +'- good と improve は各2〜3個、next は次にすぐできる具体的な行動を2〜3個（食品名と量を入れる）\n'
+  +'- やわらかい口調でひらがな多め、責めない。記録が少ない日は「記録が少ないので推測です」と添える\n'
+  +'- summary は2文以内';
+function rvDays(kind){const n=RV_KINDS.find(x=>x.k===kind).n,y=addDays(today(),-1);return [...Array(n)].map((_,i)=>addDays(y,-(n-1-i)));}
+function rvKey(kind){return kind+':'+addDays(today(),-1);}
+function rvPayload(ds){const P=state.prof,W='日月火水木金土';
+  const L=['対象: '+ds[0]+(ds.length>1?'〜'+ds[ds.length-1]+'（'+ds.length+'日）':''),
+    '本人: '+P.age+'歳 '+(P.sex==='f'?'女性':'男性')+' '+P.h+'cm 体重'+bodyW()+'kg ／ 目標: 1日'+state.defTarget+'kcalのアンダー、タンパク質'+state.proTarget+'g ／ 基礎代謝 約'+Math.round(bmr())+'kcal、座り仕事での消費めやす 約'+Math.round(baseBurn())+'kcal'];
+  ds.forEach(d=>{const x=state.days[d];if(!x||!(x.meals||[]).length){L.push(d+': 記録なし');return;}
+    const k=mealsK(x),out=burnKcal(x);
+    L.push(d+'（'+W[new Date(d+'T00:00').getDay()]+'）: 摂取'+Math.round(k)+'kcal P'+Math.round(mealsP(x))+'g ／ 運動'+Math.round(out)+'kcal ／ 収支'+Math.round(k-baseBurn()-out)
+      +(x.treat?' ／ ごほうびの日':'')+(x.water?' ／ 水分'+x.water+'ml':'')+(x.dry===true?' ／ 休肝日':''));
+    [...SLOTS,{id:'その他',l:'時間なし'}].forEach(s=>{const ms=x.meals.filter(m=>(SLOTS.some(z=>z.id===m.t)?m.t:'その他')===s.id);
+      if(ms.length)L.push('  '+s.l+': '+ms.map(m=>m.n+' '+Math.round(+m.k||0)+'kcal').join('、'));});});
+  return L.join('\n');}
+const VEG_RE=/サラダ|野菜|ブロッコリー|ほうれん草|小松菜|キャベツ|トマト|きゅうり|もやし|ナムル|おひたし|煮物|煮びたし|わかめ|海藻|めかぶ|もずく|ひじき|きのこ|しいたけ|しめじ|えのき|まいたけ|味噌汁|豚汁|野菜炒め|キムチ|浅漬け|筑前煮|切り干し|白和え|なす|ごぼう|オクラ|枝豆|ブルーベリー|バナナ|りんご|みかん|いちご|キウイ|かぼちゃ|酢の物|カリフラワー|いんげん|ピーマン|にんじん|白菜|大根/;
+const SALT_RE=/ラーメン|カップ麺|うどん|そば|焼きそば|漬|キムチ|たくあん|梅干し|ハム|ベーコン|ウインナー|弁当|カレー|牛丼|唐揚げ|ポテチ|柿の種/;
+const ALC_RE=/ビール|ワイン|ハイボール|チューハイ|サワー|日本酒|焼酎/;
+function ruleReview(ds){const L=ds.filter(d=>state.days[d]&&(state.days[d].meals||[]).length);if(!L.length)return null;
+  const n=L.length,kc=L.map(d=>mealsK(state.days[d])),avgK=kc.reduce((a,b)=>a+b,0)/n,avgP=L.reduce((a,d)=>a+mealsP(state.days[d]),0)/n;
+  const low=kc.filter(k=>k<bmr()).length,over=L.filter(d=>dayNet(d)>0).length;
+  const veg=L.reduce((a,d)=>a+state.days[d].meals.filter(m=>VEG_RE.test(m.n)).length,0)/n;
+  const salt=L.reduce((a,d)=>a+state.days[d].meals.filter(m=>SALT_RE.test(m.n)).length,0)/n;
+  const alc=L.reduce((a,d)=>a+state.days[d].meals.filter(m=>ALC_RE.test(m.n)).reduce((s,m)=>s+(+m.k||0),0),0)/n;
+  const bal={
+    amount:low>=Math.max(1,Math.ceil(n/2))?'△ '+n+'日のうち'+low+'日は基礎代謝より少なめ。つけ忘れでなければ、食べなさすぎかも'
+      :over>n/2?'△ オーバーの日が'+over+'日。もう少しだけ量をへらしたいね':'◎ 1日平均'+Math.round(avgK)+'kcal。やせながら続けられる量だよ',
+    protein:avgP>=state.proTarget?'◎ 1日平均'+Math.round(avgP)+'g。しっかりとれてる':avgP>=state.proTarget*.7?'○ 1日平均'+Math.round(avgP)+'g。あと少し':'△ 1日平均'+Math.round(avgP)+'g。筋肉を守るために、もう少しほしい',
+    veg:veg>=3?'◎ 野菜・海藻・果物が1日'+veg.toFixed(1)+'品':veg>=1.5?'○ 1日'+veg.toFixed(1)+'品。もう1品あると◎':'△ 1日'+veg.toFixed(1)+'品。野菜や海藻が少なめ',
+    carb_fat:'○ 料理名だけでは細かく分からないので、AIチェックだとくわしく見られるよ',
+    salt_alcohol:(salt>=3||alc>200)?'△ 塩分が多そうなものが1日'+salt.toFixed(1)+'品、お酒が1日平均'+Math.round(alc)+'kcal':'○ 塩分・お酒はひかえめ'};
+  const good=[],imp=[],next=[];
+  Object.values(bal).forEach(v=>{if(v[0]==='◎')good.push(v.slice(2));else if(v[0]==='△')imp.push(v.slice(2));});
+  if(avgP<state.proTarget)next.push('タンパク質をあと'+Math.round(state.proTarget-avgP)+'g：サラダチキン1個（24g）か、ゆで卵2個（12g）');
+  if(veg<3)next.push('野菜・海藻を1品：味噌汁にわかめ、もずく酢1パック、ブロッコリー100gなど');
+  if(low>0)next.push('食べなさすぎの日は、ごはんを少なめでも1杯たそう（約160kcal）');
+  if(!next.length)next.push('この調子で続けよう。水をこまめに飲むのも忘れずに');
+  return{summary:n+'日分の記録から、数字だけでかんたんにチェックしたよ。',balance:bal,good:good.length?good:['記録が続いてるのがえらい'],improve:imp.length?imp:['大きな問題はなさそう'],next};}
+async function runReview(kind,quiet){if(rvBusy)return;const ds=rvDays(kind),key=rvKey(kind);
+  if(!ds.some(d=>state.days[d]&&(state.days[d].meals||[]).length)){if(!quiet)toast('この期間の食事記録がないよ');return;}
+  state.reviews=state.reviews||{};
+  if(!aiKey()){const r=ruleReview(ds);state.reviews[key]={at:hhmm(),src:'rule',data:r};save();renderReview();return;}
+  rvBusy=true;if(!quiet)renderReview();
+  try{const r=await aiCall(RV_SYS,RV_SCHEMA,rvPayload(ds),'medium');state.reviews[key]={at:hhmm(),src:'ai',data:r};
+    const ks=Object.keys(state.reviews).sort((a,b)=>a.split(':')[1]<b.split(':')[1]?1:-1);ks.slice(20).forEach(k=>delete state.reviews[k]);
+    save();if(!quiet)toast('🥗 食事チェックができたよ');}
+  catch(e){if(!quiet)toast(e instanceof TypeError?'通信できなかったよ':(e.message||'エラー'));}
+  finally{rvBusy=false;render();}}
+function renderReview(){const tabs=document.getElementById('rvTabs'),body=document.getElementById('rvBody');tabs.innerHTML='';
+  RV_KINDS.forEach(x=>tabs.appendChild(chipEl(x.l,'',x.k===rvKind?'on':'',()=>{rvKind=x.k;renderReview();})));
+  const ds=rvDays(rvKind),rv=(state.reviews||{})[rvKey(rvKind)],period=ds.length>1?ds[0].slice(5).replace('-','/')+'〜'+ds[ds.length-1].slice(5).replace('-','/'):ds[0].slice(5).replace('-','/');
+  if(rvBusy){body.innerHTML='<div class="empty">🦭 ごまちゃんが食事をチェック中…</div>';return;}
+  if(!rv||!rv.data){body.innerHTML='<div class="muted" style="font-size:.8rem;margin-bottom:8px;">対象：'+period+'</div>';
+    const b=document.createElement('button');b.style.width='100%';
+    b.textContent=aiKey()?'🥗 チェックする（AI・約'+(rvKind==='month'?'0.2':rvKind==='week'?'0.1':'0.05')+'円）':'🥗 かんたんチェック（無料）';
+    b.onclick=()=>runReview(rvKind);body.appendChild(b);
+    if(!aiKey()){const t=document.createElement('div');t.className='muted';t.style.cssText='font-size:.72rem;margin-top:6px;';
+      t.textContent='APIキーを設定すると、料理の中身まで見たくわしいチェックになります（その他タブ）';body.appendChild(t);}
+    return;}
+  const r=rv.data,B=r.balance||{},rows=[['量',B.amount],['タンパク質',B.protein],['野菜・海藻・果物',B.veg],['主食と脂質',B.carb_fat],['塩分・お酒',B.salt_alcohol]];
+  const li=a=>(a||[]).map(s=>'<li>'+esc(s)+'</li>').join('');
+  body.innerHTML='<div class="muted" style="font-size:.74rem;margin-bottom:6px;">対象：'+period+' ・ '+(rv.src==='ai'?'AIチェック':'かんたんチェック')+' ・ '+rv.at+'作成</div>'
+    +'<div class="rv-sum"><div class="rf">'+chikaSVG('happy','rv')+'</div><div>'+esc(r.summary||'')+'</div></div>'
+    +'<div class="rv-bal">'+rows.map(([l,v])=>{v=String(v||'');const c=v[0]==='◎'?'g':v[0]==='△'?'w':'';return '<div class="rv-row '+c+'"><b>'+l+'</b><span>'+esc(v)+'</span></div>';}).join('')+'</div>'
+    +'<div class="rv-h">◎ よかったところ</div><ul class="rv-list">'+li(r.good)+'</ul>'
+    +'<div class="rv-h">△ ここを少し</div><ul class="rv-list">'+li(r.improve)+'</ul>'
+    +'<div class="rv-h">👉 次にやること</div><ul class="rv-list">'+li(r.next)+'</ul>';
+  const re=document.createElement('button');re.className='ghost';re.style.cssText='width:100%;margin-top:10px;';re.textContent='🔄 つくりなおす';
+  re.onclick=()=>runReview(rvKind);body.appendChild(re);}
+function autoReview(){if(!aiKey()||new Date().getHours()<4)return;const y=addDays(today(),-1);
+  if((state.reviews||{})['day:'+y])return;if(!(state.days[y]&&(state.days[y].meals||[]).length))return;runReview('day',true);}
 
 /* ============ 食事の記録をなおす ============ */
 let meIdx=null,meBase=null;
@@ -2838,7 +2945,8 @@ setTimeout(confettiRain,300);setTimeout(playFX,300);
   if(go==='move'||go==='sum'||go==='body')showTab(go);
   else if(go==='weight'){const i=document.getElementById('mwInput');if(i)setTimeout(()=>i.focus(),300);else{showTab('body');setTimeout(()=>document.getElementById('wInput').focus(),300);}}
   else if(go==='food')setTimeout(()=>{const t=document.getElementById('aiText');t.scrollIntoView({block:'center'});t.focus();},300);
-  history.replaceState(null,'',location.pathname);})(); // welcome burst
+  history.replaceState(null,'',location.pathname);})();
+setTimeout(autoReview,1500); // welcome burst
 
 /* PWA: register SW + auto-update (新版が来たら自動リロード) */
 if('serviceWorker' in navigator){
