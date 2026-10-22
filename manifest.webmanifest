@@ -11,13 +11,13 @@
   "theme_color": "#FFF8EE",
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "./gomachan-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png",
+      "src": "./gomachan-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -30,7 +30,7 @@
       "url": "./?go=food",
       "icons": [
         {
-          "src": "./icon-192.png",
+          "src": "./gomachan-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -42,7 +42,7 @@
       "url": "./?go=move",
       "icons": [
         {
-          "src": "./icon-192.png",
+          "src": "./gomachan-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -54,7 +54,7 @@
       "url": "./?go=weight",
       "icons": [
         {
-          "src": "./icon-192.png",
+          "src": "./gomachan-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -66,7 +66,7 @@
       "url": "./?go=sum",
       "icons": [
         {
-          "src": "./icon-192.png",
+          "src": "./gomachan-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }

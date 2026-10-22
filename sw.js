@@ -1,6 +1,6 @@
 /* KARADAクエスト service worker — offline app shell */
-const CACHE = 'bodyquest-16.0.0';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'bodyquest-16.0.1';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './gomachan-192.png', './gomachan-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
