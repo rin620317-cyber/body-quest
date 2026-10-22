@@ -326,6 +326,82 @@
   .rv-list{margin:10px 0 0;padding-left:18px;font-size:.84rem;line-height:1.65;}
   .rv-h{font-size:.8rem;font-weight:800;margin-top:12px;}
   .rvbanner{background:#F4FBF8;border-color:#BFEBD9;}
+  /* v16 */
+  .tb-right{display:flex;align-items:center;gap:6px;}
+  .tb-tod{font-size:.68rem;font-weight:800;color:var(--sub);white-space:nowrap;}
+  body[data-tod="morning"] #aurora .a1{background:#FFE2B8;} body[data-tod="morning"] #aurora .a2{background:#D8F1FF;} body[data-tod="morning"] #aurora .a3{background:#FFF3B0;}
+  body[data-tod="evening"] #aurora .a1{background:#FFC6B0;} body[data-tod="evening"] #aurora .a2{background:#FFD6E8;} body[data-tod="evening"] #aurora .a3{background:#E3D2FF;}
+  body[data-tod="night"]{--bg:#F3F0FB;background-image:radial-gradient(#E2DBF7 1.6px,transparent 1.8px),radial-gradient(#D9E6F7 1.6px,transparent 1.8px);}
+  body[data-tod="night"] #aurora .a1{background:#CFC6F5;} body[data-tod="night"] #aurora .a2{background:#C4DBF6;} body[data-tod="night"] #aurora .a3{background:#E8DDFF;}
+  body[data-tod="night"] .topbar{background:rgba(243,240,251,.9);}
+  .mascot{position:relative;overflow:hidden;}
+  .mascot>*:not(.scene){position:relative;z-index:1;}
+  .scene{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .scene span{position:absolute;font-size:.9rem;opacity:.55;}
+  .scene .fall{top:-24px;animation:sfall linear infinite;}
+  .scene .rise{bottom:-24px;animation:srise linear infinite;}
+  .scene .tw{font-size:.75rem;animation:stw ease-in-out infinite;}
+  @keyframes sfall{0%{transform:translateY(0) rotate(0);}100%{transform:translateY(260px) rotate(220deg);}}
+  @keyframes srise{0%{transform:translateY(0);opacity:0;}20%{opacity:.6;}100%{transform:translateY(-260px);opacity:0;}}
+  @keyframes stw{0%,100%{opacity:.15;transform:scale(.7);}50%{opacity:.9;transform:scale(1.1);}}
+  body[data-season="spring"] .mascot{background:linear-gradient(135deg,#FFFFFF,#FFEAF1);}
+  body[data-season="summer"] .mascot{background:linear-gradient(135deg,#FFFFFF,#E4F6FF);}
+  body[data-season="autumn"] .mascot{background:linear-gradient(135deg,#FFFFFF,#FFEEDC);}
+  body[data-season="winter"] .mascot{background:linear-gradient(135deg,#FFFFFF,#E8F2FF);}
+  body[data-tod="night"] .mascot{background:linear-gradient(135deg,#FFFFFF,#ECE7FB);}
+  .room{position:relative;height:190px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#DDF2FF,#F4FBFF);}
+  body[data-tod="morning"] .room{background:linear-gradient(180deg,#FFF0D2,#E6F5FF);}
+  body[data-tod="evening"] .room{background:linear-gradient(180deg,#FFD3BE,#F1DDF6);}
+  body[data-tod="night"] .room{background:linear-gradient(180deg,#3E3C70,#6D69A8);}
+  .room-floor{position:absolute;left:14%;right:14%;bottom:8px;height:40px;border-radius:50%;background:#F6DDBF;z-index:1;}
+  .room[data-season="winter"] .room-floor{background:#FFFFFF;box-shadow:inset 0 -5px 0 #CFE7F6;}
+  .room[data-season="spring"] .room-floor{background:#FFE0EA;}
+  .room[data-season="summer"] .room-floor{background:#BDE7F7;}
+  .room-seal{position:absolute;left:50%;bottom:18px;width:132px;transform:translateX(-50%);z-index:2;}
+  .room-seal svg{display:block;width:100%;animation:bob 2.8s ease-in-out infinite;transform-origin:50% 100%;}
+  .room-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;}
+  .rs{background:var(--panel2);border-radius:12px;padding:6px 2px;text-align:center;}
+  .rs b{display:block;font-size:.9rem;} .rs span{font-size:.6rem;color:var(--sub);font-weight:700;}
+  .wear-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  button.wear{background:#fff;color:var(--txt);border:1.5px solid var(--line);border-radius:14px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:none;font-size:.64rem;font-weight:800;min-width:0;}
+  .wear .we{font-size:1.4rem;line-height:1.15;} .wear small{font-size:.54rem;color:var(--sub);font-weight:700;}
+  button.wear.on{border-color:#FFB3C6;background:#FFE6EC;} button.wear.lock{opacity:.55;}
+  .omicard{background:linear-gradient(135deg,#FFFBEF,#FFFFFF);border-color:#F2D9A6;}
+  .omi-row{display:flex;gap:12px;align-items:center;}
+  .omi-box{font-size:2.2rem;display:inline-block;}
+  .omi-box.shake{animation:shake .7s;}
+  @keyframes shake{0%,100%{transform:rotate(0);}20%{transform:rotate(-18deg);}40%{transform:rotate(16deg);}60%{transform:rotate(-12deg);}80%{transform:rotate(8deg);}}
+  .omi-rank{flex:0 0 auto;width:58px;height:58px;border-radius:50%;background:#FFF1D6;color:#C47F14;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.05rem;border:2px solid #F2D9A6;}
+  .omi-rank.big{background:linear-gradient(135deg,#FFD36E,#FF9DB5);color:#fff;border-color:#FFD36E;}
+  button.gaman-btn{margin-top:10px;background:linear-gradient(135deg,#8F6FE0,#5FB8E6);}
+  .gaman-face{width:130px;margin:0 auto;} .gaman-face svg{width:100%;display:block;}
+  .zzz{height:20px;font-weight:900;color:#A98BF0;letter-spacing:4px;}
+  .zzz span{display:inline-block;animation:zz 1.8s ease-in-out infinite;} .zzz span:nth-child(2){animation-delay:.3s;} .zzz span:nth-child(3){animation-delay:.6s;}
+  @keyframes zz{0%,100%{transform:translateY(0);opacity:.3;}50%{transform:translateY(-6px);opacity:1;}}
+  .shellpop{font-size:2rem;animation:shellin .8s cubic-bezier(.2,1.6,.4,1) both;}
+  @keyframes shellin{0%{transform:scale(0) rotate(-40deg);opacity:0;}100%{transform:scale(1) rotate(0);opacity:1;}}
+  .fishpop{position:fixed;left:50%;bottom:150px;font-size:2rem;z-index:90;pointer-events:none;animation:fishup 1.2s ease-out forwards;}
+  @keyframes fishup{0%{transform:translate(-50%,0) scale(.6);opacity:0;}20%{opacity:1;transform:translate(-50%,-20px) scale(1.2);}100%{transform:translate(-50%,-170px) rotate(-25deg);opacity:0;}}
+  .evline{margin-top:8px;font-size:.74rem;font-weight:700;color:var(--violet);background:#F4F0FF;border-radius:12px;padding:6px 10px;text-align:center;cursor:pointer;}
+  .ev-row{display:flex;gap:10px;align-items:center;padding:8px 0 4px;}
+  .ev-e{font-size:1.7rem;} .ev-left{text-align:right;font-size:.74rem;font-weight:800;white-space:nowrap;} .ev-left b{font-size:1.4rem;color:var(--accent2);}
+  .ev-tip{font-size:.7rem;color:var(--sub);font-weight:700;margin-top:2px;}
+  .ev-ops{display:flex;gap:14px;justify-content:flex-end;font-size:.72rem;padding-bottom:8px;border-bottom:1px dashed var(--line);}
+  .dex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;}
+  .dex{background:var(--panel2);border-radius:12px;padding:6px 2px;text-align:center;opacity:.6;border:1.5px solid transparent;}
+  .dex b{display:block;font-size:1.4rem;} .dex span{display:block;font-size:.58rem;font-weight:800;} .dex small{display:block;font-size:.52rem;color:var(--sub);min-height:1em;}
+  .dex.done{opacity:1;background:#F4F0FF;} .dex.now{opacity:1;border-color:#B79CF2;border-style:dashed;}
+  .cb{max-width:84%;padding:8px 12px;font-size:.86rem;line-height:1.55;white-space:pre-wrap;}
+  .cb.u{align-self:flex-end;background:#FFD3DE;color:#5A2A35;border-radius:14px 14px 4px 14px;}
+  .cb.c{align-self:flex-start;background:var(--panel2);border-radius:14px 14px 14px 4px;}
+  .cb.wait{opacity:.6;animation:cbw 1.2s ease-in-out infinite;}
+  @keyframes cbw{0%,100%{opacity:.45;}50%{opacity:.85;}}
+  .vd{display:inline-block;font-size:.72rem;font-weight:900;padding:2px 9px;border-radius:999px;margin-bottom:4px;}
+  .vd.ok{background:#E9F8F1;color:var(--accent);} .vd.careful{background:#FFF6DB;color:#C47F14;} .vd.stop{background:#FFE6EC;color:var(--fire);}
+  button.cb-add{display:block;width:100%;margin-top:8px;font-size:.74rem;padding:6px 8px;white-space:normal;}
+  .askcard{background:linear-gradient(135deg,#FFFFFF,#F2FBF7);}
+  #chatChips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;}
+  #chatChips .chip{flex:0 0 auto;}
 </style>
 </head>
 <body>
@@ -336,8 +412,8 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🦭 KARADAクエスト<span class="ver">v15.5.0</span></div>
-      <div class="tb-lv" id="tbLv">Lv1</div>
+      <div class="brand">🦭 KARADAクエスト<span class="ver">v16.0.0</span></div>
+      <div class="tb-right"><span class="tb-tod" id="todTxt"></span><div class="tb-lv" id="tbLv">Lv1</div></div>
     </div>
     <div class="datehop">
       <button class="ghost" id="prevDay">‹ 前日</button>
@@ -353,6 +429,7 @@
       <div class="stamp-head"><b>🏅 きょうの4つ</b><span id="stampMeta" class="muted"></span></div>
       <div class="stamps" id="stamps"></div>
       <div id="treatRow" style="margin-top:8px;"></div>
+      <div id="evLine" class="evline" hidden></div>
     </div>
     <div id="topBanners"></div>
 
@@ -445,11 +522,12 @@
     </div>
 
     <div class="card mascot" id="chiCard">
+      <div class="scene" id="chiScene"></div>
       <div class="chika-wrap" id="chiFaceHome"></div>
       <div class="bubble">
         <div class="chika-name">ごまちゃん</div>
         <div id="chiTip"></div>
-        <div class="bubble-sub">💬 タップでごまちゃんとおしゃべり</div>
+        <div class="bubble-sub" id="chiSub">💬 タップで相談</div>
       </div>
     </div>
 
@@ -505,6 +583,17 @@
       <div id="calLeft" class="muted" style="text-align:center;margin-top:10px;font-weight:700;"></div>
       <div id="snackLine" class="infoline"></div>
       <div id="nightLine" class="infoline info-night" hidden></div>
+    </div>
+
+    <div class="card askcard">
+      <h3>💬 ごまちゃんに相談</h3>
+      <div class="muted" style="font-size:.74rem;margin-bottom:8px;">「今から○○食べてもいい？」と聞くと、いまの収支を見てこたえるよ</div>
+      <div class="chips" id="askChips"></div>
+      <div class="row nowrap" style="margin-top:8px;">
+        <input id="askInput" type="text" autocomplete="off" placeholder="例：今からアイス食べてもいい？" style="flex:1;min-width:0;">
+        <button id="askGo">相談</button>
+      </div>
+      <div id="askMode" class="muted" style="font-size:.7rem;margin-top:6px;"></div>
     </div>
 
     <div class="card">
@@ -655,6 +744,13 @@
     </div>
 
     <div class="card">
+      <h3>🎯 イベントまでのカウントダウン</h3>
+      <div id="evBox"></div>
+      <div class="muted" style="font-size:.7rem;margin-top:6px;">卒業式・入学式の日付は仮です。決まったら「日付をかえる」でなおしてね。</div>
+      <button class="ghost" id="evAdd" style="width:100%;margin-top:8px;">＋ イベントを追加</button>
+    </div>
+
+    <div class="card">
       <h3>🏁 シックスパックへの道（腹囲）</h3>
       <div id="roadmap"></div>
       <div class="muted" style="font-size:.7rem;margin-top:8px;">腹囲は週1回、朝におへその高さで測ろう。お腹の見え方は体脂肪の量しだいなので、数字はあくまで目安です。</div>
@@ -671,6 +767,17 @@
 
   <!-- ================= その他 ================= -->
   <section class="tab" id="tab-more">
+    <div class="card roomcard" id="roomCard">
+      <h3>🦭 ごまちゃんのおへや</h3>
+      <div class="room" id="roomScene"><div class="scene" id="roomDeco"></div><div class="room-floor"></div><div class="room-seal" id="roomSeal"></div></div>
+      <div class="room-stats" id="roomStats"></div>
+      <div class="muted" style="font-size:.7rem;margin-top:6px;">🐚 貝がら：おみくじ・夜のガマンでもらえる ／ 🐟 おさかな：食事を記録するたび、ごまちゃんにもおすそわけ（1日5ひきまで）</div>
+      <div class="sec-label">👕 きせかえ（タップで着る／はずす）</div>
+      <div class="wear-grid" id="wearGrid"></div>
+      <div class="sec-label">💪 腹筋ごまちゃん</div>
+      <div id="absInfo"></div>
+    </div>
+
     <div class="card">
       <div class="hero">
         <div class="ring">
@@ -822,12 +929,14 @@
 <div class="overlay" id="chatOverlay"><div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh;">
   <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px;">
     <div id="chatFace" style="width:40px;flex:0 0 auto;"></div>
-    <div style="flex:1;text-align:left;"><div style="font-weight:700;">ごまちゃん</div><div class="muted" style="font-size:.66rem;">いつでも相談してね（無料・ルール式の相棒）</div></div>
+    <div style="flex:1;text-align:left;"><div style="font-weight:700;">ごまちゃん</div><div class="muted" style="font-size:.66rem;" id="chatMode"></div></div>
+    <span class="link" id="chatAiTgl" style="font-size:.72rem;" hidden></span>
     <span class="link" id="chatClose">閉じる</span>
   </div>
   <div id="chatLog" style="flex:1;overflow-y:auto;text-align:left;padding:4px;display:flex;flex-direction:column;gap:8px;min-height:220px;"></div>
-  <div style="display:flex;gap:8px;margin-top:10px;">
-    <input id="chatInput" placeholder="例：今からカツ丼食べたい…" style="flex:1;">
+  <div id="chatChips" class="chips" style="margin-top:8px;"></div>
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <input id="chatInput" autocomplete="off" placeholder="例：今からアイス食べてもいい？" style="flex:1;min-width:0;">
     <button id="chatSend">送信</button>
   </div>
 </div></div>
@@ -953,6 +1062,19 @@
   <div style="text-align:center;margin-top:12px;"><span class="link" id="rcDelete" style="color:var(--fire);">この料理を削除</span></div>
 </div></div>
 
+<!-- 夜のガマン -->
+<div class="overlay" id="gamanOverlay"><div class="modal" style="text-align:center;">
+  <div class="zzz"><span>z</span><span>z</span><span>Z</span></div>
+  <div id="gamanFace" class="gaman-face"></div>
+  <div class="shellpop">🐚</div>
+  <h2 id="gamanTitle" style="font-size:1.2rem;margin:6px 0;">えらい！！</h2>
+  <div id="gamanMsg" class="muted" style="font-size:.84rem;line-height:1.7;"></div>
+  <div style="display:flex;gap:8px;margin-top:16px;">
+    <button id="gamanClose" style="flex:2;">🦷 閉店してねる</button>
+    <button class="ghost" id="gamanOnly" style="flex:1;">とじる</button>
+  </div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <!-- LEVEL UP MODAL -->
@@ -1039,6 +1161,10 @@ const BADGES=[
   {id:'ws80',  e:'📐',t:'腹囲80cm',    chk:s=>waistNow()!=null&&waistNow()<=80},
   {id:'ws78',  e:'🧱',t:'腹囲78cm',    chk:s=>waistNow()!=null&&waistNow()<=78},
   {id:'ws76',  e:'🍫',t:'シックスパック圏',chk:s=>waistNow()!=null&&waistNow()<=76},
+  {id:'gm1',   e:'🌙',t:'夜のガマン',  chk:s=>gamanTotal(s)>=1},
+  {id:'gm10',  e:'🌛',t:'ガマン10回',  chk:s=>gamanTotal(s)>=10},
+  {id:'sh30',  e:'🐚',t:'貝がら30こ',  chk:s=>(s.shells||0)>=30},
+  {id:'gold1', e:'✨',t:'金の貝がら',  chk:s=>(s.gold||0)>=1},
 ];
 /* Core workout: name, seconds, cue. type work/rest */
 const WORKOUT=[
@@ -1176,7 +1302,7 @@ function waistLost(s){const w=waistDays(s);if(w.length<2)return 0;return(+s.days
 function totalXP(s){let xp=0;for(const d of sd(s)){const x=s.days[d];
   if(d>=NEW_FROM){const c=dayChecks(d);CHECKS.forEach(q=>{if(c[q.k]===true)xp+=25;});if(newScore(d)===4)xp+=50;}
   else{QUESTS.forEach(q=>{if(x[q.key])xp+=q.xp;});if(score(d)===4)xp+=50;}
-  xp+=Math.round((+x.km||0)*5);xp+=(+x.wo||0)*15;}return xp;}
+  xp+=Math.round((+x.km||0)*5);xp+=(+x.wo||0)*15;xp+=Math.min(3,+x.gaman||0)*10;}return xp;}
 function maxStreak(s){const ds=sd(s);let mx=0,c=0,prev=null;for(const d of ds){if(score(d)>=3){if(prev&&dayDiff(prev,d)===1)c++;else c=1;mx=Math.max(mx,c);prev=d;}else{prev=null;c=0;}}return mx;}
 function curStreak(s){let c=0,d=today();if(score(d)<3)d=addDays(d,-1);while(score(d)>=3){c++;d=addDays(d,-1);}return c;}
 function levelFor(xp){let lvl=1,need=200,acc=0;while(xp>=acc+need){acc+=need;lvl++;need=Math.round(need*1.25);}return{lvl,into:xp-acc,need};}
@@ -1277,6 +1403,11 @@ function render(){
   renderWeekSum();
   renderMonster();
   renderReview();
+  wearSync();
+  renderRoom();
+  renderEvents();
+  renderChatMode();
+  applyTod();
   document.getElementById('tbLv').textContent='Lv'+L.lvl;
 }
 function afterChange(){render();}
@@ -1304,7 +1435,7 @@ function addMeal(n,k,p,s,slot){const dd=day(cur);dd.meals=dd.meals||[];
   const m={n,k:Math.round(+k||0),p:Math.round((+p||0)*10)/10,s:snack?1:0,t};
   if(cur===today())m.at=hhmm();
   if(t==='夜食')m.night=1;
-  dd.meals.push(m);save();
+  dd.meals.push(m);save();fishPop();
   if(before<state.proTarget&&(before+m.p)>=state.proTarget){toast('💪 タンパク質 目標クリア！');confettiRain();playFX();}
   else if(snack){toast('🍫 '+n+' +'+m.k+'kcal ＝ 自転車'+Math.round(m.k/30)+'km分。戒め！');beep(196,.22,'sawtooth');}
   else{toast('もぐもぐ記録：'+n);beep(660,.08);}
@@ -1668,7 +1799,7 @@ function addMealsBatch(list,slot){const dd=day(cur);dd.meals=dd.meals||[];
   const before=dd.meals.reduce((a,m)=>a+(+m.p||0),0);let p=0;
   list.forEach(x=>{const m={n:x.n,k:Math.round(+x.k||0),p:Math.round((+x.p||0)*10)/10,s:x.s?1:0,t:slot};
     if(cur===today())m.at=hhmm();if(slot==='夜食')m.night=1;dd.meals.push(m);p+=m.p;});
-  save();checkBadges();render();
+  save();fishPop();checkBadges();render();
   if(before<state.proTarget&&before+p>=state.proTarget){toast('💪 タンパク質 目標クリア！');confettiRain();playFX();}else beep(660,.08);}
 function renderAiResult(){const r=aiLast,out=document.getElementById('aiResult');out.innerHTML='';if(!r)return;
   const sl=SLOTS.find(s=>s.id===r.slot),tk=r.added.reduce((a,x)=>a+x.k,0),tp=r.added.reduce((a,x)=>a+x.p,0);
@@ -1852,11 +1983,13 @@ function renderTop(){const box=document.getElementById('topBanners');box.innerHT
       c.innerHTML='<b>🥗 きのうの食事チェックが届いたよ</b><div class="muted" style="font-size:.8rem;margin-top:4px;font-weight:700;">'+esc(rv.data.summary||'')+'</div>';
       const b=document.createElement('button');b.className='ghost';b.style.cssText='width:100%;margin-top:8px;';b.textContent='しゅうしタブで見る';
       b.onclick=()=>{state.rvSeen=y;save();rvKind='day';showTab('sum');render();};c.appendChild(b);box.appendChild(c);}}
+  renderOmikuji(box);
   if(h>=21||h<4){const c=document.createElement('div');c.className='card nightcard';
     c.innerHTML='<div class="night-head"><div class="nf">'+chikaSVG('night','nt')+'</div><div><b>🌙 夜食モード</b><div class="muted" style="font-size:.8rem;font-weight:700;margin-top:2px;">'
       +(dd.closed?'きょうはもう閉店。えらい！ このままおやすみ🌙':'21時すぎたよ。食べるなら、決めたものだけね')+'</div></div></div>';
     const chips=document.createElement('div');chips.className='chips';chips.style.marginTop='10px';
     NIGHT_CANDS.filter(x=>nightPlan().includes(x.n)).forEach(x=>chips.appendChild(chipEl(x.n,x.k+'kcal','',()=>addMeal(x.n,x.k,x.p,0,'夜食'))));
+    c.appendChild(gamanBtn());
     c.appendChild(chips);
     if(!dd.closed){const b=document.createElement('button');b.className='ghost';b.style.cssText='width:100%;margin-top:10px;';
       b.textContent='🦷 きょうはもう食べない（閉店）';
@@ -1905,14 +2038,258 @@ function renderRoadmap(){const box=document.getElementById('roadmap'),w=waistNow
   WAIST_STAGES.forEach(s=>{const done=w<=s.c,isNext=next&&s.c===next.c;
     h+='<div class="rm-step'+(done?' done':isNext?' next':'')+'"><span>'+(done?'✓ ':isNext?'▶ ':'')+s.c+'cm</span>'+s.t+'</div>';});
   box.innerHTML=h;}
-function renderMonster(){const F=fatProgress(),prog=F.def%7200,hp=7200-prog,pct=hp/7200*100;
-  document.getElementById('monster').innerHTML='<div class="mon-row"><div class="mon-face">👾</div><div style="flex:1;min-width:0;">'
-    +'<div class="barrow"><span>体脂肪1kgモンスター（'+(F.kg+1)+'体目）</span><span>HP '+Math.round(hp).toLocaleString()+'</span></div>'
-    +'<div class="xpbar"><div class="xpfill" style="width:'+pct+'%;background:linear-gradient(90deg,#B79CF2,#F7809F);animation:none;"></div></div></div></div>'
+function monOf(i){const m=MONSTERS[i%MONSTERS.length],r=Math.floor(i/MONSTERS.length);return{...m,n:m.n+(r?' ★'+(r+1):'')};}
+let monDexOpen=false;
+function renderMonster(){const F=fatProgress(),prog=F.def%7200,hp=7200-prog,pct=hp/7200*100,M=monOf(F.kg);
+  if(state.fatKg!=null&&F.kg>state.fatKg){state.monDates=state.monDates||{};for(let i=state.fatKg;i<F.kg;i++)state.monDates[i]=today();
+    toast('👾 '+monOf(F.kg-1).n+' を たおした！ 体脂肪 約1kg分 🎉');confettiRain();playFX();beep(880,.15);setTimeout(()=>beep(1170,.2),140);}
+  if(state.fatKg!==F.kg){state.fatKg=F.kg;save();}
+  let dex='';const n=Math.max(MONSTERS.length,F.kg+1);
+  for(let i=0;i<n;i++){const m=monOf(i),done=i<F.kg,now=i===F.kg,dt=(state.monDates||{})[i];
+    dex+='<div class="dex'+(done?' done':now?' now':'')+'"><b>'+(done||now?m.e:'❓')+'</b><span>'+(done||now?esc(m.n):'？？？')+'</span><small>'
+      +(done?(dt?dt.slice(5).replace('-','/')+' たおした':'たおした'):now?'たたかい中':'')+'</small></div>';}
+  document.getElementById('monster').innerHTML='<div class="mon-row"><div class="mon-face">'+M.e+'</div><div style="flex:1;min-width:0;">'
+    +'<div class="barrow"><span><b>'+esc(M.n)+'</b>（'+(F.kg+1)+'体目）</span><span>HP '+Math.round(hp).toLocaleString()+'</span></div>'
+    +'<div class="xpbar"><div class="xpfill" style="width:'+pct+'%;background:linear-gradient(90deg,#B79CF2,#F7809F);animation:none;"></div></div>'
+    +'<div class="muted" style="font-size:.7rem;margin-top:3px;">'+esc(M.t)+'</div></div></div>'
     +'<div class="mon-stats">撃破 <b>'+F.kg+'</b>体（体脂肪 約'+F.kg+'kg分）・ 累計アンダー <b>'+Math.round(F.def).toLocaleString()+'</b>kcal</div>'
+    +'<details class="more" id="monDex" style="margin-top:8px;"'+(monDexOpen?' open':'')+'><summary>📖 モンスター図鑑（'+Math.min(F.kg,MONSTERS.length)+' / '+MONSTERS.length+'）</summary><div class="dex-grid">'+dex+'</div></details>'
     +'<div class="muted" style="font-size:.7rem;margin-top:6px;">アンダー7,200kcalで1体撃破（体脂肪 約1kg分）。記録が1,000kcal未満の日と、21時前の今日は数えないよ。</div>';
-  if(state.fatKg!=null&&F.kg>state.fatKg){toast('👾 モンスター撃破！ 体脂肪 約1kg分 🎉');confettiRain();playFX();beep(880,.15);setTimeout(()=>beep(1170,.2),140);}
-  if(state.fatKg!==F.kg){state.fatKg=F.kg;save();}}
+  document.getElementById('monDex').ontoggle=e=>{monDexOpen=e.target.open;};}
+
+/* ============ v16：貝がら・夜のガマン・おみくじ・きせかえ・腹筋・図鑑・カウントダウン・時間帯・相談 ============ */
+function shells(){return state.shells||0;}
+function gamanTotal(s){return sd(s).reduce((a,d)=>a+(+s.days[d].gaman||0),0);}
+function giveShell(n,gold){state.shells=(state.shells||0)+(n||0);if(gold)state.gold=(state.gold||0)+1;save();}
+function curLv(){return levelFor(totalXP(state)).lvl;}
+
+/* 時間帯・季節 */
+function season(){const m=new Date().getMonth()+1;return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';}
+function tod(){const h=new Date().getHours();return h>=4&&h<10?'morning':h>=10&&h<16?'day':h>=16&&h<19?'evening':'night';}
+const TOD_TXT={morning:'🌅 おはよう',day:'☀️ こんにちは',evening:'🌇 ゆうがた',night:'🌙 こんばんは'};
+const SEASON_FX={spring:'🌸',summer:'🫧',autumn:'🍁',winter:'❄️'};
+function applyTod(){const t=tod();document.body.dataset.tod=t;document.body.dataset.season=season();
+  const el=document.getElementById('todTxt');if(el)el.textContent=TOD_TXT[t];}
+function sceneFx(n){const nt=tod()==='night',se=season(),e=nt?'✨':SEASON_FX[se],cls=nt?'tw':se==='summer'?'rise':'fall';let s='';
+  for(let i=0;i<n;i++){const l=Math.round(6+i*(88/Math.max(1,n-1)));
+    s+='<span class="'+cls+'" style="left:'+l+'%;'+(cls==='tw'?'top:'+((i*37)%70+6)+'%;':'')+'animation-delay:-'+(i*1.7).toFixed(1)+'s;animation-duration:'+(7+i%3*2)+'s;">'+e+'</span>';}
+  return s;}
+function renderChiExtras(){const sc=document.getElementById('chiScene');if(sc){const k=tod()+season();if(sc.dataset.k!==k){sc.dataset.k=k;sc.innerHTML=sceneFx(5);}}
+  const n=Math.min(5,((state.days[today()]||{}).meals||[]).length),sub=document.getElementById('chiSub');if(!sub)return;
+  sub.innerHTML='💬 タップで相談 ・ 🐟'+n+(n>=5?'（まんぷく）':'')+' ・ 🐚'+shells()+' ・ <span class="link" id="chiRoom">👕 おへや</span>';
+  document.getElementById('chiRoom').onclick=e=>{e.stopPropagation();showTab('more');};}
+function fishPop(){if(cur!==today())return;const n=((state.days[today()]||{}).meals||[]).length;if(n>5)return;
+  const f=document.createElement('div');f.className='fishpop';f.textContent='🐟';document.body.appendChild(f);setTimeout(()=>f.remove(),1300);}
+
+/* 夜のガマン */
+const GAMAN_MSG=['食べたい波は、15分くらいで しずまることが多いよ。お水を1杯のんで、歯みがきしちゃお','いまのガマンは、あしたの朝の体重へのプレゼント🎁',
+  'おなかがすいてるんじゃなくて、つかれてるのかも。きょうは もう ねちゃお','冷凍庫のアイスは にげないよ。あしたの昼の おやつにしても いいんだよ','えらすぎる…ごまちゃん、ほこらしい〜'];
+function gamanBtn(){const b=document.createElement('button');b.className='big gaman-btn';const n=+(day(cur).gaman||0);
+  b.innerHTML='🌙 食べたいけど、ガマンした！<span class="sub">'+(n?'きょう '+n+'回ガマンできてる。':'')+'押すと ごまちゃんが 貝がらをくれるよ🐚</span>';
+  b.onclick=doGaman;return b;}
+function doGaman(){const dd=day(cur);dd.gaman=(+dd.gaman||0)+1;const got=dd.gaman<=3;
+  if(got)giveShell(1);else save();
+  document.getElementById('gamanFace').innerHTML=chikaSVG('night','gm');
+  document.getElementById('gamanTitle').textContent=got?'えらい！！ 🐚 貝がら GET':'えらい！！ 何回でも えらい';
+  document.getElementById('gamanMsg').innerHTML=(got?'貝がら ぜんぶで <b>'+shells()+'</b>こ ・ ガマン '+gamanTotal(state)+'回目':'（きょうの貝がらは3こまで。でも ガマンは何回でも えらい！）')
+    +'<br>'+esc(GAMAN_MSG[Math.floor(Math.random()*GAMAN_MSG.length)]);
+  document.getElementById('gamanClose').hidden=!!dd.closed;
+  const ov=document.getElementById('gamanOverlay'),sp=ov.querySelector('.shellpop');sp.hidden=!got;sp.style.animation='none';void sp.offsetWidth;sp.style.animation='';
+  ov.classList.add('show');confettiRain();playFX();beep(660,.1);setTimeout(()=>beep(990,.16),120);checkBadges();render();}
+document.getElementById('gamanClose').onclick=()=>{day(cur).closed=true;save();document.getElementById('gamanOverlay').classList.remove('show');render();toast('🌙 閉店！ おやすみ〜');};
+document.getElementById('gamanOnly').onclick=()=>document.getElementById('gamanOverlay').classList.remove('show');
+
+/* おみくじ（1日1回） */
+const OMI_RANKS=[['大吉',15],['中吉',25],['小吉',25],['吉',25],['末吉',10]];
+const OMI_MSG={'大吉':'きょうは なにをやっても うまくいく日！ そのいきおいで アンダーも いけちゃう〜','中吉':'いいながれ きてるよ。タンパク質を さきに食べると もっといい日に',
+  '小吉':'こつこつの日。きょうも ひとつずつ 書いていこ','吉':'ふつうが いちばん。いつもどおりで はなまる🌸','末吉':'あとから よくなる日。夜を のりきれたら 大逆転だよ'};
+const OMI_ITEMS=['ゆで卵','サラダチキン','味噌汁','炭酸水','納豆','ヨーグルト','焼き魚','ブロッコリー','もずく酢','冷奴','バナナ','鶏むね','枝豆','キムチ','朝のブラックコーヒー'];
+const OMI_ACTS=['配達のあとにストレッチ','階段をつかう','21時に歯みがき','プランク30秒','お水をコップ1杯多めに','深呼吸を3回','背すじを伸ばして座る','スクワット10回','早めにおふろ','5分だけ散歩'];
+function drawOmikuji(){const tot=OMI_RANKS.reduce((a,r)=>a+r[1],0);let x=Math.random()*tot,rank='吉';
+  for(const [r,w] of OMI_RANKS){if(x<w){rank=r;break;}x-=w;}
+  const R=a=>a[Math.floor(Math.random()*a.length)],gold=Math.random()<0.05,n=rank==='大吉'?2:1;
+  state.omi={d:today(),rank,item:R(OMI_ITEMS),act:R(OMI_ACTS),n,gold};giveShell(n,gold);
+  if(rank==='大吉'||gold){confettiRain();playFX();}beep(880,.1);setTimeout(()=>beep(1320,.18),120);
+  toast(gold?'✨ 金の貝がら！ レアだよ〜':'🐚 貝がら '+n+'こ GET');checkBadges();render();}
+function renderOmikuji(box){const o=state.omi;if(new Date().getHours()<4)return;
+  if(!o||o.d!==today()){const c=document.createElement('div');c.className='card omicard';
+    c.innerHTML='<div class="omi-row"><div class="omi-box">🎐</div><div style="flex:1;"><b>きょうのおみくじ</b><div class="muted" style="font-size:.76rem;font-weight:700;">1日1回。貝がらがもらえるよ（たまに 金の貝がら）</div></div></div>';
+    const b=document.createElement('button');b.style.cssText='width:100%;margin-top:10px;';b.textContent='🎐 ひく';
+    b.onclick=()=>{b.disabled=true;c.querySelector('.omi-box').classList.add('shake');beep(520,.06);setTimeout(drawOmikuji,700);};
+    c.appendChild(b);box.appendChild(c);return;}
+  if(o.hide)return;
+  const c=document.createElement('div');c.className='card omicard';
+  c.innerHTML='<div class="omi-row"><div class="omi-rank'+(o.rank==='大吉'?' big':'')+'">'+esc(o.rank)+'</div><div style="flex:1;min-width:0;font-size:.8rem;font-weight:700;line-height:1.6;">'
+    +esc(OMI_MSG[o.rank]||'')+'<div class="muted" style="font-size:.74rem;">🍀 ラッキーフード：'+esc(o.item)+'<br>👟 ラッキーアクション：'+esc(o.act)+'</div>'
+    +'<div style="font-size:.74rem;color:var(--gold);">'+(o.gold?'✨ 金の貝がら GET！':'🐚 貝がら '+o.n+'こ GET')+'</div></div></div>';
+  const x=document.createElement('span');x.className='link';x.style.cssText='display:block;text-align:right;font-size:.72rem;margin-top:4px;';x.textContent='とじる';
+  x.onclick=()=>{state.omi.hide=true;save();render();};c.appendChild(x);box.appendChild(c);}
+
+/* きせかえ・腹筋 */
+const WEAR=[
+  {id:'muffler',slot:'neck',e:'🧣',n:'マフラー',need:'Lv3になる',ok:()=>curLv()>=3},
+  {id:'bowtie',slot:'neck',e:'🎀',n:'ちょうネクタイ',need:'貝がら5こ',ok:()=>shells()>=5},
+  {id:'beanie',slot:'head',e:'🧶',n:'ニット帽',need:'Lv5になる',ok:()=>curLv()>=5},
+  {id:'sakura',slot:'head',e:'🌸',n:'さくらの髪かざり',need:'貝がら15こ',ok:()=>shells()>=15},
+  {id:'glasses',slot:'face',e:'🕶️',n:'サングラス',need:'連続7日',ok:()=>maxStreak(state)>=7},
+  {id:'medal',slot:'neck',e:'🥇',n:'金メダル',need:'モンスター1体たおす',ok:()=>fatProgress().kg>=1},
+  {id:'crown',slot:'head',e:'👑',n:'おうかん',need:'金の貝がら1こ',ok:()=>(state.gold||0)>=1},
+  {id:'santa',slot:'head',e:'🎅',n:'サンタぼうし',need:'12月に登場',ok:()=>new Date().getMonth()===11},
+];
+function wearSync(){const got=state.wearGot,now=WEAR.filter(w=>w.ok()).map(w=>w.id);
+  if(!got){state.wearGot=now;save();return;}
+  const nw=now.filter(id=>!got.includes(id));if(!nw.length)return;
+  state.wearGot=got.concat(nw);save();const w=WEAR.find(x=>x.id===nw[0]);
+  setTimeout(()=>{toast('👕 きせかえ GET：'+w.e+' '+w.n+'（その他タブで着られるよ）');confettiRain();playFX();},500);}
+function wearOf(slot){try{const id=(state.wear||{})[slot];return id&&(state.wearGot||[]).includes(id)?id:'';}catch(e){return '';}}
+function absLv(){try{const w=waistNow();return w==null?0:WAIST_STAGES.filter(s=>w<=s.c).length;}catch(e){return 0;}}
+function wearClip(){let s='';const L=absLv();
+  if(L>0){const st='stroke="#B9BED0" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="'+(0.35+0.12*L).toFixed(2)+'"';
+    s+='<path d="M60 87 L60 102" '+st+'/>';
+    if(L>=2)s+='<path d="M52 91 Q56 92.5 60 91 M60 91 Q64 92.5 68 91" '+st+'/>';
+    if(L>=3)s+='<path d="M52.5 96 Q56 97.5 60 96 M60 96 Q64 97.5 67.5 96" '+st+'/>';
+    if(L>=4)s+='<path d="M51 87 Q48.5 94.5 52 102 M69 87 Q71.5 94.5 68 102" '+st+'/>';}
+  if(wearOf('neck')==='muffler')s+='<rect x="0" y="79" width="120" height="7" fill="#F28B82"/><rect x="0" y="81.6" width="120" height="1.6" fill="#fff" opacity=".7"/>';
+  return s;}
+function wearTop(){let s='';const h=wearOf('head'),n=wearOf('neck'),f=wearOf('face');
+  if(absLv()>=5)s+='<path d="M80 90 l1.5 3.5 3.5 1.5 -3.5 1.5 -1.5 3.5 -1.5 -3.5 -3.5 -1.5 3.5 -1.5z" fill="#FFD36E"/>';
+  if(n==='muffler')s+='<path d="M75 83 L83 83 L86 99 L78 100 Z" fill="#F28B82"/><path d="M78.5 100 l0 3 M81 99.7 l0 3 M83.5 99.4 l0 3" stroke="#F28B82" stroke-width="1.4"/>';
+  if(n==='bowtie')s+='<path d="M60 85 L49 79 L49 91 Z M60 85 L71 79 L71 91 Z" fill="#E8648A"/><circle cx="60" cy="85" r="3" fill="#C94C72"/>';
+  if(n==='medal')s+='<path d="M52 79 L60 90 L68 79" stroke="#5FB8E6" stroke-width="3.5" fill="none" stroke-linejoin="round"/><circle cx="60" cy="94" r="6" fill="#FFD36E" stroke="#E8A62E" stroke-width="1.5"/><circle cx="60" cy="94" r="3" fill="none" stroke="#E8A62E" stroke-width="1"/>';
+  if(f==='glasses')s+='<rect x="38" y="51" width="16" height="11" rx="4.5" fill="#2F2A33"/><rect x="66" y="51" width="16" height="11" rx="4.5" fill="#2F2A33"/><path d="M54 55 L66 55" stroke="#2F2A33" stroke-width="2"/>'
+    +'<path d="M41 54 l4 -1.5 M69 54 l4 -1.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".7"/>';
+  if(h==='beanie')s+='<path d="M26 41 C26 10 94 10 94 41 Z" fill="#9EC5F0"/><path d="M42 24 L42 37 M51 20 L51 37 M60 19 L60 37 M69 20 L69 37 M78 24 L78 37" stroke="#86B3E6" stroke-width="2"/>'
+    +'<rect x="23" y="34" width="74" height="9" rx="4.5" fill="#7FAEE6"/><circle cx="60" cy="12" r="6" fill="#fff" stroke="#D6D9E6" stroke-width="1.5"/>';
+  if(h==='santa')s+='<path d="M26 41 C26 10 94 10 94 41 Z" fill="#E85A6A"/><path d="M66 16 Q92 6 100 26 L93 28 Q86 16 70 22 Z" fill="#E85A6A"/><circle cx="99" cy="28" r="5.5" fill="#fff"/><rect x="23" y="34" width="74" height="9" rx="4.5" fill="#fff"/>';
+  if(h==='crown')s+='<path d="M41 23 L44 6 L52 15 L60 2 L68 15 L76 6 L79 23 Z" fill="#FFD36E" stroke="#E8A62E" stroke-width="1.5" stroke-linejoin="round"/><circle cx="60" cy="17" r="2.4" fill="#E8648A"/><circle cx="49" cy="18.5" r="1.7" fill="#5FB8E6"/><circle cx="71" cy="18.5" r="1.7" fill="#7FD8B9"/>';
+  if(h==='sakura'){for(let i=0;i<5;i++){const a=(i*72-90)*Math.PI/180,x=(84+3.6*Math.cos(a)).toFixed(1),y=(33+3.6*Math.sin(a)).toFixed(1);
+      s+='<ellipse cx="'+x+'" cy="'+y+'" rx="3" ry="3.6" transform="rotate('+(i*72)+' '+x+' '+y+')" fill="#FFB7CB"/>';}
+    s+='<circle cx="84" cy="33" r="1.8" fill="#FFD36E"/>';}
+  return s;}
+function renderRoom(){const box=document.getElementById('roomSeal');if(!box)return;
+  box.innerHTML=chikaSVG(tod()==='night'?'night':'happy','rm');
+  const sc=document.getElementById('roomScene');sc.dataset.season=season();
+  const dc=document.getElementById('roomDeco'),k=tod()+season();if(dc.dataset.k!==k){dc.dataset.k=k;dc.innerHTML=sceneFx(7);}
+  const fish=Math.min(5,((state.days[today()]||{}).meals||[]).length);
+  document.getElementById('roomStats').innerHTML='<div class="rs"><b>🐚 '+shells()+'</b><span>貝がら</span></div><div class="rs"><b>✨ '+(state.gold||0)+'</b><span>金の貝がら</span></div>'
+    +'<div class="rs"><b>🌙 '+gamanTotal(state)+'</b><span>夜のガマン</span></div><div class="rs"><b>🐟 '+fish+'/5</b><span>きょうのごはん</span></div>';
+  const g=document.getElementById('wearGrid');g.innerHTML='';const got=state.wearGot||[];
+  WEAR.forEach(w=>{const has=got.includes(w.id),on=has&&(state.wear||{})[w.slot]===w.id;const b=document.createElement('button');
+    b.className='wear'+(on?' on':'')+(has?'':' lock');
+    b.innerHTML='<span class="we">'+(has?w.e:'🔒')+'</span><span>'+(has?esc(w.n):'？？？')+'</span><small>'+(has?(on?'✓ きてる':'タップで着る'):esc(w.need))+'</small>';
+    b.onclick=()=>{if(!has){toast('🔒 '+w.need+'で 手に入るよ');return;}state.wear=state.wear||{};state.wear[w.slot]=on?'':w.id;save();render();beep(on?440:880,.08);};
+    g.appendChild(b);});
+  const w=waistNow(),L=absLv(),nx=w!=null?WAIST_STAGES.find(s=>w>s.c):null;
+  document.getElementById('absInfo').innerHTML='<div class="barrow"><span>腹筋レベル <b>'+L+'</b> / 5</span><span class="muted">'+(w!=null?'いまの腹囲 '+w+'cm':'腹囲が未記録')+'</span></div>'
+    +'<div class="xpbar"><div class="xpfill" style="width:'+(L/5*100)+'%;background:linear-gradient(90deg,#9ED9F5,#7FD8B9);animation:none;"></div></div>'
+    +'<div class="muted" style="font-size:.74rem;margin-top:6px;">'+(w==null?'「からだ」タブで腹囲を入れると、ごまちゃんのおなかに 腹筋の線が出てくるよ'
+      :nx?'腹囲が '+nx.c+'cm になると、ごまちゃんの腹筋が 1段 くっきりするよ（あと '+(w-nx.c).toFixed(1)+'cm）':'ごまちゃんも シックスパック！ ✨')+'</div>';}
+
+/* モンスター図鑑 */
+const MONSTERS=[
+  {e:'🍟',n:'ポテチラ',t:'夜中のポテチから 生まれた'},{e:'🍺',n:'ビアッパラ',t:'「1本だけ」が 口ぐせ'},
+  {e:'🍜',n:'スープノミホス',t:'ラーメンのスープを 飲みほす'},{e:'🍦',n:'ミントアイスン',t:'冷凍庫のおくに かくれている'},
+  {e:'🍩',n:'ドーナッツン',t:'まるくて あまい わな'},{e:'🍔',n:'バーガーン',t:'配達帰りに あらわれる'},
+  {e:'🍫',n:'チョコリン',t:'ストレスで ふえる'},{e:'🍕',n:'ピザドン',t:'週末の夜に やってくる'},
+  {e:'🍚',n:'オオモリーニ',t:'「大盛り無料」の声に よわい'},{e:'🍰',n:'ケーキング',t:'スイーツの おうさま'},
+  {e:'🍗',n:'カラアゲドン',t:'あげものの ボス'},{e:'🍶',n:'ヨイドレン',t:'夜ふかしと なかよし'},
+];
+
+/* イベントのカウントダウン */
+const EV_DEF=[{e:'🎓',n:'卒業式',d:'2027-03-19'},{e:'🌸',n:'入学式',d:'2027-04-07'}];
+function events(){return state.events||EV_DEF;}
+function renderEvents(){const up=events().map(v=>({...v,left:dayDiff(today(),v.d)})).filter(v=>v.left>=0).sort((a,b)=>a.left-b.left);
+  const line=document.getElementById('evLine');line.hidden=!up.length;
+  line.innerHTML=up.slice(0,2).map(v=>'<span style="white-space:nowrap;">'+esc(v.e)+' '+esc(v.n)+'まで <b>あと'+v.left+'日</b></span>').join(' ・ ');line.onclick=()=>showTab('body');
+  const box=document.getElementById('evBox'),dt=+state.defTarget||500;let h='';
+  events().forEach((v,i)=>{const left=dayDiff(today(),v.d),kg=left*dt/7200;
+    h+='<div class="ev-row"><div class="ev-e">'+esc(v.e)+'</div><div style="flex:1;min-width:0;"><b>'+esc(v.n)+'</b> <span class="muted">'+esc(v.d.replace(/-/g,'/'))+'</span>'
+      +(left>0?'<div class="ev-tip">毎日アンダー'+dt+'kcalなら、当日までに 体脂肪 約'+kg.toFixed(1)+'kg分（半分の日だけでも 約'+(kg/2).toFixed(1)+'kg）</div>':left===0?'<div class="ev-tip">きょうだよ！ たのしんでね</div>':'<div class="ev-tip">おつかれさま！</div>')+'</div>'
+      +'<div class="ev-left">'+(left>0?'あと<b>'+left+'</b>日':left===0?'<b>きょう！</b>':'おわり')+'</div></div>'
+      +'<div class="ev-ops"><span class="link" data-ed="'+i+'">📅 日付をかえる</span><span class="link" data-del="'+i+'" style="color:var(--fire);">消す</span></div>';});
+  box.innerHTML=h||'<div class="empty">イベントがないよ。下のボタンで追加してね</div>';
+  box.querySelectorAll('[data-ed]').forEach(el=>el.onclick=()=>{const i=+el.dataset.ed,ev=events().slice(),v=prompt(ev[i].n+' の日付（例：2027-03-19）',ev[i].d);
+    if(v==null)return;if(!/^\d{4}-\d{2}-\d{2}$/.test(v.trim())){toast('2027-03-19 のように入れてね');return;}
+    ev[i]={...ev[i],d:v.trim()};state.events=ev;save();render();toast('📅 日付をかえたよ');});
+  box.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{const i=+el.dataset.del,ev=events().slice();if(!confirm(ev[i].n+' を消しますか？'))return;
+    ev.splice(i,1);state.events=ev;save();render();});}
+document.getElementById('evAdd').onclick=()=>{const n=prompt('イベントの名前（例：運動会、家族旅行）');if(!n||!n.trim())return;
+  const d=prompt('日付（例：2027-05-20）',addDays(today(),30));if(d==null)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d.trim())){toast('2027-05-20 のように入れてね');return;}
+  state.events=events().concat({e:'📅',n:n.trim().slice(0,20),d:d.trim()});save();render();toast('🎯 イベントを追加したよ');};
+
+/* ごまちゃんに相談（ルール式＋AI） */
+const CHAT_FOODS=[
+  {kw:['スーパーカップ'],n:'スーパーカップ',k:370,p:5.5,s:1},{kw:['チョコモナカ'],n:'チョコモナカジャンボ',k:300,p:4,s:1},
+  {kw:['ハーゲンダッツ','ダッツ'],n:'ハーゲンダッツ',k:250,p:4.5,s:1},{kw:['ピノ'],n:'ピノ 1箱',k:200,p:2.5,s:1},{kw:['アイス'],n:'アイス',k:250,p:3.5,s:1},
+  {kw:['カツ丼','かつ丼'],n:'カツ丼',k:900,p:30,s:0},{kw:['ラーメン'],n:'ラーメン',k:600,p:20,s:0},{kw:['カップ麺','カップラーメン','カップヌードル'],n:'カップ麺',k:350,p:9,s:0},
+  {kw:['カレー'],n:'カレー',k:700,p:18,s:0},{kw:['牛丼','吉野家','すき家','松屋'],n:'牛丼 並',k:650,p:22,s:0},{kw:['ピザ'],n:'ピザ 2切れ',k:500,p:20,s:0},
+  {kw:['唐揚げ','からあげ','から揚げ'],n:'唐揚げ 5個',k:500,p:30,s:0},{kw:['マック','マクド','ハンバーガー'],n:'ハンバーガーセット',k:800,p:25,s:0},
+  {kw:['焼肉','焼き肉'],n:'焼肉',k:1000,p:45,s:0},{kw:['寿司','すし'],n:'お寿司 10貫',k:500,p:25,s:0},{kw:['餃子'],n:'餃子 6個',k:350,p:14,s:0},
+  {kw:['ケーキ'],n:'ケーキ',k:350,p:5,s:1},{kw:['ドーナツ'],n:'ドーナツ',k:250,p:3,s:1},{kw:['チョコ'],n:'チョコ',k:250,p:3,s:1},
+  {kw:['ポテチ','ポテトチップ'],n:'ポテチ 1袋',k:330,p:3.5,s:1},{kw:['ビール'],n:'ビール 350缶',k:140,p:1,s:1},{kw:['ハイボール'],n:'ハイボール',k:110,p:0,s:1},
+  {kw:['チューハイ','サワー','ストロング'],n:'チューハイ 350缶',k:180,p:0,s:1},{kw:['ワイン'],n:'ワイン グラス1杯',k:90,p:0,s:1},
+  {kw:['おにぎり'],n:'おにぎり 1個',k:180,p:3,s:0},{kw:['菓子パン'],n:'菓子パン',k:350,p:7,s:1},{kw:['ナッツ'],n:'素焼きナッツ 小袋',k:150,p:5,s:0},
+  {kw:['ヨーグルト'],n:'ヨーグルト 100g',k:56,p:3.6,s:0},{kw:['ゆで卵','たまご','卵'],n:'ゆで卵 1個',k:76,p:6.2,s:0},{kw:['プロテイン'],n:'プロテイン 1杯',k:120,p:24,s:0},
+];
+function guessFood(t){const T=toKata(t),hit=n=>{const b=toKata(String(n||'').split(/[\s（(]/)[0]);return b.length>=2&&T.includes(b);};let f=null;
+  for(const p of (state.products||[]))if(hit(p.n)){f={n:p.n,k:+p.k||0,p:+p.p||0,s:p.s?1:0};break;}
+  if(!f)for(const x of (state.favs||[]).concat(recentFoods()))if(hit(x.n)){f={n:x.n,k:+x.k||0,p:+x.p||0,s:x.s?1:0};break;}
+  if(!f)for(const x of CHAT_FOODS)if(x.kw.some(k=>T.includes(toKata(k)))){f={n:x.n,k:x.k,p:x.p,s:x.s};break;}
+  if(!f)return null;
+  let q=1;const m=t.match(/(\d+(?:\.\d+)?)\s*(杯|本|個|缶|皿|人前|つ|枚|切れ|袋|箱)/);if(m)q=Math.min(5,Math.max(0.5,+m[1]));
+  if(/半分|はんぶん/.test(t))q=0.5;
+  return{n:f.n+(q===1?'':q===0.5?'（半分）':' ×'+q),k:Math.round(f.k*q),p:Math.round(f.p*q*10)/10,s:f.s};}
+function ruleConsult(t){const h=new Date().getHours(),night=h>=21||h<4,dd=day(today()),eaten=mealsK(dd),bud=budgetOf(dd),left=Math.round(bud-eaten),
+  pro=Math.round(mealsP(dd)),w=latestW(state)||72,f=guessFood(t);
+  if(f){const after=left-f.k,add={n:f.n,k:f.k,p:f.p,s:f.s},short=f.n.split(/[\s（(×]/)[0];let v,msg;
+    const base=f.n+'は だいたい '+f.k+'kcal。いまの残りは '+left+'kcal だから、とると残り '+after+'kcal'+(after<0?'（'+(-after)+'kcal オーバー）':'')+'。\n';
+    if(dd.treat){v='ok';msg=base+'きょうは ごほうびの日🎉 たのしんで食べてね。そのかわり、あしたは いつもどおりに もどそ';}
+    else if(night){if(f.k<=120&&!f.s){v='careful';msg=base+'21時すぎだけど、これくらい軽いものなら まあOK。ゆっくり よくかんでね';}
+      else{v='stop';msg=base+'でも いまは21時すぎ。ねる前のこれは、あしたの体重に いちばん のこりやすいよ。\n👉 まず 炭酸水かお茶を1杯 → 10分まって、それでも食べたいなら ヨーグルトか ゆで卵。'
+        +(f.s?'\n👉 '+short+'は、あしたの昼の「おやつ」なら ごまちゃん ゆるす！ 半分ずつ 2回にわけるのも アリだよ':'')+'\n👉 ガマンできたら「🌙 ガマンした！」で 貝がら あげる🐚';}}
+    else if(after>=150){v='ok';msg=base+(f.s?'残りの中に おさまるから OK！ 味わって食べてね。食べたら ちゃんと書こう':'残りの中に おさまるから OK！ タンパク質も とれると なおいいね');}
+    else if(after>=-150){v='careful';msg=base+'ギリギリだね。半分にするか、配達か筋トレを足せば アンダーのまま いけるよ（配達30分で 約'+Math.round(6*w*0.5)+'kcal）';}
+    else{v='stop';msg=base+'きょうは もう オーバーになっちゃう。あしたの昼に まわすか、どうしてもなら 半分（約'+Math.round(f.k/2)+'kcal）にしよ';}
+    if(!night&&pro<state.proTarget*0.6&&f.p<10)msg+='\n（タンパク質が まだ '+pro+'g。できれば 卵や鶏・魚も いっしょに）';
+    return{t:msg,v,add};}
+  if(/配達|デリバリー|走|ラン|自転車|筋トレ|散歩|ウォーキング/.test(t)){const mm=t.match(/(\d+(?:\.\d+)?)\s*(分|時間)/),hr=mm?(mm[2]==='分'?+mm[1]/60:+mm[1]):1;
+    const met=/走|ラン/.test(t)?8:/筋トレ/.test(t)?5:/散歩|ウォーキング/.test(t)?3.5:6,k=Math.round(met*w*hr);
+    return{t:'いいね〜！ '+(mm?mm[0]:'1時間')+'で だいたい '+k+'kcal うごけるよ。いまの残り '+left+'kcal が、'+(left+k)+'kcal に ふえる計算。\nうごいたら「うごく」タブで記録してね'+(night?'\n（夜おそいときは、ねる前の はげしい運動は ひかえめにね）':''),v:'ok'};}
+  if(/おなか|お腹|小腹|すいた|空いた|腹へ|ハラヘ/.test(t))
+    return{t:night?'夜おなか すいたね…。まず お水か炭酸水を1杯、10分まってみて。それでも なら「'+nightPlan().slice(0,3).join('」「')+'」のどれかにしよ。残りは '+left+'kcal だよ'
+      :'おなか すいたなら、ちゃんと食べよ！ 残りは '+left+'kcal。タンパク質（卵・鶏・魚・豆腐）を さきにとると、満足感が 長もちするよ',v:night?'careful':'ok'};
+  if(/あと|残り|のこり|何kcal|なんkcal|どれくらい|どのくらい/.test(t))
+    return{t:left>=0?'きょうの残りは '+left+'kcal だよ（たべた '+Math.round(eaten)+' / めやす '+Math.round(bud)+'kcal）。'+(night?'でも21時すぎだから、きょうは もう ごちそうさまが いちばん🌙':'タンパク質は あと '+Math.max(0,Math.round(state.proTarget-pro))+'g。')
+      :'きょうは もう '+(-left)+'kcal オーバーしてるよ。うごいて とりかえすか、きょうは ここで ごちそうさまにしよ',v:''};
+  return{t:chikaReply(t),v:''};}
+const CHAT_SYS='あなたは「ごまちゃん」。ゴマフアザラシの赤ちゃんの、ゆるくてやさしい専属トレーナーです。相手は39歳の男性（173cm）で、自転車の配達とデスクワークをしています。目標は、毎日アンダーカロリー（食べる量を使う量より少なく）にすることと筋トレで、おなかを引きしめること。夜21時以降の食事とお酒が苦手ポイントです。\n'
+  +'ユーザーは「今から○○しようと思うけど、いいかな？」のような相談をします。いっしょに渡す「きょうの記録」（時刻・残りカロリー・タンパク質・食べたもの）をつかって、具体的な数字で答えてください。\n'
+  +'- verdict：ok＝どうぞ／careful＝くふうすればOK（量・時間・くみあわせを提案）／stop＝いまはやめておこう（かわりの案を必ず出す）／info＝判定がいらない質問\n'
+  +'- reply：ひらがな多めの、やさしい口調で2〜5文。責めない。kcalや残りの数字を入れる。やめておく場合も、あしたの昼にずらす・半分にする・軽いものにかえる など、すぐ実行できる代わりを出す\n'
+  +'- 食べすぎだけでなく、食べなさすぎ（基礎代謝を大きく下回る）にも気をつける。医療的な診断はしない。体調が悪そうなら受診をすすめる\n'
+  +'- 21時以降の飲食は、残りカロリーがあっても、汁物・ヨーグルト・ゆで卵・炭酸水など軽いものをすすめる\n'
+  +'- 「ごほうびの日」は、楽しむことを優先して、量の工夫だけ伝える\n'
+  +'- food_name・kcal・protein・snack：相談が飲食なら、その1回分の推定（food_name は量もふくめた短い日本語）。飲食の相談でなければ food_name は空文字、kcal と protein は 0';
+const CHAT_SCHEMA={type:'object',additionalProperties:false,required:['verdict','reply','food_name','kcal','protein','snack'],
+  properties:{verdict:{type:'string',enum:['ok','careful','stop','info']},reply:{type:'string'},food_name:{type:'string'},kcal:{type:'number'},protein:{type:'number'},snack:{type:'boolean'}}};
+function chatCtx(){const dd=day(today()),ms=dd.meals||[],eaten=mealsK(dd),bud=budgetOf(dd);
+  return '【きょうの記録】\n時刻：'+hhmm()+'\n体重：'+(latestW(state)||'不明')+'kg\n'
+    +'食べていい目安：'+Math.round(bud)+'kcal（ふだんの消費'+Math.round(baseBurn())+'＋運動'+Math.round(burnKcal(dd))+'−アンダー目標'+state.defTarget+'）\n'
+    +'食べた量：'+Math.round(eaten)+'kcal（残り '+Math.round(bud-eaten)+'kcal）\nタンパク質：'+Math.round(mealsP(dd))+' / '+state.proTarget+'g\n'
+    +'食べたもの：'+(ms.length?ms.map(m=>(m.at||m.t||'')+' '+m.n+' '+Math.round(+m.k||0)+'kcal').join('、'):'まだなし')+'\n'
+    +(dd.closed?'夜の「閉店」ボタン：押した\n':'')+(dd.treat?'きょうは「ごほうびの日」\n':'');}
+const CHAT_CHIPS=['今からアイス食べてもいい？','ビール1本だけ飲んでいい？','あと何kcal食べれる？','配達1時間いったら？','夜おなかすいた…'];
+function renderChatChips(){[['chatChips',false],['askChips',true]].forEach(([id,open])=>{const box=document.getElementById(id);if(!box)return;box.innerHTML='';
+  CHAT_CHIPS.forEach(c=>box.appendChild(chipEl(c,'','',()=>{if(open)openChat();chatSend(c);})));});}
+function renderChatMode(){const on=chatAiOn(),k=!!aiKey();
+  const el=document.getElementById('chatMode');if(el)el.textContent=on?'AIが いまの収支を見て こたえるよ（1回 約0.05円）':'かんたん回答（無料）'+(k?'':'・APIキーを入れると AIがくわしく答える');
+  const tg=document.getElementById('chatAiTgl');if(tg){tg.hidden=!k;tg.textContent=on?'🤖 AI：ON':'🤖 AI：OFF';}
+  const am=document.getElementById('askMode');if(am)am.textContent=on?'🤖 AIが こたえるよ（1回 約0.05円）':'🦭 無料のかんたん回答で こたえるよ'+(k?'':'（APIキーを入れると AIがくわしく答える）');}
+document.getElementById('chatAiTgl').onclick=()=>{state.chatAi=!chatAiOn();save();renderChatMode();toast(state.chatAi?'🤖 AIで こたえるよ':'🦭 無料のかんたん回答に したよ');};
+document.getElementById('askGo').onclick=()=>{const i=document.getElementById('askInput'),t=i.value.trim();if(!t){i.focus();return;}i.value='';openChat();chatSend(t);};
+document.getElementById('askInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();document.getElementById('askGo').click();}});
+renderChatChips();
 
 /* ============ お気に入り（入れ替え自由） ============ */
 let favEdit=false;
@@ -2710,13 +3087,14 @@ function chikaSVG(mood,p){mood=mood||'normal';p=p||'c';
       +'<circle cx="50" cy="27" r="1.5" fill="#C5C9D6"/><circle cx="57" cy="23.5" r="1.3" fill="#C5C9D6"/><circle cx="64" cy="25.5" r="1.5" fill="#C5C9D6"/>'
       +'<circle cx="71" cy="28.5" r="1.2" fill="#C5C9D6"/><circle cx="54" cy="31" r="1.1" fill="#C5C9D6"/><circle cx="67" cy="32" r="1.1" fill="#C5C9D6"/>'
       +'<rect x="0" y="36" width="120" height="7" fill="#7FD8B9"/><rect x="0" y="38.8" width="120" height="1.4" fill="#fff" opacity=".8"/>'
+      +wearClip()
     +'</g>'
     +'<path d="'+body+'" fill="none" stroke="'+line+'" stroke-width="2.5"/>'
     +'<path d="M101 37 l10 -5 l-1.5 7 z M101 41 l9 4 l-6 3 z" fill="#7FD8B9"/>'
     +'<ellipse cx="35" cy="67" rx="6" ry="3.5" fill="#FFC2D1" opacity=".85"/><ellipse cx="85" cy="67" rx="6" ry="3.5" fill="#FFC2D1" opacity=".85"/>'
     +'<circle cx="51" cy="68" r="1" fill="#A3A8B8"/><circle cx="49" cy="71.5" r="1" fill="#A3A8B8"/><circle cx="69" cy="68" r="1" fill="#A3A8B8"/><circle cx="71" cy="71.5" r="1" fill="#A3A8B8"/>'
     +'<ellipse cx="60" cy="66.5" rx="3.4" ry="2.5" fill="'+ink+'"/>'
-    +eyes+brows+mouth+extra+'</svg>';}
+    +eyes+brows+mouth+extra+wearTop()+'</svg>';}
 
 function chikaLine(){const dd=day(cur);const ms=dd.meals||[];
   const kcal=ms.reduce((a,m)=>a+(+m.k||0),0),pro=ms.reduce((a,m)=>a+(+m.p||0),0);
@@ -2726,7 +3104,7 @@ function chikaLine(){const dd=day(cur);const ms=dd.meals||[];
   if(cur!==today())return{mood:'normal',t:cur.slice(5).replace('-','/')+' の記録をひらいてるよ。書きわすれ、ここで足せるよ〜'};
   if(h>=21||h<4){
     if(nightK>0)return{mood:'night',t:pick(['よるのぶんも ちゃんと書けたね。えらい〜。お水も いっしょに のんでね','書けたのが いちばん えらい。あしたの朝、体重はかってみよ'])};
-    return{mood:'night',t:pick(['21時すぎたよ〜。きょうは ここで ごちそうさま できたら はなまる🌸','おなかすいた？ まずお水1杯。それでも食べたら、ちゃんと書いてね'])};}
+    return{mood:'night',t:pick(['21時すぎたよ〜。きょうは ここで ごちそうさま できたら はなまる🌸','おなかすいた？ まずお水1杯。それでも食べたら、ちゃんと書いてね','たべたくなったら「🌙 ガマンした！」をおしてね。貝がら あげる🐚'])};}
   if(!ms.length)return{mood:'normal',t:h<11?'おはよ〜。あさごはん なにたべた？':'まだ なにも書いてないよ〜。さくっと1こ書いてみよ'};
   const bud=budgetOf(dd),net=kcal-(baseBurn()+out);
   if(net>0)return{mood:'worry',t:'いまの記録だと '+Math.round(net)+'kcal オーバー…。でも書けたのが えらい！ 配達か筋トレで とりかえそ'};
@@ -2736,7 +3114,7 @@ function chikaLine(){const dd=day(cur);const ms=dd.meals||[];
   return{mood:'happy',t:pick(['いいかんじ！ あと '+Math.round(bud-kcal)+'kcal 食べても アンダーだよ','もぐもぐ記録、えらい〜。このちょうし！'])};}
 function renderChika(){const L=chikaLine();
   document.getElementById('chiFaceHome').innerHTML=chikaSVG(L.mood,'h');
-  document.getElementById('chiTip').textContent=L.t;}
+  document.getElementById('chiTip').textContent=L.t;renderChiExtras();}
 
 /* ============ 経過写真（IndexedDBに縮小保存） ============ */
 let _pdb;
@@ -2820,22 +3198,40 @@ function chikaReply(raw){
     'その気持ち、大事にしよ。無理はしないで、でも流されないで。私はあなたの味方だからね。'
   ]);
 }
+const VERDICT={ok:['🙆 どうぞ','ok'],careful:['🤔 くふうすればOK','careful'],stop:['🙅 いまはガマン','stop']};
 function renderChat(){const log=document.getElementById('chatLog');if(!log)return;log.innerHTML='';
   (state.chat||[]).forEach(m=>{const b=document.createElement('div');
-    if(m.r==='u')b.style.cssText='align-self:flex-end;max-width:80%;background:#FFD3DE;color:#5A2A35;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:.86rem;line-height:1.5;white-space:pre-wrap;';
-    else b.style.cssText='align-self:flex-start;max-width:82%;background:var(--panel2);padding:8px 12px;border-radius:14px 14px 14px 4px;font-size:.86rem;line-height:1.55;white-space:pre-wrap;';
-    b.textContent=m.t;log.appendChild(b);});
-  log.scrollTop=log.scrollHeight;}
-function openChat(){if(!state.chat||!state.chat.length){state.chat=[{r:'c',t:'やっほー、ごまちゃんだよ。今どんな感じ？…もしかして、何か食べたくなってる？ 正直に言ってみ、一緒に考えよ。'}];save();}
+    if(m.r==='u'){b.className='cb u';b.textContent=m.t;}
+    else{b.className='cb c'+(m.wait?' wait':'');
+      if(m.v&&VERDICT[m.v]){const v=document.createElement('div');v.className='vd '+VERDICT[m.v][1];v.textContent=VERDICT[m.v][0];b.appendChild(v);}
+      const tx=document.createElement('div');tx.textContent=m.t;b.appendChild(tx);
+      if(m.add&&!m.wait){const a=document.createElement('button');a.className='ghost cb-add';
+        a.textContent=m.added?'✓ 記録したよ':'📒 食べたら記録：'+m.add.n+'（'+m.add.k+'kcal）';a.disabled=!!m.added;
+        a.onclick=()=>{if(cur!==today())cur=today();m.added=1;addMeal(m.add.n,m.add.k,m.add.p,m.add.s);renderChat();};b.appendChild(a);}}
+    log.appendChild(b);});
+  log.scrollTop=log.scrollHeight;renderChatMode();}
+function openChat(){state.chat=(state.chat||[]).filter(m=>!m.wait);
+  if(!state.chat.length){state.chat=[{r:'c',t:'やっほー、ごまちゃんだよ。「今から○○食べてもいい？」みたいに きいてね。いまの収支を見て こたえるよ'}];save();}
+  document.getElementById('chatFace').innerHTML=chikaSVG('happy','c');renderChatChips();
   document.getElementById('chatOverlay').classList.add('show');renderChat();setTimeout(()=>{const i=document.getElementById('chatInput');if(i)i.focus();},120);}
-function chatSend(){const inp=document.getElementById('chatInput');const t=inp.value.trim();if(!t)return;
-  state.chat=state.chat||[];state.chat.push({r:'u',t});state.chat.push({r:'c',t:chikaReply(t)});
-  if(state.chat.length>60)state.chat=state.chat.slice(-60);
-  save();inp.value='';renderChat();beep(660,.05);}
+let chatBusy=false;
+function chatAiOn(){return !!aiKey()&&state.chatAi!==false;}
+async function chatSend(preset){const inp=document.getElementById('chatInput');const t=String(preset||inp.value||'').trim();if(!t||chatBusy)return;
+  state.chat=(state.chat||[]).filter(m=>!m.wait);const hist=state.chat.slice(-6);state.chat.push({r:'u',t});inp.value='';
+  if(chatAiOn()){chatBusy=true;const ph={r:'c',t:'🦭 かんがえ中…',wait:1};state.chat.push(ph);renderChat();
+    try{const r=await aiCall(CHAT_SYS,CHAT_SCHEMA,chatCtx()+(hist.length?'\n【これまでの会話】\n'+hist.map(m=>(m.r==='u'?'ユーザー：':'ごまちゃん：')+m.t).join('\n'):'')+'\n\n【相談】\n'+t,'low');
+      const m={r:'c',t:String(r.reply||'').trim()||'うーん、うまく考えられなかった…もう一回きいてね',v:r.verdict==='info'?'':r.verdict};
+      if(r.food_name&&+r.kcal>0)m.add={n:String(r.food_name).trim().slice(0,40),k:Math.round(+r.kcal),p:Math.round((+r.protein||0)*10)/10,s:r.snack?1:0};
+      const i=state.chat.indexOf(ph);if(i>=0)state.chat.splice(i,1,m);else state.chat.push(m);}
+    catch(e){const rr=ruleConsult(t),m={r:'c',t:rr.t+'\n\n（AIにつながらなかったので、かんたん回答だよ：'+(e instanceof TypeError?'通信できなかった':(e.message||'エラー'))+'）',v:rr.v,add:rr.add};
+      const i=state.chat.indexOf(ph);if(i>=0)state.chat.splice(i,1,m);else state.chat.push(m);}
+    finally{chatBusy=false;}}
+  else{const rr=ruleConsult(t);state.chat.push({r:'c',t:rr.t,v:rr.v,add:rr.add});}
+  if(state.chat.length>60)state.chat=state.chat.slice(-60);save();renderChat();beep(660,.05);}
 document.getElementById('chiCard').onclick=openChat;
 document.getElementById('chatFace').innerHTML=chikaSVG('happy','c');
 document.getElementById('chatClose').onclick=()=>document.getElementById('chatOverlay').classList.remove('show');
-document.getElementById('chatSend').onclick=chatSend;
+document.getElementById('chatSend').onclick=()=>chatSend();
 document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chatSend();}});
 
 /* ============ からだ相談室（ルールベース・無料） ============ */
@@ -2946,7 +3342,8 @@ setTimeout(confettiRain,300);setTimeout(playFX,300);
   else if(go==='weight'){const i=document.getElementById('mwInput');if(i)setTimeout(()=>i.focus(),300);else{showTab('body');setTimeout(()=>document.getElementById('wInput').focus(),300);}}
   else if(go==='food')setTimeout(()=>{const t=document.getElementById('aiText');t.scrollIntoView({block:'center'});t.focus();},300);
   history.replaceState(null,'',location.pathname);})();
-setTimeout(autoReview,1500); // welcome burst
+setTimeout(autoReview,1500);
+setInterval(()=>{applyTod();renderChiExtras();renderRoom();},300000); // welcome burst
 
 /* PWA: register SW + auto-update (新版が来たら自動リロード) */
 if('serviceWorker' in navigator){
