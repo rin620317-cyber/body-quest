@@ -402,6 +402,10 @@
   .askcard{background:linear-gradient(135deg,#FFFFFF,#F2FBF7);}
   #chatChips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;}
   #chatChips .chip{flex:0 0 auto;}
+  .lib-save{margin-top:16px;padding-top:12px;border-top:1px dashed var(--line);}
+  .chip.lib{background:#F4FBF8;border-color:#BFEBD9;}
+  .chip.libedit{background:#FFF8E6;border-color:#F2D9A6;}
+  .chip.libadd{background:#fff;border-style:dashed;color:var(--accent);}
 </style>
 </head>
 <body>
@@ -412,7 +416,7 @@
 
   <header class="topbar">
     <div class="tb-row">
-      <div class="brand">🦭 KARADAクエスト<span class="ver">v16.0.1</span></div>
+      <div class="brand">🦭 KARADAクエスト<span class="ver">v16.1.0</span></div>
       <div class="tb-right"><span class="tb-tod" id="todTxt"></span><div class="tb-lv" id="tbLv">Lv1</div></div>
     </div>
     <div class="datehop">
@@ -452,6 +456,13 @@
         <span>⭐ お気に入り（1タップ）</span><span class="link" id="favEditBtn" style="font-size:.74rem;">入れ替える</span>
       </div>
       <div class="chips" id="favChips"></div>
+
+      <div class="in-label" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span>📁 マイ食品（自分でカテゴリ分け）</span>
+        <span style="white-space:nowrap;font-size:.74rem;"><span class="link" id="libEditBtn">なおす</span> ・ <span class="link" id="libCatsEdit">カテゴリ</span></span>
+      </div>
+      <div class="chips" id="libTabs"></div>
+      <div class="chips" id="libItems" style="margin-top:6px;"></div>
 
       <div class="in-label">🤖 書くだけ・撮るだけ（AIが計算して記録）</div>
       <textarea id="aiText" rows="2" placeholder="例：鮭おにぎり、サラダチキン、ゆで卵／グラタン2人前つくって半分"></textarea>
@@ -1008,6 +1019,36 @@
     <button id="meSave" style="flex:2;">保存</button>
     <button class="ghost" id="meDel" style="flex:1;color:var(--fire);">削除</button>
   </div>
+  <div class="lib-save">
+    <label class="mini">📁 マイ食品に保存（履歴から消えずに、ずっと残る）</label>
+    <div class="row nowrap" style="margin-top:6px;">
+      <select id="meCat" class="sel" style="flex:1;min-width:0;"></select>
+      <button class="ghost" id="meLib">📁 保存</button>
+    </div>
+    <div class="muted" id="meLibNote" style="font-size:.7rem;margin-top:4px;"></div>
+  </div>
+</div></div>
+
+<!-- マイ食品 -->
+<div class="overlay" id="libOverlay"><div class="modal recipe-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <h2 style="font-size:1.15rem;margin:0;" id="lbTitle">📁 マイ食品</h2><span class="link" id="lbClose">閉じる</span>
+  </div>
+  <label class="mini">名前</label>
+  <input id="lbName" type="text" style="width:100%;" placeholder="例：豆腐カレー（ごはん→木綿豆腐）">
+  <div class="row" style="margin-top:10px;">
+    <div><label class="mini">カロリー(kcal)</label><input id="lbKcal" type="number" style="width:100px;"></div>
+    <div><label class="mini">タンパク質(g)</label><input id="lbP" type="number" step="0.1" style="width:90px;"></div>
+  </div>
+  <label class="mini" style="margin-top:10px;">カテゴリ</label>
+  <select id="lbCat" class="sel" style="width:100%;"></select>
+  <label style="display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:700;margin-top:10px;"><input type="checkbox" id="lbSnack" style="width:auto;transform:scale(1.2);"> おやつ・お酒として数える（戒めカウント）</label>
+  <div class="muted" style="font-size:.7rem;margin-top:6px;">カロリーがわからないときは、AIで記録したあと「きょう食べたもの」の行をタップ →「📁 保存」が楽だよ。</div>
+  <div style="display:flex;gap:8px;margin-top:14px;">
+    <button id="lbEat" style="flex:2;">🍙 保存して記録</button>
+    <button class="ghost" id="lbSave" style="flex:1;">保存だけ</button>
+  </div>
+  <div style="text-align:center;margin-top:12px;"><span class="link" id="lbDel" style="color:var(--fire);">マイ食品から削除</span></div>
 </div></div>
 
 <!-- マイ商品 -->
@@ -1453,7 +1494,8 @@ function renderSearch(){const raw=document.getElementById('foodSearch').value.tr
   const hit=x=>{const h=toKata(x.n+' '+(x.tags||''));return toks.every(t=>h.includes(t));};const res=[];const seen=new Set();
   const push=(x,kind)=>{if(!seen.has(x.n)){seen.add(x.n);res.push({...x,kind});}};
   (state.products||[]).forEach(p=>{const x={n:prodLabel(p),k:p.k,p:p.p,s:p.s,tags:prodTags(p),sub:prodSub(p)};if(hit(x))push(x,'one');});
-  recentFoods().filter(hit).forEach(x=>push(x,'one'));
+  (state.lib||[]).forEach(f=>{const x={n:f.n,k:f.k,p:f.p,s:f.s,tags:f.c,sub:'📁'+f.c};if(hit(x))push(x,'one');});
+  historyFoods().filter(hit).forEach(x=>push(x,'one'));
   (state.recipes||[]).forEach(r=>{const per=recipePer(r);const x={n:r.n+'（1人前）',k:per.k,p:per.p,s:null,tags:r.n};if(hit(x))push(x,'one');});
   menuAll().filter(hit).forEach(x=>push(x,'one'));
   ingAll().filter(hit).forEach(x=>push(x,'g'));
@@ -1495,6 +1537,7 @@ function quickItems(){const map={},groups=[];
       name:q=>r.n+'（'+(q===1?'1人前':qtyWord(q))+'）'});});
   const pd={l:'🏷 マイ商品',opts:[]};
   (state.products||[]).forEach(p=>add(pd,'p'+p.id,p.n+(p.st?'・'+p.st:'')+'（'+p.k+'kcal）',{n:prodLabel(p),k:p.k,p:p.p,s:p.s,product:p.id}));
+  libCats().forEach((c,ci)=>{const g={l:'📁 '+c,opts:[]};(state.lib||[]).filter(f=>f.c===c).forEach(f=>add(g,'L'+f.id,f.n+'（'+Math.round(f.k)+'kcal）',{n:f.n,k:f.k,p:f.p,s:f.s}));groups.push(g);});
   groups.push(rec,rc,pd);
   const og={l:'🍙 定番',opts:[]},all=menuAll();
   BASIC_FOODS.forEach((n,i)=>{const f=all.find(x=>x.n===n);if(f)add(og,'b'+i,f.n+'（'+f.k+'kcal）',{n:f.n,k:f.k,p:f.p,s:f.s});});groups.push(og);
@@ -1568,7 +1611,7 @@ function renderFood(){
       const star=document.createElement('button');star.className='mini-btn fav'+(isFav(m.n)?' on':'');star.textContent=isFav(m.n)?'★':'☆';
       star.onclick=e=>{e.stopPropagation();toggleFav(m);};
       el.appendChild(star);el.appendChild(plus);el.appendChild(x);ml.appendChild(el);});});
-  renderSlots();renderQuick();renderYest();renderFavs();
+  renderSlots();renderQuick();renderYest();renderFavs();renderLib();
 }
 
 /* ざっくり概算：料理タイプ別（100gあたり kcal / タンパク質g） */
@@ -1771,6 +1814,7 @@ let aiImg=null,aiUndo=null;
 function aiContext(){const L=[];
   (state.recipes||[]).forEach(r=>{const p=recipePer(r);L.push(r.n+'（1人前）: '+Math.round(p.k)+'kcal, P'+Math.round(p.p)+'g');});
   (state.products||[]).forEach(p=>L.push(prodLabel(p)+': '+p.k+'kcal, P'+p.p+'g'));
+  (state.lib||[]).slice(0,20).forEach(f=>L.push(f.n+': '+Math.round(f.k)+'kcal, P'+Math.round(+f.p||0)+'g'));
   recentFoods().slice(0,10).forEach(f=>L.push(f.n+': '+Math.round(f.k)+'kcal, P'+Math.round(+f.p||0)+'g'));
   const u=[...new Set(L)].slice(0,25);return u.length?'\n\n（参考：この人のいつものメニュー）\n'+u.join('\n'):'';}
 function renderAiPhoto(){const b=document.getElementById('aiPhotoPrev');b.innerHTML='';if(!aiImg)return;
@@ -2234,7 +2278,7 @@ const CHAT_FOODS=[
 ];
 function guessFood(t){const T=toKata(t),hit=n=>{const b=toKata(String(n||'').split(/[\s（(]/)[0]);return b.length>=2&&T.includes(b);};let f=null;
   for(const p of (state.products||[]))if(hit(p.n)){f={n:p.n,k:+p.k||0,p:+p.p||0,s:p.s?1:0};break;}
-  if(!f)for(const x of (state.favs||[]).concat(recentFoods()))if(hit(x.n)){f={n:x.n,k:+x.k||0,p:+x.p||0,s:x.s?1:0};break;}
+  if(!f)for(const x of (state.lib||[]).concat(state.favs||[],recentFoods()))if(hit(x.n)){f={n:x.n,k:+x.k||0,p:+x.p||0,s:x.s?1:0};break;}
   if(!f)for(const x of CHAT_FOODS)if(x.kw.some(k=>T.includes(toKata(k)))){f={n:x.n,k:x.k,p:x.p,s:x.s};break;}
   if(!f)return null;
   let q=1;const m=t.match(/(\d+(?:\.\d+)?)\s*(杯|本|個|缶|皿|人前|つ|枚|切れ|袋|箱)/);if(m)q=Math.min(5,Math.max(0.5,+m[1]));
@@ -2407,6 +2451,66 @@ function renderReview(){const tabs=document.getElementById('rvTabs'),body=docume
 function autoReview(){if(!aiKey()||new Date().getHours()<4)return;const y=addDays(today(),-1);
   if((state.reviews||{})['day:'+y])return;if(!(state.days[y]&&(state.days[y].meals||[]).length))return;runReview('day',true);}
 
+/* ============ マイ食品（自分でカテゴリ分け・ずっと残る） ============ */
+const LIB_CATS=['主食','主菜','副菜','汁物','おやつ・お酒','飲み物','その他'];
+let libCat=null,libEdit=false,lbId=null;
+function libCats(){return state.libCats||LIB_CATS;}
+function historyFoods(){const map={};const ds=sd(state);
+  ds.forEach((d,di)=>{(state.days[d].meals||[]).forEach(m=>{const r=map[m.n]||(map[m.n]={n:m.n,c:0,last:0});r.c++;r.last=di;r.k=m.k;r.p=m.p;r.s=m.s;});});
+  return Object.values(map).sort((a,b)=>(b.c+b.last*0.05)-(a.c+a.last*0.05));}
+function libCatGuess(m){const ex=(state.lib||[]).find(f=>f.n===m.n);if(ex)return ex.c;
+  if(m.s)return libCats().includes('おやつ・お酒')?'おやつ・お酒':libCats()[0];return libCat||libCats()[0];}
+function fillCatSel(sel,val){sel.innerHTML='';libCats().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  const o=document.createElement('option');o.value='__new';o.textContent='＋ 新しいカテゴリをつくる…';sel.appendChild(o);
+  sel.value=libCats().includes(val)?val:libCats()[0];sel.dataset.prev=sel.value;
+  sel.onchange=()=>{if(sel.value!=='__new'){sel.dataset.prev=sel.value;return;}
+    const n=(prompt('新しいカテゴリの名前（例：主食、朝ごはん、コンビニ）')||'').trim().slice(0,12);
+    if(!n){sel.value=sel.dataset.prev;return;}
+    if(!libCats().includes(n)){state.libCats=libCats().concat(n);save();}
+    fillCatSel(sel,n);};}
+function libUpsert(x){state.lib=state.lib||[];const ex=state.lib.find(f=>f.n===x.n);
+  if(ex){Object.assign(ex,x);return ex;}const it={id:Date.now(),...x};state.lib.push(it);return it;}
+function renderLib(){const tabs=document.getElementById('libTabs'),box=document.getElementById('libItems'),L=state.lib||[];tabs.innerHTML='';box.innerHTML='';
+  const eb=document.getElementById('libEditBtn');eb.hidden=!L.length;eb.textContent=libEdit?'✓ 完了':'なおす';
+  if(!L.length){libEdit=false;box.innerHTML='<span class="muted">「きょう食べたもの」の行をタップ →「📁 保存」で、ここにカテゴリ別に ずっと残せるよ</span>';
+    box.appendChild(chipEl('＋ 新しく登録','','libadd',()=>openLib(null)));return;}
+  const cats=libCats().filter(c=>L.some(f=>f.c===c));
+  if(!cats.includes(libCat))libCat=cats[0];
+  cats.forEach(c=>tabs.appendChild(chipEl(c,String(L.filter(f=>f.c===c).length),'ctab'+(c===libCat?' on':''),()=>{libCat=c;renderLib();})));
+  L.filter(f=>f.c===libCat).forEach(f=>box.appendChild(chipEl((libEdit?'✏️ ':'')+f.n,Math.round(f.k)+'kcal',libEdit?'libedit':'lib',()=>{
+    if(libEdit)openLib(f.id);else addMeal(f.n,f.k,f.p,f.s);})));
+  box.appendChild(chipEl('＋ 新しく登録','','libadd',()=>openLib(null)));}
+document.getElementById('libEditBtn').onclick=()=>{libEdit=!libEdit;renderLib();if(libEdit)toast('なおしたいものを タップしてね');};
+document.getElementById('libCatsEdit').onclick=()=>{
+  const v=prompt('カテゴリを「、」で区切って ならべてね（順番もこのとおりになります）\n消したカテゴリの中身は「その他」に移ります',libCats().join('、'));
+  if(v==null)return;let cs=[...new Set(v.split(/[、,，\n]+/).map(s=>s.trim().slice(0,12)).filter(Boolean))];
+  if(!cs.length){toast('カテゴリを1つ以上 入れてね');return;}
+  const lost=(state.lib||[]).filter(f=>!cs.includes(f.c));if(lost.length&&!cs.includes('その他'))cs.push('その他');
+  lost.forEach(f=>f.c='その他');state.libCats=cs;save();render();toast('📁 カテゴリを整理したよ');};
+function openLib(id){const G=k=>document.getElementById(k),f=(state.lib||[]).find(x=>x.id===id);lbId=f?f.id:null;
+  G('lbTitle').textContent=f?'📁 マイ食品をなおす':'📁 マイ食品を登録';
+  G('lbName').value=f?f.n:'';G('lbKcal').value=f?Math.round(f.k):'';G('lbP').value=f?(f.p||0):'';G('lbSnack').checked=!!(f&&f.s);
+  fillCatSel(G('lbCat'),f?f.c:libCat||libCats()[0]);G('lbDel').hidden=!f;
+  G('libOverlay').classList.add('show');setTimeout(()=>{if(!f)G('lbName').focus();},120);}
+function lbRead(){const G=k=>document.getElementById(k),n=G('lbName').value.trim(),k=parseFloat(G('lbKcal').value);
+  if(!n){toast('名前を入れてね');return null;}if(isNaN(k)||k<0){toast('カロリーを入れてね');return null;}
+  const c=G('lbCat').value==='__new'?libCats()[0]:G('lbCat').value;
+  return{n,k:Math.round(k),p:Math.round((parseFloat(G('lbP').value)||0)*10)/10,s:G('lbSnack').checked?1:0,c};}
+function lbStore(x){state.lib=state.lib||[];let it=lbId!=null?state.lib.find(f=>f.id===lbId):null;
+  if(it){const dup=state.lib.find(f=>f.n===x.n&&f.id!==it.id);if(dup)state.lib=state.lib.filter(f=>f!==dup);Object.assign(it,x);}else it=libUpsert(x);
+  libCat=x.c;save();document.getElementById('libOverlay').classList.remove('show');return it;}
+document.getElementById('lbSave').onclick=()=>{const x=lbRead();if(!x)return;lbStore(x);render();toast('📁 「'+x.c+'」に保存したよ');};
+document.getElementById('lbEat').onclick=()=>{const x=lbRead();if(!x)return;lbStore(x);addMeal(x.n,x.k,x.p,x.s);};
+document.getElementById('lbDel').onclick=()=>{if(lbId==null)return;const f=(state.lib||[]).find(x=>x.id===lbId);
+  if(!f||!confirm('「'+f.n+'」をマイ食品から削除しますか？\n（これまでの食事の記録は消えません）'))return;
+  state.lib=state.lib.filter(x=>x.id!==lbId);save();document.getElementById('libOverlay').classList.remove('show');render();toast('削除しました');};
+document.getElementById('lbClose').onclick=()=>document.getElementById('libOverlay').classList.remove('show');
+document.getElementById('meLib').onclick=()=>{const G=k=>document.getElementById(k),n=G('meName').value.trim(),k=parseFloat(G('meKcal').value);
+  if(!n){toast('名前を入れてね');return;}if(isNaN(k)||k<0){toast('カロリーを入れてね');return;}
+  const c=G('meCat').value==='__new'?libCats()[0]:G('meCat').value;
+  libUpsert({n,k:Math.round(k),p:Math.round((parseFloat(G('meP').value)||0)*10)/10,s:G('meSnack').checked?1:0,c});libCat=c;save();
+  G('meLibNote').textContent='📁「'+c+'」に保存したよ。ごはんタブの「マイ食品」から1タップで記録できるよ';render();toast('📁 「'+c+'」に保存したよ');beep(880,.08);};
+
 /* ============ 食事の記録をなおす ============ */
 let meIdx=null,meBase=null;
 function openMealEdit(i){const m=day(cur).meals[i];if(!m)return;const G=id=>document.getElementById(id);
@@ -2416,6 +2520,8 @@ function openMealEdit(i){const m=day(cur).meals[i];if(!m)return;const G=id=>docu
   if(!sl.options.length)[...SLOTS.map(s=>[s.id,s.e+' '+s.l]),['その他','📝 時間なし']].forEach(([v,l])=>{
     const o=document.createElement('option');o.value=v;o.textContent=l;sl.appendChild(o);});
   sl.value=SLOTS.some(s=>s.id===m.t)?m.t:'その他';G('meTime').value=m.at||'';G('meSnack').checked=!!m.s;
+  fillCatSel(G('meCat'),libCatGuess(m));const ex=(state.lib||[]).find(f=>f.n===m.n);
+  G('meLibNote').textContent=ex?'いま「'+ex.c+'」に保存ずみ。保存しなおすと、カテゴリとカロリーを上書きするよ':'';
   G('mealEditOverlay').classList.add('show');}
 function closeMealEdit(){document.getElementById('mealEditOverlay').classList.remove('show');meIdx=null;meBase=null;}
 document.getElementById('meQty').onchange=e=>{if(!meBase)return;const q=+e.target.value,G=id=>document.getElementById(id);
